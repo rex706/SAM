@@ -5,13 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SAM"
         mc:Ignorable="d"
-        Title="SAM" Height="190" Width="138" WindowStartupLocation="CenterScreen" Topmost="True" ResizeMode="NoResize" Icon="inverted.png">
+        Title="SAM" Height="190" Width="138" WindowStartupLocation="CenterScreen" Topmost="True" ResizeMode="CanMinimize" Icon="inverted.png">
     <Grid x:Name="MainGrid" Background="#FF252729" RenderTransformOrigin="0.484,0.505">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="0*"/>
         </Grid.ColumnDefinitions>
-        <Button x:Name="NewButton" Margin="25,42,0,0" Width="73" Click="NewButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="73" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{x:Null}" ToolTip="Add account">
+        <Button x:Name="NewButton" Margin="30,57,0,0" Width="64" Click="NewButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="63" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{x:Null}" ToolTip="Add account" RenderTransformOrigin="0.5,0.5">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Setter Property="VerticalContentAlignment" Value="Stretch"/>
@@ -34,5 +34,23 @@
                 </Style>
             </Button.Style>
         </Button>
+        <DockPanel>
+            <Menu x:Name="FileMenu" DockPanel.Dock="Top" Height="20" VerticalAlignment="Top">
+                <MenuItem Header="_File">
+                    <MenuItem Header="_New" Click="NewButton_Click" />
+                    <MenuItem Header="_Open" />
+                    <MenuItem Header="_Save" />
+                    <Separator />
+                    <MenuItem Header="_Exit" Click="ExitMenuItem_Click" />
+                </MenuItem>
+                <MenuItem Header="_Edit">
+                    <MenuItem Header="_Refresh" Click="MainWindow_Loaded" />
+                    <MenuItem Header="_Settings" Click="SettingsButton_Click" />
+                </MenuItem>
+                <MenuItem Header="Help">
+                    <MenuItem Header="GitHub" Click="GitMenuItem_Click"/>
+                </MenuItem>
+            </Menu>
+        </DockPanel>
     </Grid>
 </Window>

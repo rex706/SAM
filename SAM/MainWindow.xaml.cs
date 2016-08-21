@@ -28,6 +28,8 @@ namespace SAM
         private static string account;
         private static string ePassword;
 
+        private static string AccPerRow;
+
         private static Version latest;
 
         public MainWindow()
@@ -59,8 +61,20 @@ namespace SAM
             else if (updateResult == 2)
             {
                 //An update is available, and the user has chosen to update.
-                //TODO: Exit the application. Later, initiate a process that downloads new updated binaries.
+                //TODO: Initiate a process that downloads new updated binaries.
                 Close();
+            }
+
+            if (!File.Exists("SAMSettings.ini"))
+            {
+                var settingsFile = new IniFile("SAMSettings.ini");
+                settingsFile.Write("AccountsPerRow", "5", "Settings");
+                AccPerRow = "5";
+            }
+            else
+            {
+                var settingsFile = new IniFile("SAMSettings.ini");
+                AccPerRow = settingsFile.Read("AccountsPerRow", "Settings");
             }
 
             RefreshWindow();
@@ -89,31 +103,38 @@ namespace SAM
            
             if (hashAddresses != null)
             {
-                //adjust window size and info positions
-                refreshSize();
-
-                int counter = 0;
+                int xcounter = 0;
+                int ycounter = 0;
 
                 foreach (DictionaryEntry de in hashAddresses)
                 {
                     string tempname = de.Key.ToString();
                     string temppass = StringCipher.Decrypt(de.Value.ToString(), EKey);
+
                     if (seedDic)
                     {
                         DecryptedAddresses.Add(tempname, temppass);
                     }
+
                     Console.WriteLine("Key = {0}, Value = {1}", de.Key.ToString(), de.Value.ToString());
                     Console.WriteLine("Key = {0}, Value = {1}", tempname, temppass);
 
                     Button accountButton = new Button();
                     accountButton.Tag = tempname;
                     accountButton.Content = tempname;
-                    accountButton.Name = "Button" + counter.ToString();
+                    accountButton.Name = "Button" + xcounter.ToString();
                     accountButton.Height = 100;
                     accountButton.Width = 100;
                     accountButton.HorizontalAlignment = HorizontalAlignment.Left;
                     accountButton.VerticalAlignment = VerticalAlignment.Top;
-                    accountButton.Margin = new Thickness(15 + (counter * 138), 30, 0, 0);
+
+                    if ((xcounter % Int32.Parse(AccPerRow) == 0) && xcounter != 0)
+                    {
+                        ycounter++;
+                        xcounter = 0;
+                    }
+                   
+                    accountButton.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 38, 0, 0);
                     MainGrid.Children.Add(accountButton);
                     accountButton.Click += new RoutedEventHandler(AccountButton_Click);
                     ContextMenu accountContext = new ContextMenu();
@@ -124,27 +145,37 @@ namespace SAM
                     menuItem1.Click += delegate { deleteAccount(accountButton); };
                     // accountButton.MouseRightButtonDown += accountButton_mouseRightButtonDown;
 
-
-                    counter++;
+                    xcounter++;
                 }
+
+                int xval = 0;
+
+                //adjust window size and info positions
+                if (ycounter == 0)
+                {
+                    xval = xcounter + 1;
+                    Application.Current.MainWindow.Height = (190);
+                }
+                else
+                {
+                    xval = Int32.Parse(AccPerRow);
+                    Application.Current.MainWindow.Height = (190 + (125 * ycounter));
+                }
+
+                Application.Current.MainWindow.Width = (xval * 125);
+
+                //adjust new account button
+                NewButton.Margin = new Thickness(15 + ((xcounter) * 125), (ycounter * 120) + 52, 0, 0);
             }
         }
-
-        private void refreshSize() {
-            Application.Current.MainWindow.Width = ((hashAddresses.Count + 1) * 138);
-            NewButton.Margin = new Thickness(15 + (hashAddresses.Count * 138), 44, 0, 0);
-
-        }
-
-
 
         private void deleteAccount(object butt)
         {
             Button button = butt as Button;
-            MainGrid.Children.RemoveRange(1, MainGrid.Children.Count - 1);
+            MainGrid.Children.RemoveRange(2, MainGrid.Children.Count - 1);
             hashAddresses.Remove(button.Tag);
             Serialize();
-            
+
             postDeserializedRefresh(false);
         }
 
@@ -160,13 +191,20 @@ namespace SAM
                 account = input[0];
                 string password = input[1];
 
-                // Encrypt info before saving to file
-                // eAccount = StringCipher.Encrypt(accountName, EKey);
-                ePassword = StringCipher.Encrypt(password, EKey);
-                hashAddresses.Add(account, ePassword);
-                Serialize();
+                try
+                {
+                    // Encrypt info before saving to file
+                    // eAccount = StringCipher.Encrypt(accountName, EKey);
+                    ePassword = StringCipher.Encrypt(password, EKey);
+                    hashAddresses.Add(account, ePassword);
+                    Serialize();
 
-                RefreshWindow();
+                    RefreshWindow();
+                }
+                catch (Exception m)
+                {
+                    MessageBox.Show("Error: " + m.Message);
+                }
             }
         }
 
@@ -180,11 +218,11 @@ namespace SAM
                 {
                     Process[] SteamProc = Process.GetProcessesByName("Steam");
                     SteamProc[0].Kill();
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1314);
                 }
                 catch
                 {
-
+                    Console.WriteLine("No steam process found.");
                 }
 
                 string defaultPath = @"C:\Program Files (x86)\Steam\";
@@ -336,5 +374,24 @@ namespace SAM
         }
 
         #endregion
+
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var settingsDialog = new Window1();
+            settingsDialog.ShowDialog();
+
+            AccPerRow = settingsDialog.ResponseText;
+            postDeserializedRefresh(false);
+        }
+
+        private void GitMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://github.com/rex706/SAM");
+        }
+
+        private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
     }
 }
