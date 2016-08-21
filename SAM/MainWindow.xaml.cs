@@ -172,7 +172,7 @@ namespace SAM
         private void deleteAccount(object butt)
         {
             Button button = butt as Button;
-            MainGrid.Children.RemoveRange(2, MainGrid.Children.Count - 1);
+            MainGrid.Children.RemoveRange(2, MainGrid.Children.Count - 2);
             hashAddresses.Remove(button.Tag);
             Serialize();
 
