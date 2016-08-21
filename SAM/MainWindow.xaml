@@ -8,10 +8,10 @@
         Title="SAM" Height="190" Width="138" WindowStartupLocation="CenterScreen" Topmost="True" ResizeMode="NoResize" Icon="inverted.png">
     <Grid x:Name="MainGrid" Background="#FF252729" RenderTransformOrigin="0.484,0.505">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="19*"/>
-            <ColumnDefinition Width="14*"/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="0*"/>
         </Grid.ColumnDefinitions>
-        <Button x:Name="NewButton" Margin="26,44,0,0" Width="73" Click="NewButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="73" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{x:Null}" ToolTip="Add account" Grid.ColumnSpan="2">
+        <Button x:Name="NewButton" Margin="25,42,0,0" Width="73" Click="NewButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="73" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{x:Null}" ToolTip="Add account">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Setter Property="VerticalContentAlignment" Value="Stretch"/>

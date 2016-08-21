@@ -75,7 +75,7 @@ namespace SAM
             {
                 //deserialize file and count the number of entries
                 Deserialize();
-                postDeserializedRefresh();
+                postDeserializedRefresh(true);
                 
             }
             else
@@ -84,13 +84,13 @@ namespace SAM
             }
         }
 
-        private void postDeserializedRefresh()
+        private void postDeserializedRefresh(bool seedDic)
         {
+           
             if (hashAddresses != null)
             {
                 //adjust window size and info positions
-                Application.Current.MainWindow.Width = ((hashAddresses.Count + 1) * 138);
-                NewButton.Margin = new Thickness(15 + (hashAddresses.Count * 138), 44, 0, 0);
+                refreshSize();
 
                 int counter = 0;
 
@@ -98,9 +98,10 @@ namespace SAM
                 {
                     string tempname = de.Key.ToString();
                     string temppass = StringCipher.Decrypt(de.Value.ToString(), EKey);
-
-                    DecryptedAddresses.Add(tempname, temppass);
-
+                    if (seedDic)
+                    {
+                        DecryptedAddresses.Add(tempname, temppass);
+                    }
                     Console.WriteLine("Key = {0}, Value = {1}", de.Key.ToString(), de.Value.ToString());
                     Console.WriteLine("Key = {0}, Value = {1}", tempname, temppass);
 
@@ -127,18 +128,26 @@ namespace SAM
                     counter++;
                 }
             }
+            MainGrid.UpdateLayout();
+            MainGrid.ShowGridLines = true;
         }
 
+        private void refreshSize() {
+            Application.Current.MainWindow.Width = ((hashAddresses.Count + 1) * 138);
+            NewButton.Margin = new Thickness(15 + (hashAddresses.Count * 138), 44, 0, 0);
+
+        }
 
 
 
         private void deleteAccount(object butt)
         {
             Button button = butt as Button;
-            MainGrid.Children.Remove(button);
+            MainGrid.Children.RemoveRange(1, MainGrid.Children.Count - 1);
             hashAddresses.Remove(button.Tag);
             Serialize();
-            postDeserializedRefresh();
+            
+            postDeserializedRefresh(false);
         }
 
         private void NewButton_Click(object sender, RoutedEventArgs e)
