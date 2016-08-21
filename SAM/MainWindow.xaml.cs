@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace SAM
 {
@@ -19,13 +20,13 @@ namespace SAM
 
     public partial class MainWindow : Window
     {
-        private static Hashtable HashAddresses;
+        private static Hashtable hashAddresses;
         private static Hashtable DecryptedAddresses;
 
         private static string EKey = "PRIVATE_KEY"; // Change this before use
 
-        private static string EAccount;
-        private static string EPassword;
+        private static string account;
+        private static string ePassword;
 
         private static Version latest;
 
@@ -74,45 +75,70 @@ namespace SAM
             {
                 //deserialize file and count the number of entries
                 Deserialize();
-
-                if (HashAddresses != null)
-                {
-                    //adjust window size and info positions
-                    Application.Current.MainWindow.Width = ((HashAddresses.Count + 1) * 138);
-                    NewButton.Margin = new Thickness(15 + (HashAddresses.Count * 138), 44, 0, 0);
-
-                    int counter = 0;
-
-                    foreach (DictionaryEntry de in HashAddresses)
-                    {
-                        string tempname = StringCipher.Decrypt(de.Key.ToString(), EKey);
-                        string temppass = StringCipher.Decrypt(de.Value.ToString(), EKey);
-
-                        DecryptedAddresses.Add(tempname, temppass);
-
-                        Console.WriteLine("Key = {0}, Value = {1}", de.Key.ToString(), de.Value.ToString());
-                        Console.WriteLine("Key = {0}, Value = {1}", tempname, temppass);
-
-                        Button AccountButton = new Button();
-                        AccountButton.Tag = tempname;
-                        AccountButton.Content = tempname;
-                        AccountButton.Name = "Button" + counter.ToString();
-                        AccountButton.Height = 100;
-                        AccountButton.Width = 100;
-                        AccountButton.HorizontalAlignment = HorizontalAlignment.Left;
-                        AccountButton.VerticalAlignment = VerticalAlignment.Top;
-                        AccountButton.Margin = new Thickness(15 + (counter * 138), 30, 0, 0);
-                        MainGrid.Children.Add(AccountButton);
-                        AccountButton.Click += new RoutedEventHandler(AccountButton_Click);
-
-                        counter++;
-                    }
-                }
+                postDeserializedRefresh();
+                
             }
             else
             {
-                HashAddresses = new Hashtable();
+                hashAddresses = new Hashtable();
             }
+        }
+
+        private void postDeserializedRefresh()
+        {
+            if (hashAddresses != null)
+            {
+                //adjust window size and info positions
+                Application.Current.MainWindow.Width = ((hashAddresses.Count + 1) * 138);
+                NewButton.Margin = new Thickness(15 + (hashAddresses.Count * 138), 44, 0, 0);
+
+                int counter = 0;
+
+                foreach (DictionaryEntry de in hashAddresses)
+                {
+                    string tempname = de.Key.ToString();
+                    string temppass = StringCipher.Decrypt(de.Value.ToString(), EKey);
+
+                    DecryptedAddresses.Add(tempname, temppass);
+
+                    Console.WriteLine("Key = {0}, Value = {1}", de.Key.ToString(), de.Value.ToString());
+                    Console.WriteLine("Key = {0}, Value = {1}", tempname, temppass);
+
+                    Button accountButton = new Button();
+                    accountButton.Tag = tempname;
+                    accountButton.Content = tempname;
+                    accountButton.Name = "Button" + counter.ToString();
+                    accountButton.Height = 100;
+                    accountButton.Width = 100;
+                    accountButton.HorizontalAlignment = HorizontalAlignment.Left;
+                    accountButton.VerticalAlignment = VerticalAlignment.Top;
+                    accountButton.Margin = new Thickness(15 + (counter * 138), 30, 0, 0);
+                    MainGrid.Children.Add(accountButton);
+                    accountButton.Click += new RoutedEventHandler(AccountButton_Click);
+                    ContextMenu accountContext = new ContextMenu();
+                    MenuItem menuItem1 = new MenuItem();
+                    menuItem1.Header = "Delete Account";
+                    accountContext.Items.Add(menuItem1);
+                    accountButton.ContextMenu = accountContext;
+                    menuItem1.Click += delegate { deleteAccount(accountButton); };
+                    // accountButton.MouseRightButtonDown += accountButton_mouseRightButtonDown;
+
+
+                    counter++;
+                }
+            }
+        }
+
+
+
+
+        private void deleteAccount(object butt)
+        {
+            Button button = butt as Button;
+            MainGrid.Children.Remove(button);
+            hashAddresses.Remove(button.Tag);
+            Serialize();
+            postDeserializedRefresh();
         }
 
         private void NewButton_Click(object sender, RoutedEventArgs e)
@@ -124,13 +150,13 @@ namespace SAM
             if (dialog.ShowDialog() == true)
             {
                 string[] input = dialog.ResponseText.Split(' ');
-                string AccountName = input[0];
-                string Password = input[1];
+                account = input[0];
+                string password = input[1];
 
                 // Encrypt info before saving to file
-                EAccount = StringCipher.Encrypt(AccountName, EKey);
-                EPassword = StringCipher.Encrypt(Password, EKey);
-
+                // eAccount = StringCipher.Encrypt(accountName, EKey);
+                ePassword = StringCipher.Encrypt(password, EKey);
+                hashAddresses.Add(account, ePassword);
                 Serialize();
 
                 RefreshWindow();
@@ -248,7 +274,7 @@ namespace SAM
         private static void Serialize()
         {
             // Update hashtable of values that will eventually be serialized.
-            HashAddresses.Add(EAccount, EPassword);
+            
 
             // To serialize the hashtable and its key/value pairs, you must first open a stream for writing. 
             // In this case, use a file stream.
@@ -258,7 +284,7 @@ namespace SAM
             BinaryFormatter formatter = new BinaryFormatter();
             try
             {
-                formatter.Serialize(fs, HashAddresses);
+                formatter.Serialize(fs, hashAddresses);
             }
             catch (SerializationException e)
             {
@@ -274,7 +300,7 @@ namespace SAM
         private static void Deserialize()
         {
             // Declare the hashtable reference.
-            HashAddresses = null;
+            hashAddresses = null;
 
             // Open the file containing the data that you want to deserialize.
             FileStream fs = new FileStream("info.dat", FileMode.Open);
@@ -283,7 +309,7 @@ namespace SAM
                 BinaryFormatter formatter = new BinaryFormatter();
 
                 // Deserialize the hashtable from the file and assign the reference to the local variable.
-                HashAddresses = (Hashtable)formatter.Deserialize(fs);
+                hashAddresses = (Hashtable)formatter.Deserialize(fs);
             }
             catch (SerializationException e)
             {
@@ -296,7 +322,7 @@ namespace SAM
             }
 
             // To prove that the table deserialized correctly, display the key/value pairs.
-            foreach (DictionaryEntry de in HashAddresses)
+            foreach (DictionaryEntry de in hashAddresses)
             {
                 Console.WriteLine("{0} : {1}.", de.Key, de.Value);
             }
