@@ -173,12 +173,19 @@ namespace SAM
         private void deleteAccount(object butt)
         {
             Button button = butt as Button;
-            MainGrid.Children.RemoveRange(2, MainGrid.Children.Count - 2);
+            
             hashAddresses.Remove(button.Tag);
             Serialize();
 
+            hardRefresh();
+        }
+
+        private void hardRefresh()
+        {
+            MainGrid.Children.RemoveRange(2, MainGrid.Children.Count - 2);
             postDeserializedRefresh(false);
         }
+
 
         private void NewButton_Click(object sender, RoutedEventArgs e)
         {
@@ -382,7 +389,7 @@ namespace SAM
             settingsDialog.ShowDialog();
 
             AccPerRow = settingsDialog.ResponseText;
-            postDeserializedRefresh(false);
+            hardRefresh();
         }
 
         private void GitMenuItem_Click(object sender, RoutedEventArgs e)
