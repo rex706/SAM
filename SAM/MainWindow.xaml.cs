@@ -128,8 +128,6 @@ namespace SAM
                     counter++;
                 }
             }
-            MainGrid.UpdateLayout();
-            MainGrid.ShowGridLines = true;
         }
 
         private void refreshSize() {
