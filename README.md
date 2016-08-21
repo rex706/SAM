@@ -4,6 +4,8 @@ Easily switch steam between accounts.
 
 ![alt tag](http://i.imgur.com/WfsC9HE.png)
 
+[Download](https://drive.google.com/file/d/0B2byNRcR0k4vdjlrWkZVMWY4YVk/view?usp=sharing)
+
 Features
 
 * Add multiple steam accounts to switch back and forth easily.
@@ -11,7 +13,7 @@ Features
 
 Latest version: 0.1.2
 
-[Download](https://drive.google.com/file/d/0B2byNRcR0k4vdjlrWkZVMWY4YVk/view?usp=sharing)
+
 
 * Right click on any account for an option to delete it.
 * File menu.

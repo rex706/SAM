@@ -181,7 +181,6 @@ namespace SAM
             postDeserializedRefresh(false);
         }
 
-
         private void NewButton_Click(object sender, RoutedEventArgs e)
         {
             //get avatar?
