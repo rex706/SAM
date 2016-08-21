@@ -128,11 +128,7 @@ namespace SAM
                     accountButton.HorizontalAlignment = HorizontalAlignment.Left;
                     accountButton.VerticalAlignment = VerticalAlignment.Top;
 
-                    if ((xcounter % Int32.Parse(AccPerRow) == 0) && xcounter != 0)
-                    {
-                        ycounter++;
-                        xcounter = 0;
-                    }
+                    
                    
                     accountButton.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 38, 0, 0);
                     MainGrid.Children.Add(accountButton);
@@ -146,6 +142,11 @@ namespace SAM
                     // accountButton.MouseRightButtonDown += accountButton_mouseRightButtonDown;
 
                     xcounter++;
+                    if ((xcounter % Int32.Parse(AccPerRow) == 0) && xcounter != 0)
+                    {
+                        ycounter++;
+                        xcounter = 0;
+                    }
                 }
 
                 int xval = 0;
