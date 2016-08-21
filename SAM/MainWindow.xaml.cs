@@ -127,9 +127,6 @@ namespace SAM
                     accountButton.Width = 100;
                     accountButton.HorizontalAlignment = HorizontalAlignment.Left;
                     accountButton.VerticalAlignment = VerticalAlignment.Top;
-
-                    
-                   
                     accountButton.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 38, 0, 0);
                     MainGrid.Children.Add(accountButton);
                     accountButton.Click += new RoutedEventHandler(AccountButton_Click);
@@ -166,17 +163,15 @@ namespace SAM
                 Application.Current.MainWindow.Width = (xval * 125);
 
                 //adjust new account button
-                NewButton.Margin = new Thickness(15 + ((xcounter) * 125), (ycounter * 120) + 52, 0, 0);
+                NewButton.Margin = new Thickness(30 + ((xcounter) * 120), (ycounter * 120) + 52, 0, 0);
             }
         }
 
         private void deleteAccount(object butt)
         {
             Button button = butt as Button;
-            
             hashAddresses.Remove(button.Tag);
             Serialize();
-
             hardRefresh();
         }
 
