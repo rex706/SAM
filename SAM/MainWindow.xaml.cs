@@ -149,6 +149,7 @@ namespace SAM
                     accountButton.HorizontalAlignment = HorizontalAlignment.Left;
                     accountButton.VerticalAlignment = VerticalAlignment.Top;
                     accountButton.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 38, 0, 0);
+                    accountButton.BorderBrush = null;
 
                     if (account.Url == null || account.Url == "" || account.Url == " ")
                         accountButton.Content = account.Name;
