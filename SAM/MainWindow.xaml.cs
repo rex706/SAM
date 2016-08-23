@@ -27,11 +27,6 @@ namespace SAM
         public string Password { get; set; }
 
         public string Url { get; set; }
-
-        public override string ToString()
-        {
-            return "Name: " + Name + "   Name: " + Password + "   Url: " + Url;
-        }
     }
 
     [Serializable]
@@ -98,6 +93,28 @@ namespace SAM
             {
                 var settingsFile = new IniFile("SAMSettings.ini");
                 accPerRow = settingsFile.Read("AccountsPerRow", "Settings");
+
+                if (File.Exists("info.dat"))
+                {
+                    StreamReader datReader = new StreamReader("info.dat");
+                    string temp = datReader.ReadLine();
+                    datReader.Close();
+
+                    if (!temp.Contains("xml"))
+                    {
+                        MessageBox.Show("Your info.dat is out of date and must be deleted.\nSorry for the inconvenience!");
+
+                        try
+                        {
+                            File.Delete("info.dat");
+                        }
+                        catch (Exception m)
+                        {
+                            Console.WriteLine(m.Message);
+                        }
+                    }
+                }
+                settingsFile.Write("Version", AssemblyVersion, "System");
             }
 
             RefreshWindow();
@@ -359,12 +376,10 @@ namespace SAM
                             //Update is available, and user wants to update. Requires app to close.
                             return 2;
                         }
-
                         //Update is available, but user chose not to update just yet.
                         return 1;
                     }
                 }
-
                 //No update available.
                 return 0;
             }
