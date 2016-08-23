@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections;
+﻿using HtmlAgilityPack;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
+using System.Windows.Media.Imaging;
+using System.Linq;
+using System.Windows.Media;
+using System.Xml.Serialization;
 
 namespace SAM
 {
@@ -18,19 +20,39 @@ namespace SAM
     /// Interaction logic for MainWindow.xaml
     /// </summary>
 
+    public class Account
+    {
+        public string Name { get; set; }
+
+        public string Password { get; set; }
+
+        public string Url { get; set; }
+
+        public override string ToString()
+        {
+            return "Name: " + Name + "   Name: " + Password + "   Url: " + Url;
+        }
+    }
+
+    [Serializable]
     public partial class MainWindow : Window
     {
-        private static Hashtable hashAddresses;
-        private static Hashtable DecryptedAddresses;
 
-        private static string EKey = "PRIVATE_KEY"; // Change this before use
+        #region Globals
+
+        private static List<Account> encryptedAccounts;
+        private static List<Account> decryptedAccounts;
+
+        private static string eKey = "PRIVATE_KEY"; // Change this before use
 
         private static string account;
         private static string ePassword;
 
-        private static string AccPerRow;
+        private static string accPerRow;
 
         private static Version latest;
+
+        #endregion
 
         public MainWindow()
         {
@@ -68,13 +90,14 @@ namespace SAM
             if (!File.Exists("SAMSettings.ini"))
             {
                 var settingsFile = new IniFile("SAMSettings.ini");
+                settingsFile.Write("Version", AssemblyVersion, "System");
                 settingsFile.Write("AccountsPerRow", "5", "Settings");
-                AccPerRow = "5";
+                accPerRow = "5";
             }
             else
             {
                 var settingsFile = new IniFile("SAMSettings.ini");
-                AccPerRow = settingsFile.Read("AccountsPerRow", "Settings");
+                accPerRow = settingsFile.Read("AccountsPerRow", "Settings");
             }
 
             RefreshWindow();
@@ -82,52 +105,71 @@ namespace SAM
 
         private void RefreshWindow()
         {
-            DecryptedAddresses = new Hashtable();
+            decryptedAccounts = new List<Account>();
 
             //check if info.dat exists
             if (File.Exists("info.dat"))
             {
                 //deserialize file and count the number of entries
-                Deserialize();
+                encryptedAccounts = Deserialize();
                 postDeserializedRefresh(true);
                 
             }
             else
             {
-                hashAddresses = new Hashtable();
+                encryptedAccounts = new List<Account>();
             }
         }
 
-        private void postDeserializedRefresh(bool seedDic)
+        private void postDeserializedRefresh(bool seedAcc)
         {
            
-            if (hashAddresses != null)
+            if (encryptedAccounts != null)
             {
                 int xcounter = 0;
                 int ycounter = 0;
 
-                foreach (DictionaryEntry de in hashAddresses)
+                foreach (var account in encryptedAccounts)
                 {
-                    string tempname = de.Key.ToString();
-                    string temppass = StringCipher.Decrypt(de.Value.ToString(), EKey);
+                    string temppass = StringCipher.Decrypt(account.Password, eKey);
 
-                    if (seedDic)
+                    if (seedAcc)
                     {
-                        DecryptedAddresses.Add(tempname, temppass);
+                        decryptedAccounts.Add(new Account() { Name = account.Name, Password = temppass, Url = account.Url });
                     }
 
-                    Console.WriteLine("Key = {0}, Value = {1}", de.Key.ToString(), de.Value.ToString());
-                    Console.WriteLine("Key = {0}, Value = {1}", tempname, temppass);
+                    Console.WriteLine("Name = {0}, Pass = {1}, Url = {2}", account.Name, account.Password, account.Url);
+                    Console.WriteLine("Name = {0}, Pass = {1}, Url = {2}", account.Name, temppass, account.Url);
 
                     Button accountButton = new Button();
-                    accountButton.Tag = tempname;
-                    accountButton.Content = tempname;
-                    accountButton.Name = "Button" + xcounter.ToString();
+                    accountButton.Tag = xcounter.ToString();
+                    accountButton.Name = account.Name;
                     accountButton.Height = 100;
                     accountButton.Width = 100;
                     accountButton.HorizontalAlignment = HorizontalAlignment.Left;
                     accountButton.VerticalAlignment = VerticalAlignment.Top;
                     accountButton.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 38, 0, 0);
+
+                    if (account.Url == null || account.Url == "" || account.Url == " ")
+                        accountButton.Content = account.Name;
+                    else
+                    {
+                        try
+                        {
+                        ImageBrush brush1 = new ImageBrush();
+                        BitmapImage image = new BitmapImage(new Uri(account.Url));
+                        brush1.ImageSource = image;
+                        accountButton.Background = brush1;
+                        }
+                        catch (Exception m)
+                        {
+                            //probably no internet connection or avatar url is bad
+                            Console.WriteLine("Error: " + m.Message);
+
+                            accountButton.Content = account.Name;
+                        }
+                    }
+
                     MainGrid.Children.Add(accountButton);
                     accountButton.Click += new RoutedEventHandler(AccountButton_Click);
                     ContextMenu accountContext = new ContextMenu();
@@ -136,10 +178,9 @@ namespace SAM
                     accountContext.Items.Add(menuItem1);
                     accountButton.ContextMenu = accountContext;
                     menuItem1.Click += delegate { deleteAccount(accountButton); };
-                    // accountButton.MouseRightButtonDown += accountButton_mouseRightButtonDown;
 
                     xcounter++;
-                    if ((xcounter % Int32.Parse(AccPerRow) == 0) && xcounter != 0)
+                    if ((xcounter % Int32.Parse(accPerRow) == 0) && xcounter != 0)
                     {
                         ycounter++;
                         xcounter = 0;
@@ -156,7 +197,7 @@ namespace SAM
                 }
                 else
                 {
-                    xval = Int32.Parse(AccPerRow);
+                    xval = Int32.Parse(accPerRow);
                     Application.Current.MainWindow.Height = (190 + (125 * ycounter));
                 }
 
@@ -170,8 +211,8 @@ namespace SAM
         private void deleteAccount(object butt)
         {
             Button button = butt as Button;
-            hashAddresses.Remove(button.Tag);
-            Serialize();
+            encryptedAccounts.RemoveAt(Int32.Parse(button.Tag.ToString()));
+            Serialize(encryptedAccounts);
             hardRefresh();
         }
 
@@ -183,8 +224,6 @@ namespace SAM
 
         private void NewButton_Click(object sender, RoutedEventArgs e)
         {
-            //get avatar?
-
             // User entered info
             var dialog = new TextDialog();
             if (dialog.ShowDialog() == true)
@@ -192,14 +231,32 @@ namespace SAM
                 string[] input = dialog.ResponseText.Split(' ');
                 account = input[0];
                 string password = input[1];
+                string profUrl = null;
+                HtmlDocument document = null;
+
+                //if user entered profile url, get avatar jpg url
+                if (input.Length > 3)
+                {
+                    document = new HtmlWeb().Load(input[3]);
+                    var urls = document.DocumentNode.Descendants("img").Select(t => t.GetAttributeValue("src", null)).Where(s => !String.IsNullOrEmpty(s));
+
+                    foreach (string url in urls)
+                    {
+                        if (url.Contains("http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/") && url.Contains("full.jpg"))
+                        {
+                            profUrl = url;
+                        }
+                    }
+                }
 
                 try
                 {
                     // Encrypt info before saving to file
-                    // eAccount = StringCipher.Encrypt(accountName, EKey);
-                    ePassword = StringCipher.Encrypt(password, EKey);
-                    hashAddresses.Add(account, ePassword);
-                    Serialize();
+                    ePassword = StringCipher.Encrypt(password, eKey);
+
+                    encryptedAccounts.Add(new Account() { Name = account, Password = ePassword, Url = profUrl });
+
+                    Serialize(encryptedAccounts);
 
                     RefreshWindow();
                 }
@@ -257,7 +314,7 @@ namespace SAM
                 startInfo.FileName = path + "Steam.exe";
                 startInfo.WorkingDirectory = path;
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                startInfo.Arguments = "-login " + btn.Tag.ToString() + " " + DecryptedAddresses[btn.Tag.ToString()].ToString();
+                startInfo.Arguments = "-login " + btn.Name.ToString() + " " + decryptedAccounts[Int32.Parse(btn.Tag.ToString())].Password.ToString();
 
                 try
                 {
@@ -283,12 +340,12 @@ namespace SAM
             client.Timeout = new TimeSpan(0, 0, 0, 10);
             try
             {
-                //open the text file using a stream reader
+                // Open the text file using a stream reader
                 using (Stream stream = await client.GetStreamAsync("http://textuploader.com/58mva/raw"))
                 {
-                    Version current = Assembly.GetExecutingAssembly().GetName().Version;
+                    System.Version current = Assembly.GetExecutingAssembly().GetName().Version;
                     StreamReader reader = new StreamReader(stream);
-                    latest = Version.Parse(reader.ReadToEnd());
+                    latest = System.Version.Parse(reader.ReadToEnd());
 
                     if (latest != current)
                     {
@@ -297,6 +354,7 @@ namespace SAM
                         {
                             //TODO: Later on, remove this and replace with automated process of downloading new binaries.
                             Process.Start("https://github.com/rex706/SAM");
+
                             //Update is available, and user wants to update. Requires app to close.
                             return 2;
                         }
@@ -318,61 +376,21 @@ namespace SAM
 
         #region Serialize/Deserialize
 
-        private static void Serialize()
+        public static void Serialize(List<Account> input)
         {
-            // Update hashtable of values that will eventually be serialized.
-            
-
-            // To serialize the hashtable and its key/value pairs, you must first open a stream for writing. 
-            // In this case, use a file stream.
-            FileStream fs = new FileStream("info.dat", FileMode.Create);
-
-            // Construct a BinaryFormatter and use it to serialize the data to the stream.
-            BinaryFormatter formatter = new BinaryFormatter();
-            try
-            {
-                formatter.Serialize(fs, hashAddresses);
-            }
-            catch (SerializationException e)
-            {
-                Console.WriteLine("Failed to serialize. Reason: " + e.Message);
-                throw;
-            }
-            finally
-            {
-                fs.Close();
-            }
+            var serializer = new XmlSerializer(input.GetType());
+            var sw = new StreamWriter("info.dat");
+            serializer.Serialize(sw, input);
+            sw.Close();
         }
 
-        private static void Deserialize()
+        public static List<Account> Deserialize()
         {
-            // Declare the hashtable reference.
-            hashAddresses = null;
-
-            // Open the file containing the data that you want to deserialize.
-            FileStream fs = new FileStream("info.dat", FileMode.Open);
-            try
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-
-                // Deserialize the hashtable from the file and assign the reference to the local variable.
-                hashAddresses = (Hashtable)formatter.Deserialize(fs);
-            }
-            catch (SerializationException e)
-            {
-                Console.WriteLine("Failed to deserialize. Reason: " + e.Message);
-                throw;
-            }
-            finally
-            {
-                fs.Close();
-            }
-
-            // To prove that the table deserialized correctly, display the key/value pairs.
-            foreach (DictionaryEntry de in hashAddresses)
-            {
-                Console.WriteLine("{0} : {1}.", de.Key, de.Value);
-            }
+            var stream = new StreamReader("info.dat");
+            var ser = new XmlSerializer(typeof(List<Account>));
+            object obj = ser.Deserialize(stream);
+            stream.Close();
+            return (List<Account>)obj;
         }
 
         #endregion
@@ -382,7 +400,7 @@ namespace SAM
             var settingsDialog = new Window1();
             settingsDialog.ShowDialog();
 
-            AccPerRow = settingsDialog.ResponseText;
+            accPerRow = settingsDialog.ResponseText;
             hardRefresh();
         }
 
