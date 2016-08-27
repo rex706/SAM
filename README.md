@@ -2,7 +2,12 @@
 
 Easily switch between steam accounts.
 
-![alt tag](http://i.imgur.com/Pxcf66b.png)
+TODO:
+
+* Generate new private key on first use
+* Edit entry
+
+![alt tag](http://i.imgur.com/qOsnaTG.png)
 
 [**Download**](https://drive.google.com/file/d/0B2byNRcR0k4vdjlrWkZVMWY4YVk/view?usp=sharing)
 
@@ -11,7 +16,11 @@ Easily switch between steam accounts.
 * Add multiple steam accounts to switch back and forth easily.
 * Encrypts saved user info.
 
-**Latest version: 0.1.3**
+**Latest version:** 0.1.3.1
+
+* Fixed all spacing weirdness/issues.
+
+0.1.3
 
 * Display steam avatar on button if user inputs a profile url.
 * Password entry masking.
@@ -28,10 +37,3 @@ Easily switch between steam accounts.
 0.1.1
 
 * Release
-
-
-
-TODO:
-
-* Generate new private key on first use
-* Edit entry
