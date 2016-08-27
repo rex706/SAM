@@ -193,6 +193,7 @@ namespace SAM
                         BitmapImage image = new BitmapImage(new Uri(account.Url));
                         brush1.ImageSource = image;
                         accountButton.Background = brush1;
+                        MainGrid.Children.Add(accountLabel);
                         }
                         catch (Exception m)
                         {
@@ -204,8 +205,7 @@ namespace SAM
                     }
 
                     MainGrid.Children.Add(accountButton);
-                    MainGrid.Children.Add(accountLabel);
-
+                    
                     accountButton.Click += new RoutedEventHandler(AccountButton_Click);
                     ContextMenu accountContext = new ContextMenu();
                     MenuItem menuItem1 = new MenuItem();
