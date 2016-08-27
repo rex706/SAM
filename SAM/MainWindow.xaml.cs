@@ -253,9 +253,9 @@ namespace SAM
                 HtmlDocument document = null;
 
                 //if user entered profile url, get avatar jpg url
-                if (input.Length > 3)
+                if (input.Length > 2)
                 {
-                    document = new HtmlWeb().Load(input[3]);
+                    document = new HtmlWeb().Load(input[2]);
                     var urls = document.DocumentNode.Descendants("img").Select(t => t.GetAttributeValue("src", null)).Where(s => !String.IsNullOrEmpty(s));
 
                     foreach (string url in urls)

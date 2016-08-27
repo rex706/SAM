@@ -33,6 +33,7 @@
                     </Setter>
                 </Style>
             </Button.Style>
+            <Button x:Name="button" Content="Button" Height="100" Width="75"/>
         </Button>
         <DockPanel>
             <Menu x:Name="FileMenu" DockPanel.Dock="Top" Height="20" VerticalAlignment="Top">

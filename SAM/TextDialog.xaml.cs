@@ -16,13 +16,13 @@ namespace SAM
         {
             get
             {
-                if (InputTextBox2.Text != null)
-                    return InputTextBox.Text + " " + InputTextBox1.Text + " " + InputTextBox2;
+                if (UrlBox.Text != null)
+                    return UsernameBox.Text + " " + PasswordBox.Password + " " + UrlBox.Text;
                 else
-                    return InputTextBox.Text + " " + InputTextBox1.Text;
+                    return UsernameBox.Text + " " + PasswordBox.Password;
             }
-            set { InputTextBox.Text = value; }
-        }
+            set { UsernameBox.Text = value; }
+        } 
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
