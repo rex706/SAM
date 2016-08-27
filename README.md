@@ -1,4 +1,4 @@
-# **SAM** - Steam Account Manager
+# SAM - Steam Account Manager
 
 Easily switch between steam accounts.
 

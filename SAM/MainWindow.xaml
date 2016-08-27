@@ -4,8 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SAM"
-        mc:Ignorable="d"
-        Title="SAM" Height="190" Width="138" WindowStartupLocation="CenterScreen" Icon="inverted.png">
+        mc:Ignorable="d" Height="190" Width="138" WindowStartupLocation="CenterScreen" Icon="inverted.png" ResizeMode="NoResize" Title="SAM">
     <Grid x:Name="MainGrid" Background="#FF252729" RenderTransformOrigin="0.484,0.505">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -37,16 +36,14 @@
         </Button>
         <DockPanel>
             <Menu x:Name="FileMenu" DockPanel.Dock="Top" Height="20" VerticalAlignment="Top">
-                <MenuItem Header="_File">
-                    <MenuItem Header="_New" Click="NewButton_Click" />
-                    <MenuItem Header="_Open" />
-                    <MenuItem Header="_Save" />
+                <MenuItem Header="File">
+                    <MenuItem Header="New" Click="NewButton_Click" />
                     <Separator />
-                    <MenuItem Header="_Exit" Click="ExitMenuItem_Click" />
+                    <MenuItem Header="Exit" Click="ExitMenuItem_Click" />
                 </MenuItem>
-                <MenuItem Header="_Edit">
-                    <MenuItem Header="_Refresh" Click="MainWindow_Loaded" />
-                    <MenuItem Header="_Settings" Click="SettingsButton_Click" />
+                <MenuItem Header="Edit">
+                    <MenuItem Header="Refresh" Click="MainWindow_Loaded" />
+                    <MenuItem Header="Settings" Click="SettingsButton_Click" />
                 </MenuItem>
                 <MenuItem Header="Help">
                     <MenuItem Header="GitHub" Click="GitMenuItem_Click"/>
