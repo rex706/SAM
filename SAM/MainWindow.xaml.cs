@@ -159,14 +159,29 @@ namespace SAM
                     Console.WriteLine("Name = {0}, Pass = {1}, Url = {2}", account.Name, temppass, account.Url);
 
                     Button accountButton = new Button();
+                    Label accountLabel = new Label();
+
                     accountButton.Tag = xcounter.ToString();
+
                     accountButton.Name = account.Name;
+                    accountLabel.Name = account.Name + "Label";
+                    accountLabel.Content = account.Name;
+
                     accountButton.Height = 100;
                     accountButton.Width = 100;
+                    accountLabel.Height = 30;
+                    accountLabel.Width = 100;
+
                     accountButton.HorizontalAlignment = HorizontalAlignment.Left;
                     accountButton.VerticalAlignment = VerticalAlignment.Top;
+                    accountLabel.HorizontalAlignment = HorizontalAlignment.Left;
+                    accountLabel.VerticalAlignment = VerticalAlignment.Top;
+
                     accountButton.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 38, 0, 0);
+                    accountLabel.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 130, 0, 0);
+
                     accountButton.BorderBrush = null;
+                    accountLabel.Foreground = new SolidColorBrush(Colors.White);
 
                     if (account.Url == null || account.Url == "" || account.Url == " ")
                         accountButton.Content = account.Name;
@@ -189,6 +204,8 @@ namespace SAM
                     }
 
                     MainGrid.Children.Add(accountButton);
+                    MainGrid.Children.Add(accountLabel);
+
                     accountButton.Click += new RoutedEventHandler(AccountButton_Click);
                     ContextMenu accountContext = new ContextMenu();
                     MenuItem menuItem1 = new MenuItem();
@@ -253,20 +270,22 @@ namespace SAM
                 HtmlDocument document = null;
 
                 //if user entered profile url, get avatar jpg url
-                if (input.Length > 2)
+                if (input.Length > 2 )
                 {
-                    document = new HtmlWeb().Load(input[2]);
-                    var urls = document.DocumentNode.Descendants("img").Select(t => t.GetAttributeValue("src", null)).Where(s => !String.IsNullOrEmpty(s));
-
-                    foreach (string url in urls)
+                    if(input[2] != "")
                     {
-                        if (url.Contains("http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/") && url.Contains("full.jpg"))
+                        document = new HtmlWeb().Load(input[2]);
+                        var urls = document.DocumentNode.Descendants("img").Select(t => t.GetAttributeValue("src", null)).Where(s => !String.IsNullOrEmpty(s));
+
+                        foreach (string url in urls)
                         {
-                            profUrl = url;
+                            if (url.Contains("http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/") && url.Contains("full.jpg"))
+                            {
+                                profUrl = url;
+                            }
                         }
                     }
                 }
-
                 try
                 {
                     // Encrypt info before saving to file

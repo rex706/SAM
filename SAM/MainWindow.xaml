@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SAM"
         mc:Ignorable="d"
-        Title="SAM" Height="190" Width="138" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Icon="inverted.png">
+        Title="SAM" Height="190" Width="138" WindowStartupLocation="CenterScreen" Icon="inverted.png">
     <Grid x:Name="MainGrid" Background="#FF252729" RenderTransformOrigin="0.484,0.505">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
