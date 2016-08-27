@@ -4,7 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SAM"
-        mc:Ignorable="d" Height="190" Width="138" WindowStartupLocation="CenterScreen" Icon="inverted.png" ResizeMode="NoResize" Title="SAM">
+        mc:Ignorable="d" Height="190" Width="138
+        " WindowStartupLocation="CenterScreen" Icon="inverted.png" ResizeMode="NoResize" Title="SAM">
     <Grid x:Name="MainGrid" Background="#FF252729" RenderTransformOrigin="0.484,0.505">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>

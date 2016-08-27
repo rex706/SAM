@@ -60,8 +60,16 @@ namespace SAM
         {
             //verion number from assembly
             string AssemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            int idx = AssemblyVersion.LastIndexOf('0') - 1;
-            AssemblyVersion = AssemblyVersion.Substring(0, idx);
+
+            try
+            {
+                int idx = AssemblyVersion.LastIndexOf('0') - 1;
+                AssemblyVersion = AssemblyVersion.Substring(0, idx);
+            }
+            catch
+            {
+
+            }
 
             //Check for a new version.
             int updateResult = await CheckForUpdate();
@@ -178,8 +186,9 @@ namespace SAM
                     accountLabel.HorizontalAlignment = HorizontalAlignment.Left;
                     accountLabel.VerticalAlignment = VerticalAlignment.Top;
 
-                    accountButton.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 38, 0, 0);
-                    accountLabel.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 130, 0, 0);
+                    accountButton.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 34, 0, 0);
+                    accountLabel.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 126, 0, 0);
+
 
                     accountButton.BorderBrush = null;
                     accountLabel.Foreground = new SolidColorBrush(Colors.White);
@@ -236,13 +245,13 @@ namespace SAM
                 else
                 {
                     xval = Int32.Parse(accPerRow);
-                    Application.Current.MainWindow.Height = (190 + (125 * ycounter));
+                    Application.Current.MainWindow.Height = (185 + (125 * ycounter));
                 }
 
-                Application.Current.MainWindow.Width = (xval * 125);
+                Application.Current.MainWindow.Width = (xval * 120) + 25;
 
                 //adjust new account button
-                NewButton.Margin = new Thickness(30 + ((xcounter) * 120), (ycounter * 120) + 52, 0, 0);
+                NewButton.Margin = new Thickness(33 + (xcounter * 120), (ycounter * 120) + 52, 0, 0);
             }
         }
 
