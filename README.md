@@ -2,11 +2,6 @@
 
 Easily switch between steam accounts.
 
-TODO:
-
-* Generate new private key on first use
-* Edit entry
-
 ![alt tag](http://i.imgur.com/qOsnaTG.png)
 
 [**Download**](https://drive.google.com/file/d/0B2byNRcR0k4vdjlrWkZVMWY4YVk/view?usp=sharing)
@@ -15,6 +10,15 @@ TODO:
 
 * Add multiple steam accounts to switch back and forth easily.
 * Encrypts saved user info.
+
+TODO:
+
+* Generate new private key on first use
+* Edit entry
+
+
+**CHANGELOG**
+
 
 **Latest version:** 0.1.3.1
 
