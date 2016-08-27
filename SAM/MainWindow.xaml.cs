@@ -170,6 +170,8 @@ namespace SAM
                     Button accountButton = new Button();
                     Label accountLabel = new Label();
 
+                    accountButton.Style = (Style)Resources["MyButtonStyle"];
+
                     accountButton.Tag = bCounter.ToString();
 
                     accountButton.Name = account.Name;
@@ -187,14 +189,17 @@ namespace SAM
                     accountLabel.VerticalAlignment = VerticalAlignment.Top;
 
                     accountButton.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 34, 0, 0);
-                    accountLabel.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 126, 0, 0);
+                    accountLabel.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 128, 0, 0);
 
 
                     accountButton.BorderBrush = null;
                     accountLabel.Foreground = new SolidColorBrush(Colors.White);
 
                     if (account.Url == null || account.Url == "" || account.Url == " ")
+                    {
                         accountButton.Content = account.Name;
+                        accountButton.Background = Brushes.LightGray;
+                    }
                     else
                     {
                         try
