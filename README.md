@@ -16,6 +16,9 @@ TODO:
 * Add multiple steam accounts to switch back and forth easily.
 * Encrypts saved user info.
 
+
+**CHANGELOG**
+
 **Latest version:** 0.1.4.0
 
 * Finally fixed obnoxious button glow effect.
