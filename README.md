@@ -1,6 +1,6 @@
 # SAM - Steam Account Manager
 
-Easily switch steam between accounts.
+Easily switch between steam accounts.
 
 ![alt tag](http://i.imgur.com/Pxcf66b.png)
 
