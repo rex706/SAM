@@ -143,7 +143,7 @@ namespace SAM
            
             if (encryptedAccounts != null)
             {
-                int buttonCounter = 0;
+                int bCounter = 0;
                 int xcounter = 0;
                 int ycounter = 0;
 
@@ -162,7 +162,7 @@ namespace SAM
                     Button accountButton = new Button();
                     Label accountLabel = new Label();
 
-                    accountButton.Tag = buttonCounter.ToString();
+                    accountButton.Tag = bCounter.ToString();
 
                     accountButton.Name = account.Name;
                     accountLabel.Name = account.Name + "Label";
@@ -215,7 +215,7 @@ namespace SAM
                     accountButton.ContextMenu = accountContext;
                     menuItem1.Click += delegate { deleteAccount(accountButton); };
 
-                    buttonCounter++;
+                    bCounter++;
                     xcounter++;
 
                     if ((xcounter % Int32.Parse(accPerRow) == 0) && xcounter != 0)
