@@ -1,17 +1,17 @@
-# SAM - Steam Account Manager
+# **SAM** - Steam Account Manager
 
 Easily switch between steam accounts.
 
 ![alt tag](http://i.imgur.com/Pxcf66b.png)
 
-[Download](https://drive.google.com/file/d/0B2byNRcR0k4vdjlrWkZVMWY4YVk/view?usp=sharing)
+[**Download**](https://drive.google.com/file/d/0B2byNRcR0k4vdjlrWkZVMWY4YVk/view?usp=sharing)
 
-Features
+**Features**
 
 * Add multiple steam accounts to switch back and forth easily.
 * Encrypts saved user info.
 
-Latest version: 0.1.3
+**Latest version: 0.1.3**
 
 * Display steam avatar on button if user inputs a profile url.
 * Password entry masking.
