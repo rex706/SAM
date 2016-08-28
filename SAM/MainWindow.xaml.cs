@@ -276,6 +276,11 @@ namespace SAM
 
         private void NewButton_Click(object sender, RoutedEventArgs e)
         {
+            NewAccount();
+        }
+
+        private void NewAccount()
+        {
             // User entered info
             var dialog = new TextDialog();
             if (dialog.ShowDialog() == true)
@@ -287,9 +292,9 @@ namespace SAM
                 HtmlDocument document = null;
 
                 //if user entered profile url, get avatar jpg url
-                if (input.Length > 2 )
+                if (input.Length > 2)
                 {
-                    if(input[2] != "")
+                    if (input[2] != "")
                     {
                         document = new HtmlWeb().Load(input[2]);
                         var urls = document.DocumentNode.Descendants("img").Select(t => t.GetAttributeValue("src", null)).Where(s => !String.IsNullOrEmpty(s));
@@ -317,6 +322,13 @@ namespace SAM
                 catch (Exception m)
                 {
                     MessageBox.Show("Error: " + m.Message);
+
+                    var itemToRemove = encryptedAccounts.Single(r => r.Name == account);
+                    encryptedAccounts.Remove(itemToRemove);
+
+                    Serialize(encryptedAccounts);
+
+                    NewAccount();
                 }
             }
         }
