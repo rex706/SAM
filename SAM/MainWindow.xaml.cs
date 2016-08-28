@@ -164,7 +164,7 @@ namespace SAM
                         decryptedAccounts.Add(new Account() { Name = account.Name, Password = temppass, Url = account.Url });
                     }
 
-                    Console.WriteLine("Name = {0}, Pass = {1}, Url = {2}", account.Name, account.Password, account.Url);
+                    //Console.WriteLine("Name = {0}, Pass = {1}, Url = {2}", account.Name, account.Password, account.Url);
                     Console.WriteLine("Name = {0}, Pass = {1}, Url = {2}", account.Name, temppass, account.Url);
 
                     Button accountButton = new Button();
@@ -372,6 +372,31 @@ namespace SAM
                 {
                     //error
                     //prompt user to find steam install
+                    var settingsFile = new IniFile("SAMSettings.ini");
+
+                    if (settingsFile.KeyExists("Steam", "Settings"))
+                    {
+                        path = settingsFile.Read("Steam", "Settings");
+                    }
+                    else
+                    {
+                        // Create OpenFileDialog 
+                        Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+                        // Set filter for file extension and default file extension 
+                        dlg.DefaultExt = ".exe";
+                        dlg.Filter = "Steam (*.exe)|*.exe";
+
+                        // Display OpenFileDialog by calling ShowDialog method 
+                        Nullable<bool> result = dlg.ShowDialog();
+
+                        // Get the selected file path
+                        if (result == true)
+                        {
+                            path = Path.GetDirectoryName(dlg.FileName) + "\\";
+                            settingsFile.Write("Steam", path, "Settings");
+                        }
+                    }
                 }
 
                 ProcessStartInfo startInfo = new ProcessStartInfo();
