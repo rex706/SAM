@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -45,6 +46,9 @@ namespace SAM
         private void textBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             var settingsFile = new IniFile("SAMSettings.ini");
+
+            if (!Regex.IsMatch(textBox.Text, @"^\d+$") || Int32.Parse(textBox.Text) < 1)
+                textBox.Text = "1";
 
             settingsFile.Write("AccountsPerRow", textBox.Text, "Settings");
         }

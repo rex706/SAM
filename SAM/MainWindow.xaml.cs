@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Linq;
 using System.Windows.Media;
 using System.Xml.Serialization;
+using System.Text.RegularExpressions;
 
 namespace SAM
 {
@@ -58,7 +59,7 @@ namespace SAM
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            //verion number from assembly
+            // Verion number from assembly
             string AssemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             try
@@ -71,22 +72,22 @@ namespace SAM
 
             }
 
-            //Check for a new version.
+            // Check for a new version.
             int updateResult = await CheckForUpdate();
             if (updateResult == -1)
             {
-                //Some Error occurred.
-                //TODO: Handle this Error.
+                // Some Error occurred.
+                // TODO: Handle this Error.
             }
             else if (updateResult == 1)
             {
-                //An update is available, but user has chosen not to update.
+                // An update is available, but user has chosen not to update.
 
             }
             else if (updateResult == 2)
             {
-                //An update is available, and the user has chosen to update.
-                //TODO: Initiate a process that downloads new updated binaries.
+                // An update is available, and the user has chosen to update.
+                // TODO: Initiate a process that downloads new updated binaries.
                 Close();
             }
 
@@ -102,6 +103,9 @@ namespace SAM
                 var settingsFile = new IniFile("SAMSettings.ini");
                 accPerRow = settingsFile.Read("AccountsPerRow", "Settings");
 
+                if (!Regex.IsMatch(accPerRow, @"^\d+$") || Int32.Parse(accPerRow) < 1)
+                    accPerRow = "1";
+
                 if (File.Exists("info.dat"))
                 {
                     StreamReader datReader = new StreamReader("info.dat");
@@ -110,7 +114,7 @@ namespace SAM
 
                     if (!temp.Contains("xml"))
                     {
-                        MessageBox.Show("Your info.dat is out of date and must be deleted.\nSorry for the inconvenience!");
+                        MessageBox.Show("Your info.dat is out of date and must be deleted.\nSorry for the inconvenience!", "Invalid File", MessageBoxButton.OK, MessageBoxImage.Information);
 
                         try
                         {
@@ -124,7 +128,6 @@ namespace SAM
                 }
                 settingsFile.Write("Version", AssemblyVersion, "System");
             }
-
             RefreshWindow();
         }
 
@@ -132,10 +135,10 @@ namespace SAM
         {
             decryptedAccounts = new List<Account>();
 
-            //check if info.dat exists
+            // Check if info.dat exists
             if (File.Exists("info.dat"))
             {
-                //deserialize file and count the number of entries
+                // Deserialize file
                 encryptedAccounts = Deserialize();
                 postDeserializedRefresh(true);
                 
@@ -165,7 +168,7 @@ namespace SAM
                     }
 
                     //Console.WriteLine("Name = {0}, Pass = {1}, Url = {2}", account.Name, account.Password, account.Url);
-                    Console.WriteLine("Name = {0}, Pass = {1}, Url = {2}", account.Name, temppass, account.Url);
+                    //Console.WriteLine("Name = {0}, Pass = {1}, Url = {2}", account.Name, temppass, account.Url);
 
                     Button accountButton = new Button();
                     Label accountLabel = new Label();
@@ -212,7 +215,7 @@ namespace SAM
                         }
                         catch (Exception m)
                         {
-                            //probably no internet connection or avatar url is bad
+                            // Probably no internet connection or avatar url is bad
                             Console.WriteLine("Error: " + m.Message);
 
                             accountButton.Content = account.Name;
@@ -241,7 +244,7 @@ namespace SAM
 
                 int xval = 0;
 
-                //adjust window size and info positions
+                // Adjust window size and info positions
                 if (ycounter == 0)
                 {
                     xval = xcounter + 1;
@@ -255,7 +258,7 @@ namespace SAM
 
                 Application.Current.MainWindow.Width = (xval * 120) + 25;
 
-                //adjust new account button
+                // Adjust new account button
                 NewButton.Margin = new Thickness(33 + (xcounter * 120), (ycounter * 120) + 52, 0, 0);
             }
         }
@@ -291,10 +294,10 @@ namespace SAM
                 string profUrl = null;
                 HtmlDocument document = null;
 
-                //if user entered profile url, get avatar jpg url
+                // If user entered profile url, get avatar jpg url
                 if (input.Length > 2)
                 {
-                    if (input[2] != "")
+                    if (input[2].Contains("http://steamcommunity.com/"))
                     {
                         document = new HtmlWeb().Load(input[2]);
                         var urls = document.DocumentNode.Descendants("img").Select(t => t.GetAttributeValue("src", null)).Where(s => !String.IsNullOrEmpty(s));
@@ -321,7 +324,7 @@ namespace SAM
                 }
                 catch (Exception m)
                 {
-                    MessageBox.Show("Error: " + m.Message);
+                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 
                     var itemToRemove = encryptedAccounts.Single(r => r.Name == account);
                     encryptedAccounts.Remove(itemToRemove);
@@ -338,7 +341,7 @@ namespace SAM
             var btn = sender as Button;
             if (btn != null)
             {
-                //kill steam process if it is already open
+                // Kill steam process if it is already open
                 try
                 {
                     Process[] SteamProc = Process.GetProcessesByName("Steam");
@@ -370,8 +373,8 @@ namespace SAM
                 }
                 else
                 {
-                    //error
-                    //prompt user to find steam install
+                    // Error
+                    // Prompt user to find steam install
                     var settingsFile = new IniFile("SAMSettings.ini");
 
                     if (settingsFile.KeyExists("Steam", "Settings"))
@@ -409,19 +412,19 @@ namespace SAM
 
                 try
                 {
-                    //sart the process with the info specified
+                    // Sart the process with the info specified
                     Process exeProcess = Process.Start(startInfo);
                 }
                 catch (Exception m)
                 {
-                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK);
+                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
             }
         }
 
-        //Checks if an update is available. 
-        //-1 for check Error, 0 for no update, 1 for update is available, 2 for perform update.
+        // Checks if an update is available. 
+        // -1 for check Error, 0 for no update, 1 for update is available, 2 for perform update.
         private static async Task<int> CheckForUpdate()
         {
             //Nkosi Note: Always use asynchronous versions of network and IO methods.
@@ -440,7 +443,7 @@ namespace SAM
 
                     if (latest != current)
                     {
-                        MessageBoxResult answer = MessageBox.Show("A new version of SAM is available!\n\nCurrent Version     " + current + "\nLatest Version     " + latest + "\n\nUpdate now?", "SAM Update", MessageBoxButton.YesNo);
+                        MessageBoxResult answer = MessageBox.Show("A new version of SAM is available!\n\nCurrent Version     " + current + "\nLatest Version     " + latest + "\n\nUpdate now?", "SAM Update", MessageBoxButton.YesNo, MessageBoxImage.Information);
                         if (answer == MessageBoxResult.Yes)
                         {
                             //TODO: Later on, remove this and replace with automated process of downloading new binaries.
@@ -458,7 +461,7 @@ namespace SAM
             }
             catch (Exception m)
             {
-                //MessageBox.Show("Failed to check for update.\n" + m.Message,"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //MessageBox.Show("Failed to check for update.\n" + m.Message,"Error", MessageBoxButtons.OK, MessageBoxImage.Error);
                 return 0;
             }
         }

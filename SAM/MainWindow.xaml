@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SAM"
         mc:Ignorable="d" Height="190" Width="138
-        " WindowStartupLocation="CenterScreen" Icon="inverted.png" ResizeMode="NoResize" Title="SAM">
+        " WindowStartupLocation="CenterScreen" Icon="inverted.png" ResizeMode="NoResize" Title="SAM" Background="White">
     <Window.Resources>
         <!-- This style is used for buttons, to remove the WPF default 'animated' mouse over effect -->
         <Style x:Key="MyButtonStyle" TargetType="Button">
@@ -32,7 +32,7 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Grid x:Name="MainGrid" Background="#FF252729" RenderTransformOrigin="0.484,0.505">
+    <Grid x:Name="MainGrid" Background="#FF333638" RenderTransformOrigin="0.484,0.505">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="0*"/>
@@ -73,7 +73,7 @@
                     <MenuItem Header="Settings" Click="SettingsButton_Click" />
                 </MenuItem>
                 <MenuItem Header="Help">
-                    <MenuItem Header="GitHub" Click="GitMenuItem_Click"/>
+                    <MenuItem Header="GitHub" Click="GitMenuItem_Click" />
                 </MenuItem>
             </Menu>
         </DockPanel>

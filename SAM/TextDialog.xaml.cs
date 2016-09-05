@@ -16,8 +16,15 @@ namespace SAM
         {
             get
             {
-                if (UrlBox.Text != null)
+                if (UrlBox.Text != "")
+                {
+                    if(!UrlBox.Text.Contains("http://steamcommunity.com/"))
+                    {
+                        MessageBox.Show("Invalid Url!\nMake sure your steam url starts with:\nhttp://steamcommunity.com/", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        Close();
+                    }
                     return UsernameBox.Text + " " + PasswordBox.Password + " " + UrlBox.Text;
+                } 
                 else
                     return UsernameBox.Text + " " + PasswordBox.Password;
             }
