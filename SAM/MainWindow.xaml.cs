@@ -39,7 +39,7 @@ namespace SAM
         private static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
 
-        private static string eKey = "PRIVATE_KEY"; // Change this before use
+        private static string eKey = "PRIVATE_KEY"; // Change this before release
 
         private static string account;
         private static string ePassword;
@@ -62,6 +62,12 @@ namespace SAM
             // Verion number from assembly
             string AssemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
+            MenuItem ver = new MenuItem();
+            MenuItem newExistMenuItem = (MenuItem)this.FileMenu.Items[2];
+            ver.Header = "v" + AssemblyVersion;
+            ver.IsEnabled = false;
+            newExistMenuItem.Items.Add(ver);
+
             try
             {
                 int idx = AssemblyVersion.LastIndexOf('0') - 1;
@@ -82,13 +88,15 @@ namespace SAM
             else if (updateResult == 1)
             {
                 // An update is available, but user has chosen not to update.
-
+                ver.Header = "Update Available!";
+                ver.Click += Ver_Click;
+                ver.IsEnabled = true;
             }
             else if (updateResult == 2)
             {
                 // An update is available, and the user has chosen to update.
-                // TODO: Initiate a process that downloads new updated binaries.
-                Close();
+                Process.Start("Updater.exe");
+                Environment.Exit(0);
             }
 
             if (!File.Exists("SAMSettings.ini"))
@@ -129,6 +137,16 @@ namespace SAM
                 settingsFile.Write("Version", AssemblyVersion, "System");
             }
             RefreshWindow();
+        }
+
+        private void Ver_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult answer = MessageBox.Show("A new version of SAM is available!\n\nCurrent Version     " + Assembly.GetExecutingAssembly().GetName().Version.ToString() + "\nLatest Version        " + latest + "\n\nUpdate now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            if (answer == MessageBoxResult.Yes)
+            {
+                Process.Start("Updater.exe");
+                Environment.Exit(0);
+            }
         }
 
         private void RefreshWindow()
@@ -443,12 +461,9 @@ namespace SAM
 
                     if (latest != current)
                     {
-                        MessageBoxResult answer = MessageBox.Show("A new version of SAM is available!\n\nCurrent Version     " + current + "\nLatest Version     " + latest + "\n\nUpdate now?", "SAM Update", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                        MessageBoxResult answer = MessageBox.Show("A new version of SAM is available!\n\nCurrent Version     " + current + "\nLatest Version        " + latest + "\n\nUpdate now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
                         if (answer == MessageBoxResult.Yes)
                         {
-                            //TODO: Later on, remove this and replace with automated process of downloading new binaries.
-                            Process.Start("https://github.com/rex706/SAM");
-
                             //Update is available, and user wants to update. Requires app to close.
                             return 2;
                         }
