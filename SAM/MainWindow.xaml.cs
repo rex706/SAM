@@ -39,7 +39,7 @@ namespace SAM
         private static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
 
-        private static string eKey = "PRIVATE_KEY"; // Change this before release
+        private static string eKey = "ImnsUDFnXghRF"; // Change this before release
 
         private static string account;
         private static string ePassword;
@@ -149,6 +149,11 @@ namespace SAM
             }
         }
 
+        private void RefreshMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            hardRefresh();
+        }
+
         private void RefreshWindow()
         {
             decryptedAccounts = new List<Account>();
@@ -209,9 +214,8 @@ namespace SAM
                     accountLabel.HorizontalAlignment = HorizontalAlignment.Left;
                     accountLabel.VerticalAlignment = VerticalAlignment.Top;
 
-                    accountButton.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 34, 0, 0);
-                    accountLabel.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 128, 0, 0);
-
+                    accountButton.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 14, 0, 0);
+                    accountLabel.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 108, 0, 0);
 
                     accountButton.BorderBrush = null;
                     accountLabel.Foreground = new SolidColorBrush(Colors.White);
@@ -229,7 +233,7 @@ namespace SAM
                         BitmapImage image = new BitmapImage(new Uri(account.Url));
                         brush1.ImageSource = image;
                         accountButton.Background = brush1;
-                        MainGrid.Children.Add(accountLabel);
+                        buttonGrid.Children.Add(accountLabel);
                         }
                         catch (Exception m)
                         {
@@ -240,7 +244,7 @@ namespace SAM
                         }
                     }
 
-                    MainGrid.Children.Add(accountButton);
+                    buttonGrid.Children.Add(accountButton);
                     
                     accountButton.Click += new RoutedEventHandler(AccountButton_Click);
                     ContextMenu accountContext = new ContextMenu();
@@ -267,14 +271,17 @@ namespace SAM
                 {
                     xval = xcounter + 1;
                     Application.Current.MainWindow.Height = (190);
+                    buttonGrid.Height = 141;
                 }
                 else
                 {
                     xval = Int32.Parse(accPerRow);
                     Application.Current.MainWindow.Height = (185 + (125 * ycounter));
+                    buttonGrid.Height = 141 * (125 + ycounter);
                 }
 
                 Application.Current.MainWindow.Width = (xval * 120) + 25;
+                buttonGrid.Width = (xval * 120) + 25;
 
                 // Adjust new account button
                 NewButton.Margin = new Thickness(33 + (xcounter * 120), (ycounter * 120) + 52, 0, 0);
@@ -291,7 +298,7 @@ namespace SAM
 
         private void hardRefresh()
         {
-            MainGrid.Children.RemoveRange(2, MainGrid.Children.Count - 2);
+            buttonGrid.Children.Clear();
             postDeserializedRefresh(false);
         }
 
@@ -459,7 +466,7 @@ namespace SAM
                     StreamReader reader = new StreamReader(stream);
                     latest = System.Version.Parse(reader.ReadToEnd());
 
-                    if (latest != current)
+                    if (latest > current)
                     {
                         MessageBoxResult answer = MessageBox.Show("A new version of SAM is available!\n\nCurrent Version     " + current + "\nLatest Version        " + latest + "\n\nUpdate now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
                         if (answer == MessageBoxResult.Yes)

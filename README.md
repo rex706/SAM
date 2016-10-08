@@ -19,7 +19,14 @@ TODO:
 
 **CHANGELOG**
 
-**Latest version:** 0.1.4.0
+**Latest version:** 0.1.4.1
+
+* Bundle new autoupdater
+* Fix window refresh bugs 
+* Lighten background color
+* Display version number in help menu or if there is an update
+
+0.1.4.0
 
 * Finally fixed obnoxious button glow effect.
 
