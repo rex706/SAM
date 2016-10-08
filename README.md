@@ -7,7 +7,7 @@ TODO:
 * Generate new private key on first use
 * Edit entry
 
-![alt tag](http://i.imgur.com/AzvmQC0.png)
+![alt tag](http://i.imgur.com/VGlYpRV.png)
 
 [**Download**](https://drive.google.com/file/d/0B2byNRcR0k4vdjlrWkZVMWY4YVk/view?usp=sharing)
 
