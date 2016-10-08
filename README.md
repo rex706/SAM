@@ -9,7 +9,7 @@ TODO:
 
 ![alt tag](http://i.imgur.com/VGlYpRV.png)
 
-[**Download**](https://drive.google.com/file/d/0B2byNRcR0k4vdjlrWkZVMWY4YVk/view?usp=sharing)
+[**Download**](https://drive.google.com/uc?export=download&id=0B2byNRcR0k4vdjlrWkZVMWY4YVk)
 
 **Features**
 
