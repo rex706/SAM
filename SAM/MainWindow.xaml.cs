@@ -39,7 +39,7 @@ namespace SAM
         private static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
 
-        private static string eKey = "ImnsUDFnXghRF"; // Change this before release
+        private static string eKey = "PRIVATE_KEY"; // Change this before release
 
         private static string account;
         private static string ePassword;
