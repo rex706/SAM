@@ -4,8 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SAM"
-        mc:Ignorable="d" Height="190" Width="138
-        " WindowStartupLocation="CenterScreen" Icon="inverted.png" ResizeMode="NoResize" Title="SAM" Background="#FF333638">
+        mc:Ignorable="d" Height="190" Width="138" WindowStartupLocation="CenterScreen" Icon="inverted.png" ResizeMode="NoResize" Title="SAM" Background="#FF333638">
     <Window.Resources>
         <!-- This style is used for buttons, to remove the WPF default 'animated' mouse over effect -->
         <Style x:Key="MyButtonStyle" TargetType="Button">

@@ -12,24 +12,23 @@ namespace SAM
             InitializeComponent();
         }
 
-        public string ResponseText
+        public string AccountText
         {
-            get
-            {
-                if (UrlBox.Text != "")
-                {
-                    if(!UrlBox.Text.Contains("http://steamcommunity.com/"))
-                    {
-                        MessageBox.Show("Invalid Url!\nMake sure your steam url starts with:\nhttp://steamcommunity.com/", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        Close();
-                    }
-                    return UsernameBox.Text + " " + PasswordBox.Password + " " + UrlBox.Text;
-                } 
-                else
-                    return UsernameBox.Text + " " + PasswordBox.Password;
-            }
+            get { return UsernameBox.Text; }
             set { UsernameBox.Text = value; }
-        } 
+        }
+
+        public string PasswordText
+        {
+            get { return PasswordBox.Password; }
+            set { PasswordBox.Password = value; }
+        }
+
+        public string UrlText
+        {
+            get { return UrlBox.Text; }
+            set { UrlBox.Text = value; }
+        }
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
@@ -38,6 +37,7 @@ namespace SAM
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
+            DialogResult = false;
             Close();
         }
     }
