@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -47,7 +46,9 @@ namespace SAM
 
         private static string accPerRow;
 
+        private static string AssemblyVer;
         private static Version latest;
+
         private static string fileParams;
 
         #endregion
@@ -62,23 +63,13 @@ namespace SAM
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             // Verion number from assembly
-            string AssemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            AssemblyVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             MenuItem ver = new MenuItem();
             MenuItem newExistMenuItem = (MenuItem)this.FileMenu.Items[2];
-            ver.Header = "v" + AssemblyVersion;
+            ver.Header = "v" + AssemblyVer;
             ver.IsEnabled = false;
             newExistMenuItem.Items.Add(ver);
-
-            try
-            {
-                int idx = AssemblyVersion.LastIndexOf('0') - 1;
-                AssemblyVersion = AssemblyVersion.Substring(0, idx);
-            }
-            catch
-            {
-
-            }
 
             // Check for a new version.
             int updateResult = await CheckForUpdate();
@@ -113,7 +104,7 @@ namespace SAM
             if (!File.Exists("SAMSettings.ini"))
             {
                 var settingsFile = new IniFile("SAMSettings.ini");
-                settingsFile.Write("Version", AssemblyVersion, "System");
+                settingsFile.Write("Version", AssemblyVer, "System");
                 settingsFile.Write("AccountsPerRow", "5", "Settings");
                 accPerRow = "5";
             }
@@ -147,38 +138,15 @@ namespace SAM
                         }
                     }
                 }
-                settingsFile.Write("Version", AssemblyVersion, "System");
+                settingsFile.Write("Version", AssemblyVer, "System");
             }
             RefreshWindow();
-        }
-
-        private void Ver_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBoxResult answer = MessageBox.Show("A new version of SAM is available!\n\nCurrent Version     " + Assembly.GetExecutingAssembly().GetName().Version.ToString() + "\nLatest Version        " + latest + "\n\nUpdate now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
-            if (answer == MessageBoxResult.Yes)
-            {
-                // An update is available, and the user has chosen to update.
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.CreateNoWindow = false;
-                startInfo.UseShellExecute = true;
-                startInfo.FileName = "Updater.exe";
-                startInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                startInfo.Arguments = fileParams;
-
-                Process.Start(startInfo);
-                Environment.Exit(0);
-            }
-        }
-
-        private void RefreshMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            hardRefresh();
         }
 
         private void RefreshWindow()
         {
             decryptedAccounts = new List<Account>();
+            buttonGrid.Children.Clear();
 
             // Check if info.dat exists
             if (File.Exists("info.dat"))
@@ -208,7 +176,7 @@ namespace SAM
                     decryptedAccounts.Clear();
                 }
 
-                // Create new button and label for each account
+                // Create new button and textblock for each account
                 foreach (var account in encryptedAccounts)
                 {
                     string temppass = StringCipher.Decrypt(account.Password, eKey);
@@ -257,11 +225,11 @@ namespace SAM
                     {
                         try
                         {
-                        ImageBrush brush1 = new ImageBrush();
-                        BitmapImage image = new BitmapImage(new Uri(account.AviUrl));
-                        brush1.ImageSource = image;
-                        accountButton.Background = brush1;
-                        buttonGrid.Children.Add(accountText);
+                            ImageBrush brush1 = new ImageBrush();
+                            BitmapImage image = new BitmapImage(new Uri(account.AviUrl));
+                            brush1.ImageSource = image;
+                            accountButton.Background = brush1;
+                            buttonGrid.Children.Add(accountText);
                         }
                         catch (Exception m)
                         {
@@ -283,7 +251,7 @@ namespace SAM
                     accountContext.Items.Add(editItem);
                     accountContext.Items.Add(deleteItem);
                     accountButton.ContextMenu = accountContext;
-                    deleteItem.Click += delegate { deleteAccount(accountButton); };
+                    deleteItem.Click += delegate { deleteEntry(accountButton); };
                     editItem.Click += delegate { editEntry(accountButton); };
 
                     bCounter++;
@@ -318,72 +286,6 @@ namespace SAM
                 // Adjust new account button
                 NewButton.Margin = new Thickness(33 + (xcounter * 120), (ycounter * 120) + 52, 0, 0);
             }
-        }
-
-        private void deleteAccount(object butt)
-        {
-            Button button = butt as Button;
-            encryptedAccounts.RemoveAt(Int32.Parse(button.Tag.ToString()));
-            Serialize(encryptedAccounts);
-            hardRefresh();
-        }
-
-        private void editEntry(object butt)
-        {
-            Button button = butt as Button;
-
-            var dialog = new TextDialog();
-            dialog.AccountText = decryptedAccounts[Int32.Parse(button.Tag.ToString())].Name;
-            dialog.PasswordText = decryptedAccounts[Int32.Parse(button.Tag.ToString())].Password;
-            dialog.UrlText = decryptedAccounts[Int32.Parse(button.Tag.ToString())].ProfUrl;
-
-            if (dialog.ShowDialog() == true)
-            {
-                string aviUrl = "";
-                HtmlDocument document = null;
-
-                // If user entered profile url, get avatar jpg url
-                if (dialog.UrlText.Length > 2)
-                {
-                    if (dialog.UrlText.Contains("http://steamcommunity.com/"))
-                    {
-                        document = new HtmlWeb().Load(dialog.UrlText);
-                        var urls = document.DocumentNode.Descendants("img").Select(t => t.GetAttributeValue("src", null)).Where(s => !String.IsNullOrEmpty(s));
-
-                        foreach (string url in urls)
-                        {
-                            if (url.Contains("http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/") && url.Contains("full.jpg"))
-                            {
-                                aviUrl = url;
-                            }
-                        }
-                    }
-                }
-                try
-                {
-                    // Encrypt info before saving to file
-                    ePassword = StringCipher.Encrypt(dialog.PasswordText, eKey);
-
-                    encryptedAccounts[Int32.Parse(button.Tag.ToString())].Name = dialog.AccountText;
-                    encryptedAccounts[Int32.Parse(button.Tag.ToString())].Password = ePassword;
-                    encryptedAccounts[Int32.Parse(button.Tag.ToString())].ProfUrl = dialog.UrlText;
-                    encryptedAccounts[Int32.Parse(button.Tag.ToString())].AviUrl = aviUrl;
-
-                    Serialize(encryptedAccounts);
-                    hardRefresh();
-                }
-                catch (Exception m)
-                {
-                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    editEntry(butt);
-                }
-            }
-        }
-
-        private void hardRefresh()
-        {
-            buttonGrid.Children.Clear();
-            postDeserializedRefresh(true);
         }
 
         private void NewButton_Click(object sender, RoutedEventArgs e)
@@ -429,7 +331,7 @@ namespace SAM
 
                     Serialize(encryptedAccounts);
 
-                    hardRefresh();
+                    RefreshWindow();
                 }
                 catch (Exception m)
                 {
@@ -443,6 +345,68 @@ namespace SAM
                     NewAccount();
                 }
             }
+        }
+
+        private void editEntry(object butt)
+        {
+            Button button = butt as Button;
+
+            var dialog = new TextDialog();
+            dialog.AccountText = decryptedAccounts[Int32.Parse(button.Tag.ToString())].Name;
+            dialog.PasswordText = decryptedAccounts[Int32.Parse(button.Tag.ToString())].Password;
+            dialog.UrlText = decryptedAccounts[Int32.Parse(button.Tag.ToString())].ProfUrl;
+
+            if (dialog.ShowDialog() == true)
+            {
+                string aviUrl = "";
+                HtmlDocument document = null;
+
+                // If user entered profile url, get avatar jpg url
+                if (dialog.UrlText.Length > 2)
+                {
+                    if (dialog.UrlText.Contains("http://steamcommunity.com/"))
+                    {
+                        document = new HtmlWeb().Load(dialog.UrlText);
+                        var urls = document.DocumentNode.Descendants("img").Select(t => t.GetAttributeValue("src", null)).Where(s => !String.IsNullOrEmpty(s));
+
+                        foreach (string url in urls)
+                        {
+                            if (url.Contains("http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/") && url.Contains("full.jpg"))
+                            {
+                                aviUrl = url;
+                            }
+                        }
+                    }
+                }
+                try
+                {
+                    // Encrypt info before saving to file
+                    ePassword = StringCipher.Encrypt(dialog.PasswordText, eKey);
+
+                    encryptedAccounts[Int32.Parse(button.Tag.ToString())].Name = dialog.AccountText;
+                    encryptedAccounts[Int32.Parse(button.Tag.ToString())].Password = ePassword;
+                    encryptedAccounts[Int32.Parse(button.Tag.ToString())].ProfUrl = dialog.UrlText;
+                    encryptedAccounts[Int32.Parse(button.Tag.ToString())].AviUrl = aviUrl;
+
+                    Serialize(encryptedAccounts);
+                    RefreshWindow();
+                }
+                catch (Exception m)
+                {
+                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    editEntry(butt);
+                }
+            }
+        }
+
+
+
+        private void deleteEntry(object butt)
+        {
+            Button button = butt as Button;
+            encryptedAccounts.RemoveAt(Int32.Parse(button.Tag.ToString()));
+            Serialize(encryptedAccounts);
+            RefreshWindow();
         }
 
         private void AccountButton_Click(object sender, RoutedEventArgs e)
@@ -583,6 +547,7 @@ namespace SAM
             catch (Exception m)
             {
                 //MessageBox.Show("Failed to check for update.\n" + m.Message,"Error", MessageBoxButtons.OK, MessageBoxImage.Error);
+                //return -1;
                 return 0;
             }
         }
@@ -608,13 +573,15 @@ namespace SAM
 
         #endregion
 
+        #region File Menu Click Events
+
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
             var settingsDialog = new Window1();
             settingsDialog.ShowDialog();
 
             accPerRow = settingsDialog.ResponseText;
-            hardRefresh();
+            RefreshWindow();
         }
 
         private void GitMenuItem_Click(object sender, RoutedEventArgs e)
@@ -622,9 +589,35 @@ namespace SAM
             Process.Start("https://github.com/rex706/SAM");
         }
 
+        private void Ver_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult answer = MessageBox.Show("A new version of SAM is available!\n\nCurrent Version     " + Assembly.GetExecutingAssembly().GetName().Version.ToString() + "\nLatest Version        " + latest + "\n\nUpdate now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            if (answer == MessageBoxResult.Yes)
+            {
+                // An update is available, and the user has chosen to update.
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.CreateNoWindow = false;
+                startInfo.UseShellExecute = true;
+                startInfo.FileName = "Updater.exe";
+                startInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                startInfo.Arguments = fileParams;
+
+                Process.Start(startInfo);
+                Environment.Exit(0);
+            }
+        }
+
+        private void RefreshMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshWindow();
+        }
+
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }
+
+        #endregion
     }
 }
