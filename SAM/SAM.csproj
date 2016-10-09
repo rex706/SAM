@@ -37,7 +37,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Steam-icon %281%29.ico</ApplicationIcon>
+    <ApplicationIcon>steam_alt-10.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="HtmlAgilityPack, Version=1.4.9.5, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
@@ -141,7 +141,7 @@
     <Resource Include="inverted.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Steam-icon %281%29.ico" />
+    <Resource Include="steam_alt-10.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />

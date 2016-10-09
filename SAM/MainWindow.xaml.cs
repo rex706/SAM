@@ -399,8 +399,6 @@ namespace SAM
             }
         }
 
-
-
         private void deleteEntry(object butt)
         {
             Button button = butt as Button;
