@@ -5,10 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SAM"
         mc:Ignorable="d"
-        Title="SAM Settings" Height="133" Width="198" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" Icon="Steam-icon (1).ico">
-    <Grid Background="#FF252729">
+        Title="Settings" Height="130" Width="173" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" Icon="steam_alt-10.ico" Background="#FF333638">
+    <Grid>
         <Label x:Name="NumPerRowLabel" Content="Accounts/Row" HorizontalAlignment="Left" Margin="10,17,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
-        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="23" Margin="105,20,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="36" TextChanged="textBox_TextChanged" ToolTip="Adjust the number of accounts displayed per row"/>
-        <Button x:Name="OKButton" Content="OK" HorizontalAlignment="Left" Margin="60,56,0,0" VerticalAlignment="Top" Width="65" Height="30" Click="OKButton_Click"/>
+        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="23" Margin="106,20,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="30" MaxLines="1" MaxLength="2" TextChanged="textBox_TextChanged" TextAlignment="Center" ToolTip="Adjust the number of accounts displayed per row"/>
+        <Button x:Name="OKButton" Content="OK" HorizontalAlignment="Left" Margin="47,55,0,0" VerticalAlignment="Top" Width="65" Height="30" Click="OKButton_Click"/>
     </Grid>
 </Window>

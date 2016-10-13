@@ -171,11 +171,6 @@ namespace SAM
                 int xcounter = 0;
                 int ycounter = 0;
 
-                if (seedAcc)
-                {
-                    decryptedAccounts.Clear();
-                }
-
                 // Create new button and textblock for each account
                 foreach (var account in encryptedAccounts)
                 {
@@ -298,30 +293,12 @@ namespace SAM
             // User entered info
             var dialog = new TextDialog();
 
-            if (dialog.ShowDialog() == true)
+            if (dialog.ShowDialog() == true && dialog.AccountText != "" && dialog.PasswordText != "")
             {
                 account = dialog.AccountText;
                 string password = dialog.PasswordText;
-                string aviUrl = "";
-                HtmlDocument document = null;
-
-                // If user entered profile url, get avatar jpg url
-                if (dialog.UrlText.Length > 2)
-                {
-                    if (dialog.UrlText.Contains("http://steamcommunity.com/"))
-                    {
-                        document = new HtmlWeb().Load(dialog.UrlText);
-                        var urls = document.DocumentNode.Descendants("img").Select(t => t.GetAttributeValue("src", null)).Where(s => !String.IsNullOrEmpty(s));
-
-                        foreach (string url in urls)
-                        {
-                            if (url.Contains("http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/") && url.Contains("full.jpg"))
-                            {
-                                aviUrl = url;
-                            }
-                        }
-                    }
-                }
+                string aviUrl = htmlAviScrape(dialog.UrlText);
+                
                 try
                 {
                     // Encrypt info before saving to file
@@ -358,26 +335,8 @@ namespace SAM
 
             if (dialog.ShowDialog() == true)
             {
-                string aviUrl = "";
-                HtmlDocument document = null;
+                string aviUrl = htmlAviScrape(dialog.UrlText);
 
-                // If user entered profile url, get avatar jpg url
-                if (dialog.UrlText.Length > 2)
-                {
-                    if (dialog.UrlText.Contains("http://steamcommunity.com/"))
-                    {
-                        document = new HtmlWeb().Load(dialog.UrlText);
-                        var urls = document.DocumentNode.Descendants("img").Select(t => t.GetAttributeValue("src", null)).Where(s => !String.IsNullOrEmpty(s));
-
-                        foreach (string url in urls)
-                        {
-                            if (url.Contains("http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/") && url.Contains("full.jpg"))
-                            {
-                                aviUrl = url;
-                            }
-                        }
-                    }
-                }
                 try
                 {
                     // Encrypt info before saving to file
@@ -492,6 +451,30 @@ namespace SAM
                     return;
                 }
             }
+        }
+
+        private string htmlAviScrape(string htmlString)
+        {
+            HtmlDocument document = null;
+
+            // If user entered profile url, get avatar jpg url
+            if (htmlString.Length > 2)
+            {
+                if (htmlString.Contains("http://steamcommunity.com/"))
+                {
+                    document = new HtmlWeb().Load(htmlString);
+                    var urls = document.DocumentNode.Descendants("img").Select(t => t.GetAttributeValue("src", null)).Where(s => !String.IsNullOrEmpty(s));
+
+                    foreach (string url in urls)
+                    {
+                        if (url.Contains("http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/") && url.Contains("full.jpg"))
+                        {
+                            return url;
+                        }
+                    }
+                }
+            }
+            return "";
         }
 
         // Checks if an update is available. 

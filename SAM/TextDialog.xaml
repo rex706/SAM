@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SAM"
         mc:Ignorable="d"
-        Title="Login Info" Height="270" Width="300" Background="#FF252729" ResizeMode="NoResize" Icon="inverted.png" WindowStartupLocation="CenterScreen" Topmost="True">
+        Title="Login Info" Height="270" Width="300" Background="#FF333638" ResizeMode="NoResize" Icon="steam_alt-10.ico" WindowStartupLocation="CenterScreen" Topmost="True">
     <StackPanel Margin="5,5,5,5">
         <TextBlock Name="TitleTextBox" Margin="0,0,0,10" Text="Username" Foreground="White" />
         <TextBox Name="UsernameBox" Padding="3,3,3,3" />

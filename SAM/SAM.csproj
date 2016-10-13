@@ -138,9 +138,6 @@
     <Resource Include="4ncBpopTA_glow.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="inverted.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="steam_alt-10.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
