@@ -5,21 +5,33 @@ Easily switch between steam accounts.
 TODO:
 
 * Generate new private key on first use
-* Edit entry
 
-![alt tag](http://i.imgur.com/VGlYpRV.png)
+![alt tag](http://i.imgur.com/Z4ozFkJ.png)
 
 [**Download**](https://drive.google.com/uc?export=download&id=0B2byNRcR0k4vdjlrWkZVMWY4YVk)
 
 **Features**
 
-* Add multiple steam accounts to switch back and forth easily.
+* 1-click steam log ins for multiple accounts.
 * Encrypts saved user info.
+* Adjust number of accounts per row.
 
+------------------------------------
 
 **CHANGELOG**
 
-**Latest version:** 0.1.4.1
+**Latest version:** 1.0.1.0
+
+* Window resize animations
+* Fix settings window to be less annoying
+
+1.0.0.1
+
+* 1.0 release (completely usable with all origionally planned features)
+* Edit entry
+* Bug fixes
+
+0.1.4.1
 
 * Bundle new autoupdater
 * Fix window refresh bugs 

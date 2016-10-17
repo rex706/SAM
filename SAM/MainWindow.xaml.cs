@@ -51,6 +51,14 @@ namespace SAM
 
         private static string fileParams;
 
+        // Resize animation vars
+        private static System.Windows.Forms.Timer _Timer = new System.Windows.Forms.Timer();
+        private int _Stop = 0;
+        private double _RatioHeight;
+        private double _RatioWidth;
+        private double _Height;
+        private double _Width;
+
         #endregion
 
         public MainWindow()
@@ -58,6 +66,9 @@ namespace SAM
             InitializeComponent();
 
             this.Loaded += new RoutedEventHandler(MainWindow_Loaded);
+
+            _Timer.Tick += new EventHandler(timer_Tick);
+            _Timer.Interval = (10);
         }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -260,23 +271,26 @@ namespace SAM
                 }
 
                 int xval = 0;
+                int newHeight;
 
                 // Adjust window size and info positions
                 if (ycounter == 0)
                 {
                     xval = xcounter + 1;
-                    Application.Current.MainWindow.Height = (190);
+                    newHeight = 190;
                     buttonGrid.Height = 141;
                 }
                 else
                 {
                     xval = Int32.Parse(accPerRow);
-                    Application.Current.MainWindow.Height = (185 + (125 * ycounter));
+                    newHeight = 185 + (125 * ycounter);
                     buttonGrid.Height = 141 * (125 + ycounter);
                 }
 
-                Application.Current.MainWindow.Width = (xval * 120) + 25;
-                buttonGrid.Width = (xval * 120) + 25;
+                int newWidth = (xval * 120) + 25;
+
+                resize(newHeight, newWidth);
+                buttonGrid.Width = newWidth;
 
                 // Adjust new account button
                 NewButton.Margin = new Thickness(33 + (xcounter * 120), (ycounter * 120) + 52, 0, 0);
@@ -477,6 +491,8 @@ namespace SAM
             return "";
         }
 
+        #region Update Check
+
         // Checks if an update is available. 
         // -1 for check Error, 0 for no update, 1 for update is available, 2 for perform update.
         private static async Task<int> CheckForUpdate()
@@ -532,6 +548,46 @@ namespace SAM
                 return 0;
             }
         }
+
+        #endregion
+
+        #region Resize and Resize Timer
+
+        public void resize(double _PassedHeight, double _PassedWidth)
+        {
+            _Height = _PassedHeight;
+            _Width = _PassedWidth;
+
+            _Timer.Enabled = true;
+            _Timer.Start();
+        }
+
+        private void timer_Tick(Object myObject, EventArgs myEventArgs)
+        {
+            if (_Stop == 0)
+            {
+                _RatioHeight = ((this.Height - _Height) / 5) * -1;
+                _RatioWidth = ((this.Width - _Width) / 5) * -1;
+            }
+            _Stop++;
+
+            this.Height += _RatioHeight;
+            this.Width += _RatioWidth;
+
+            if (_Stop == 5)
+            {
+                _Timer.Stop();
+                _Timer.Enabled = false;
+                _Timer.Dispose();
+
+                _Stop = 0;
+
+                this.Height = _Height;
+                this.Width = _Width;
+            }
+        }
+
+        #endregion
 
         #region Serialize/Deserialize
 

@@ -1,18 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace SAM
 {
@@ -39,18 +29,33 @@ namespace SAM
 
         public string ResponseText
         {
-            get { return textBox.Text; }
+            get
+            {
+                if (!Regex.IsMatch(textBox.Text, @"^\d+$") || Int32.Parse(textBox.Text) < 1)
+                {
+                    saveSettings("1");
+                    return "1";
+                }
+                else
+                {
+                    saveSettings(textBox.Text);
+                    return textBox.Text;
+                }
+                    
+            }
             set { textBox.Text = value; }
         }
 
         private void textBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+
+        }
+
+        private void saveSettings(string apr)
+        {
             var settingsFile = new IniFile("SAMSettings.ini");
+            settingsFile.Write("AccountsPerRow", apr, "Settings");
 
-            if (!Regex.IsMatch(textBox.Text, @"^\d+$") || Int32.Parse(textBox.Text) < 1)
-                textBox.Text = "1";
-
-            settingsFile.Write("AccountsPerRow", textBox.Text, "Settings");
         }
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
