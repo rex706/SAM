@@ -374,10 +374,15 @@ namespace SAM
 
         private void deleteEntry(object butt)
         {
-            Button button = butt as Button;
-            encryptedAccounts.RemoveAt(Int32.Parse(button.Tag.ToString()));
-            Serialize(encryptedAccounts);
-            RefreshWindow();
+            MessageBoxResult result = MessageBox.Show("Are you sure you want to delete this entry?", "Delete", MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
+
+            if(result == MessageBoxResult.Yes)
+            {
+                Button button = butt as Button;
+                encryptedAccounts.RemoveAt(Int32.Parse(button.Tag.ToString()));
+                Serialize(encryptedAccounts);
+                RefreshWindow();
+            }
         }
 
         private void AccountButton_Click(object sender, RoutedEventArgs e)
