@@ -30,6 +30,12 @@ namespace SAM
             set { UrlBox.Text = value; }
         }
 
+        public string DescriptionText
+        {
+            get { return DescriptionBox.Text; }
+            set { DescriptionBox.Text = value; }
+        }
+
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;

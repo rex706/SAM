@@ -29,6 +29,8 @@ namespace SAM
         public string ProfUrl { get; set; }
 
         public string AviUrl { get; set; }
+
+        public string Description { get; set; }
     }
 
     [Serializable]
@@ -189,7 +191,7 @@ namespace SAM
 
                     if (seedAcc)
                     {
-                        decryptedAccounts.Add(new Account() { Name = account.Name, Password = temppass, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl });
+                        decryptedAccounts.Add(new Account() { Name = account.Name, Password = temppass, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, Description = account.Description });
                     }
 
                     //Console.WriteLine("Name = {0}, Pass = {1}, Url = {2}", account.Name, account.Password, account.Url);
@@ -205,6 +207,7 @@ namespace SAM
                     accountButton.Name = account.Name;
                     accountText.Name = account.Name + "Label";
                     accountText.Text = account.Name;
+                    accountButton.ToolTip = account.Description;
 
                     accountButton.Height = 100;
                     accountButton.Width = 100;
@@ -318,7 +321,7 @@ namespace SAM
                     // Encrypt info before saving to file
                     ePassword = StringCipher.Encrypt(password, eKey);
 
-                    encryptedAccounts.Add(new Account() { Name = dialog.AccountText, Password = ePassword, ProfUrl = dialog.UrlText, AviUrl = aviUrl });
+                    encryptedAccounts.Add(new Account() { Name = dialog.AccountText, Password = ePassword, ProfUrl = dialog.UrlText, AviUrl = aviUrl, Description = dialog.DescriptionText });
 
                     Serialize(encryptedAccounts);
 
@@ -346,6 +349,7 @@ namespace SAM
             dialog.AccountText = decryptedAccounts[Int32.Parse(button.Tag.ToString())].Name;
             dialog.PasswordText = decryptedAccounts[Int32.Parse(button.Tag.ToString())].Password;
             dialog.UrlText = decryptedAccounts[Int32.Parse(button.Tag.ToString())].ProfUrl;
+            dialog.DescriptionText = decryptedAccounts[Int32.Parse(button.Tag.ToString())].Description;
 
             if (dialog.ShowDialog() == true)
             {
@@ -360,6 +364,7 @@ namespace SAM
                     encryptedAccounts[Int32.Parse(button.Tag.ToString())].Password = ePassword;
                     encryptedAccounts[Int32.Parse(button.Tag.ToString())].ProfUrl = dialog.UrlText;
                     encryptedAccounts[Int32.Parse(button.Tag.ToString())].AviUrl = aviUrl;
+                    encryptedAccounts[Int32.Parse(button.Tag.ToString())].Description = dialog.DescriptionText;
 
                     Serialize(encryptedAccounts);
                     RefreshWindow();
@@ -479,6 +484,10 @@ namespace SAM
             // If user entered profile url, get avatar jpg url
             if (htmlString.Length > 2)
             {
+                if (htmlString.Contains("https://"))
+                {
+                    htmlString = htmlString.Remove(4,1);
+                }
                 if (htmlString.Contains("http://steamcommunity.com/"))
                 {
                     document = new HtmlWeb().Load(htmlString);

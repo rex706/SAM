@@ -2,9 +2,6 @@
 
 Easily switch between steam accounts.
 
-TODO:
-
-* Generate new private key on first use
 
 ![alt tag](http://i.imgur.com/Z4ozFkJ.png)
 
@@ -20,7 +17,12 @@ TODO:
 
 **CHANGELOG**
 
-**Latest version:** 1.0.1.0
+**Latest version:** 1.0.2.0
+
+* Optional description profile entry.
+* Confirmination window when deleting entries.
+
+1.0.1.0
 
 * Window resize animations
 * Fix settings window to be less annoying
