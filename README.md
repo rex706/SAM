@@ -9,7 +9,7 @@ Easily switch between steam accounts.
 
 **Features**
 
-* 1-click steam log ins for multiple accounts.
+* 1-click steam logins for multiple accounts.
 * Encrypts saved user info.
 * Adjust number of accounts per row.
 
@@ -20,7 +20,7 @@ Easily switch between steam accounts.
 **Latest version:** 1.0.2.0
 
 * Optional description profile entry.
-* Confirmination window when deleting entries.
+* Confirmation window when deleting entries.
 
 1.0.1.0
 
