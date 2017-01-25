@@ -5,7 +5,7 @@ Easily switch between steam accounts.
 
 ![alt tag](http://i.imgur.com/Z4ozFkJ.png)
 
-[**Download**](https://github.com/rex706/SAM/releases/download/1.0.2.0/SAM.rar)
+[**Download**](https://github.com/rex706/SAM/releases/download/v1.0.2.1/SAM.zip)
 
 **Features**
 
@@ -17,7 +17,11 @@ Easily switch between steam accounts.
 
 **CHANGELOG**
 
-**Latest version:** 1.0.2.0
+**Latest version:** 1.0.2.1
+
+* Start with windows setting. 
+
+1.0.2.0
 
 * Optional description profile entry.
 * Confirmation window when deleting entries.
