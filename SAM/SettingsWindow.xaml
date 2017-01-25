@@ -5,10 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SAM"
         mc:Ignorable="d"
-        Title="Settings" Height="130" Width="173" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" Icon="steam_alt-10.ico" Background="#FF333638">
+        Title="Settings" Height="160" Width="173" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" Icon="steam_alt-10.ico" Background="#FF333638">
     <Grid>
-        <Label x:Name="NumPerRowLabel" Content="Accounts/Row" HorizontalAlignment="Left" Margin="10,17,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
-        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="23" Margin="106,20,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="30" MaxLines="1" MaxLength="2" TextChanged="textBox_TextChanged" TextAlignment="Center" ToolTip="Adjust the number of accounts displayed per row"/>
-        <Button x:Name="OKButton" Content="OK" HorizontalAlignment="Left" Margin="47,55,0,0" VerticalAlignment="Top" Width="65" Height="30" Click="OKButton_Click"/>
+        <Label x:Name="NumPerRowLabel" Content="Accounts/Row" HorizontalAlignment="Left" Margin="55,14,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="23" Margin="15,17,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="30" MaxLines="1" MaxLength="2" TextChanged="textBox_TextChanged" TextAlignment="Center" ToolTip="Adjust the number of accounts displayed per row"/>
+        <Button x:Name="OKButton" Content="OK" HorizontalAlignment="Left" Margin="47,79,0,0" VerticalAlignment="Top" Width="65" Height="30" Click="OKButton_Click"/>
+        <CheckBox x:Name="startupCheckBox" Content="Start with Windows" HorizontalAlignment="Left" Margin="21,51,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" Checked="startupCheckBox_Checked"/>
     </Grid>
 </Window>

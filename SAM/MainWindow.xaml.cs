@@ -41,7 +41,7 @@ namespace SAM
         private static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
         
-        private static string eKey = "PRIVATE_KEY"; // Change this before release
+        private static string eKey = PRIVATE_KEY; // Change this before release
 
         private static string account;
         private static string ePassword;
@@ -225,7 +225,7 @@ namespace SAM
                     accountButton.BorderBrush = null;
                     accountText.Foreground = new SolidColorBrush(Colors.White);
 
-                    if (account.AviUrl == null || account.AviUrl == "" || account.AviUrl == " ")
+                    if (account.ProfUrl == "" || account.AviUrl == null || account.AviUrl == "" || account.AviUrl == " ")
                     {
                         accountButton.Content = account.Name;
                         accountButton.Background = Brushes.LightGray;
@@ -495,7 +495,8 @@ namespace SAM
 
                     foreach (string url in urls)
                     {
-                        if (url.Contains("http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/") && url.Contains("full.jpg"))
+                        if ((url.Contains("http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/")
+                            || url.Contains("http://cdn.edgecast.steamstatic.com/steamcommunity/public/images/avatars/")) && url.Contains("full.jpg"))
                         {
                             return url;
                         }
