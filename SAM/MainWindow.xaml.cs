@@ -41,17 +41,15 @@ namespace SAM
         private static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
         
-        private static string eKey = PRIVATE_KEY; // Change this before release
+        private static string eKey = "PRIVATE_KEY"; // Change this before release
 
         private static string account;
         private static string ePassword;
 
         private static string accPerRow;
+        private static bool rememberPassword = true;
 
         private static string AssemblyVer;
-        private static Version latest;
-
-        private static string fileParams;
 
         // Resize animation vars
         private static System.Windows.Forms.Timer _Timer = new System.Windows.Forms.Timer();
@@ -85,32 +83,12 @@ namespace SAM
             newExistMenuItem.Items.Add(ver);
 
             // Check for a new version.
-            int updateResult = await CheckForUpdate();
-            if (updateResult == -1)
-            {
-                // Some Error occurred.
-                // TODO: Handle this Error.
-            }
-            else if (updateResult == 1)
+            if (await UpdateCheck.CheckForUpdate("http://textuploader.com/58mva/raw") == 1)
             {
                 // An update is available, but user has chosen not to update.
                 ver.Header = "Update Available!";
                 ver.Click += Ver_Click;
                 ver.IsEnabled = true;
-            }
-            else if (updateResult == 2)
-            {
-                // An update is available, and the user has chosen to update.
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.CreateNoWindow = false;
-                startInfo.UseShellExecute = true;
-                startInfo.FileName = "Updater.exe";
-                startInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                startInfo.Arguments = fileParams;
-
-                Process.Start(startInfo);
-                Environment.Exit(0);
             }
 
             // If no settings file exists, create one and initialize values
@@ -207,7 +185,10 @@ namespace SAM
                     accountButton.Name = account.Name;
                     accountText.Name = account.Name + "Label";
                     accountText.Text = account.Name;
-                    accountButton.ToolTip = account.Description;
+
+                    // If there is a description, set up tooltip.
+                    if (account.Description.Length > 0)
+                        accountButton.ToolTip = account.Description;
 
                     accountButton.Height = 100;
                     accountButton.Width = 100;
@@ -468,6 +449,10 @@ namespace SAM
                 {
                     // Sart the process with the info specified
                     Process exeProcess = Process.Start(startInfo);
+
+                    // SCAN FOR MEMORY TO ENABLE 'REMEMBER PASSWORD' CHECKBOX IF SETTING IS ENABLED
+                    if (rememberPassword)
+                        EnableRememberPassword();
                 }
                 catch (Exception m)
                 {
@@ -475,6 +460,48 @@ namespace SAM
                     return;
                 }
             }
+        }
+
+        private static int EnableRememberPassword()
+        {
+            AobMemScan scanner = new AobMemScan();
+
+            byte[] pattern = new byte[] { 0x03, 0x00, 0x00, 0x00, 0x00, 0x01, 0xA8, 0xA8, 0xA8, 0xFF };
+            IntPtr address = IntPtr.Zero;
+            string address_string;
+            bool foundSteam = false;
+            Process[] p = null;
+
+            // Wait for Steam's memory to be readable.
+            while (foundSteam == false)
+            {
+                try
+                {
+                    p = Process.GetProcessesByName("Steam");
+
+                    if (p.Length > 0)
+                        foundSteam = true;
+                }
+                catch
+                {
+                    foundSteam = false;
+                }
+            }
+            
+            // Get 'Remember my password' checkbox memory address.
+            while (address.ToInt32() < 0xFF)
+            {
+                address = scanner.Scan(p[0], pattern) + 29; 
+            }
+
+            address_string = string.Format("0x{0:X}", address.ToInt32());
+            AobMemScan.WriteProcessMemory(p[0].Handle, address, new byte[] { 0x01 }, 1, 0);
+
+            ProcessModuleCollection myProcessModuleCollection = p[0].Modules;
+            IntPtr processBaseAddress = myProcessModuleCollection[0].BaseAddress;
+            string baseAddressString = string.Format("0x{0:X}", processBaseAddress.ToInt32());
+
+            return 0;
         }
 
         private string htmlAviScrape(string htmlString)
@@ -505,66 +532,6 @@ namespace SAM
             }
             return "";
         }
-
-        #region Update Check
-
-        // Checks if an update is available. 
-        // -1 for check Error, 0 for no update, 1 for update is available, 2 for perform update.
-        private static async Task<int> CheckForUpdate()
-        {
-            //Nkosi Note: Always use asynchronous versions of network and IO methods.
-
-            //Check for version updates
-            var client = new HttpClient();
-            client.Timeout = new TimeSpan(0, 0, 0, 10);
-            try
-            {
-                // Open the text file using a stream reader
-                using (Stream stream = await client.GetStreamAsync("http://textuploader.com/58mva/raw"))
-                {
-                    System.Version current = Assembly.GetExecutingAssembly().GetName().Version;
-                    StreamReader reader = new StreamReader(stream);
-                    latest = System.Version.Parse(await reader.ReadLineAsync());
-
-                    List<string> newFiles = new List<string>();
-
-                    while (!reader.EndOfStream)
-                    {
-                        newFiles.Add(await reader.ReadLineAsync());
-                    }
-
-                    for(int i = 0; i < newFiles.Count; i++)
-                    {
-                        if (i == 0)
-                            fileParams += newFiles[i];
-                        else
-                            fileParams += " " + newFiles[i];
-                    }
-
-                    if (latest > current)
-                    {
-                        MessageBoxResult answer = MessageBox.Show("A new version of SAM is available!\n\nCurrent Version     " + current + "\nLatest Version        " + latest + "\n\nUpdate now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
-                        if (answer == MessageBoxResult.Yes)
-                        {
-                            //Update is available, and user wants to update. Requires app to close.
-                            return 2;
-                        }
-                        //Update is available, but user chose not to update just yet.
-                        return 1;
-                    }
-                }
-                //No update available.
-                return 0;
-            }
-            catch (Exception m)
-            {
-                //MessageBox.Show("Failed to check for update.\n" + m.Message,"Error", MessageBoxButtons.OK, MessageBoxImage.Error);
-                //return -1;
-                return 0;
-            }
-        }
-
-        #endregion
 
         #region Resize and Resize Timer
 
@@ -627,6 +594,11 @@ namespace SAM
 
         #region File Menu Click Events
 
+        private void RememberPass_Click(object sender, RoutedEventArgs e)
+        {
+            EnableRememberPassword();
+        }
+
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
             var settingsDialog = new Window1();
@@ -641,23 +613,9 @@ namespace SAM
             Process.Start("https://github.com/rex706/SAM");
         }
 
-        private void Ver_Click(object sender, RoutedEventArgs e)
+        private async void Ver_Click(object sender, RoutedEventArgs e)
         {
-            MessageBoxResult answer = MessageBox.Show("A new version of SAM is available!\n\nCurrent Version     " + Assembly.GetExecutingAssembly().GetName().Version.ToString() + "\nLatest Version        " + latest + "\n\nUpdate now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
-            if (answer == MessageBoxResult.Yes)
-            {
-                // An update is available, and the user has chosen to update.
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.CreateNoWindow = false;
-                startInfo.UseShellExecute = true;
-                startInfo.FileName = "Updater.exe";
-                startInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                startInfo.Arguments = fileParams;
-
-                Process.Start(startInfo);
-                Environment.Exit(0);
-            }
+            await UpdateCheck.CheckForUpdate("http://textuploader.com/58mva/raw");
         }
 
         private void RefreshMenuItem_Click(object sender, RoutedEventArgs e)

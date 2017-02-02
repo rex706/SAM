@@ -69,6 +69,7 @@
                 <MenuItem Header="Edit">
                     <MenuItem Header="Refresh" Click="RefreshMenuItem_Click" />
                     <MenuItem Header="Settings" Click="SettingsButton_Click" />
+                    <MenuItem Header="Remember Password" Click="RememberPass_Click"/>
                 </MenuItem>
                 <MenuItem Header="Help">
                     <MenuItem Header="GitHub" Click="GitMenuItem_Click" />
