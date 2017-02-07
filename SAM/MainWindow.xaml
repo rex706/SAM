@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SAM"
-        mc:Ignorable="d" Height="190" Width="138" WindowStartupLocation="CenterScreen" Icon="steam_alt-10.ico" ResizeMode="NoResize" Title="SAM" Background="#FF333638">
+        mc:Ignorable="d" Height="190" Width="138" WindowStartupLocation="CenterScreen" Icon="steam_alt-10.ico" ResizeMode="CanMinimize" Title="SAM" Background="#FF333638">
     <Window.Resources>
         <!-- This style is used for buttons, to remove the WPF default 'animated' mouse over effect -->
         <Style x:Key="MyButtonStyle" TargetType="Button">
@@ -36,7 +36,7 @@
             <ColumnDefinition/>
             <ColumnDefinition Width="0*"/>
         </Grid.ColumnDefinitions>
-        <Button x:Name="NewButton" Margin="30,57,0,0" Width="64" Click="NewButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="63" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{x:Null}" ToolTip="Add account" RenderTransformOrigin="0.5,0.5">
+        <Button x:Name="NewButton" Margin="30,57,0,0" Width="64" Click="NewButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="63" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{x:Null}" RenderTransformOrigin="0.5,0.5">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Setter Property="VerticalContentAlignment" Value="Stretch"/>
@@ -69,7 +69,6 @@
                 <MenuItem Header="Edit">
                     <MenuItem Header="Refresh" Click="RefreshMenuItem_Click" />
                     <MenuItem Header="Settings" Click="SettingsButton_Click" />
-                    <MenuItem Header="Remember Password" Click="RememberPass_Click"/>
                 </MenuItem>
                 <MenuItem Header="Help">
                     <MenuItem Header="GitHub" Click="GitMenuItem_Click" />

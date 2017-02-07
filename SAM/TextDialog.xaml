@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SAM"
         mc:Ignorable="d"
-        Title="Login Info" Height="380" Width="300" Background="#FF333638" ResizeMode="NoResize" Icon="steam_alt-10.ico" WindowStartupLocation="CenterScreen" Topmost="True">
+        Title="Login Info" Height="411" Width="300" Background="#FF333638" ResizeMode="NoResize" Icon="steam_alt-10.ico" WindowStartupLocation="CenterScreen" Topmost="True">
     <StackPanel Margin="5,5,5,5">
         <TextBlock Name="TitleTextBox" Margin="0,0,0,10" Text="Username*" Foreground="White" />
         <TextBox Name="UsernameBox" Padding="3,3,3,3" />
@@ -20,8 +20,9 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Button Name="OKButton" Content="OK" Grid.Column="0" Margin="0,0,5,0" Padding="8" Click="OKButton_Click" />
-            <Button Name="CancelButton" Content="Cancel" Grid.Column="1" Margin="5,0,0,0" Padding="8" Click="CancelButton_Click" />
+            <Button Name="OKButton" Content="OK" Grid.Column="0" Margin="0,28,5,-28" Padding="8" Click="OKButton_Click" />
+            <Button Name="CancelButton" Content="Cancel" Grid.Column="1" Margin="5,28,0,-28" Padding="8" Click="CancelButton_Click" />
+            <CheckBox x:Name="autoLogCheckBox" Content="Auto Login" HorizontalAlignment="Left" Margin="0,3,0,0" VerticalAlignment="Top" Foreground="White"/>
         </Grid>
     </StackPanel>
 </Window>

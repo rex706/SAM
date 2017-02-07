@@ -5,11 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SAM"
         mc:Ignorable="d"
-        Title="Settings" Height="160" Width="173" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" Icon="steam_alt-10.ico" Background="#FF333638">
+        Title="Settings" Height="272" Width="314" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" Icon="steam_alt-10.ico" Background="#FF333638">
     <Grid>
-        <Label x:Name="NumPerRowLabel" Content="Accounts/Row" HorizontalAlignment="Left" Margin="55,14,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
-        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="23" Margin="15,17,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="30" MaxLines="1" MaxLength="2" TextChanged="textBox_TextChanged" TextAlignment="Center" ToolTip="Adjust the number of accounts displayed per row"/>
-        <Button x:Name="OKButton" Content="OK" HorizontalAlignment="Left" Margin="47,79,0,0" VerticalAlignment="Top" Width="65" Height="30" Click="OKButton_Click"/>
-        <CheckBox x:Name="startupCheckBox" Content="Start with Windows" HorizontalAlignment="Left" Margin="21,51,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" Checked="startupCheckBox_Checked"/>
+        <Grid Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Name="OKButton" Content="OK" Grid.Column="0" Margin="12,176,10,10" Padding="8" Click="OKButton_Click" />
+            <Button Name="CancelButton" Content="Cancel" Margin="10,176,13,10" Padding="8" Click="cancelButton_Click" Grid.Column="1" />
+            <Rectangle Fill="#FF7C7C7C" HorizontalAlignment="Left" Height="1" Margin="12,85,0,0" Stroke="#FF535353" VerticalAlignment="Top" Width="272" Grid.ColumnSpan="2"/>
+        </Grid>
+        <Label x:Name="NumPerRowLabel" Content="Accounts/Row" HorizontalAlignment="Left" Margin="56,34,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+        <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="19" Margin="23,37,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="30" MaxLines="1" MaxLength="2" TextChanged="textBox_TextChanged" TextAlignment="Center" ToolTip="Adjust the number of accounts displayed per row"/>
+        <CheckBox x:Name="startupCheckBox" Content="Start with Windows" HorizontalAlignment="Left" Margin="21,69,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+        <Label x:Name="autologLabel" Content="Auto Login" HorizontalAlignment="Left" Margin="15,99,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+        <CheckBox x:Name="mostRecentCheckBox" Content="Most recent:" HorizontalAlignment="Left" Margin="21,131,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" Checked="autologRecentCheckBox_Checked" Unchecked="autologRecentCheckBox_Unchecked"/>
+        <Label x:Name="generalSettingsLabel" Content="General" HorizontalAlignment="Left" Margin="15,7,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+        <CheckBox x:Name="selectedAccountCheckBox" Content="Pre-selected:" HorizontalAlignment="Left" Margin="21,160,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.465,-0.933" Foreground="#FFD1D1D1" Checked="selectedAccountLabel_Checked" Unchecked="selectedAccountLabel_Unchecked"/>
+        <TextBlock x:Name="selectedAccountLabel" Text="" HorizontalAlignment="Left" Margin="114,158,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <TextBlock x:Name="recentAccountLabel" Text="" HorizontalAlignment="Left" Margin="114,129,0,0" VerticalAlignment="Top" Foreground="White"/>
     </Grid>
 </Window>

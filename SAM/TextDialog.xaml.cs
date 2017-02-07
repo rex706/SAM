@@ -7,9 +7,12 @@ namespace SAM
     /// </summary>
     public partial class TextDialog : Window
     {
+        private IniFile settingsFile;
+
         public TextDialog()
         {
             InitializeComponent();
+            settingsFile = new IniFile("SAMSettings.ini");
         }
 
         public string AccountText
@@ -36,8 +39,15 @@ namespace SAM
             set { DescriptionBox.Text = value; }
         }
 
+        public bool AutoLogAccountIndex { get; set; }
+
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
+            if (autoLogCheckBox.IsChecked == true)
+                AutoLogAccountIndex = true;
+            else
+                AutoLogAccountIndex = false;
+
             DialogResult = true;
         }
 

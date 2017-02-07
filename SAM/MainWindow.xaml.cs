@@ -3,9 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Http;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -38,18 +36,25 @@ namespace SAM
     {
         #region Globals
 
-        private static List<Account> encryptedAccounts;
+        public static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
-        
+
         private static string eKey = "PRIVATE_KEY"; // Change this before release
 
         private static string account;
         private static string ePassword;
 
         private static string accPerRow;
-        private static bool rememberPassword = true;
+        private static string steamPath;
+
+        private static bool selected = false;
+        private static int selectedAcc = -1;
+        private static bool recent = false;
+        private static int recentAcc = -1;
 
         private static string AssemblyVer;
+
+        IniFile settingsFile;
 
         // Resize animation vars
         private static System.Windows.Forms.Timer _Timer = new System.Windows.Forms.Timer();
@@ -91,22 +96,56 @@ namespace SAM
                 ver.IsEnabled = true;
             }
 
-            // If no settings file exists, create one and initialize values
+            // If no settings file exists, create one and initialize values.
             if (!File.Exists("SAMSettings.ini"))
             {
-                var settingsFile = new IniFile("SAMSettings.ini");
+                settingsFile = new IniFile("SAMSettings.ini");
                 settingsFile.Write("Version", AssemblyVer, "System");
                 settingsFile.Write("AccountsPerRow", "5", "Settings");
+                settingsFile.Write("StartWithWindows", "Settings");
+                settingsFile.Write("Recent", "False", "AutoLog");
+                settingsFile.Write("RecentAcc","", "AutoLog");
+                settingsFile.Write("Selected", "False", "AutoLog");
+                settingsFile.Write("SelectedAcc", "", "AutoLog");
                 accPerRow = "5";
             }
-            // Else load settings from preexisting file
+            // Else load settings from preexisting file.
             else
             {
-                var settingsFile = new IniFile("SAMSettings.ini");
+                settingsFile = new IniFile("SAMSettings.ini");
                 accPerRow = settingsFile.Read("AccountsPerRow", "Settings");
 
                 if (!Regex.IsMatch(accPerRow, @"^\d+$") || Int32.Parse(accPerRow) < 1)
                     accPerRow = "1";
+
+                if (settingsFile.KeyExists("Steam", "Settings"))
+                    steamPath = settingsFile.Read("Steam", "Settings");
+
+                // If the recent autolog entry exists and is set to true.
+                // else create defualt settings file entry.
+                if (settingsFile.KeyExists("Recent", "AutoLog") && settingsFile.Read("Recent", "AutoLog") == "True" && Int32.Parse(settingsFile.Read("RecentAcc", "AutoLog")) >=0)
+                {
+                    recent = true;
+                    recentAcc = Int32.Parse(settingsFile.Read("RecentAcc", "AutoLog"));
+                }
+                else if (!settingsFile.KeyExists("Recent", "AutoLog"))
+                {
+                    settingsFile.Write("Recent", "False", "AutoLog");
+                    settingsFile.Write("RecentAcc", "-1", "AutoLog");
+                }
+
+                // If the selected autolog entry exists and is set to true.
+                // else create defualt settings file entry.
+                if (settingsFile.KeyExists("Selected", "AutoLog") && settingsFile.Read("Selected", "AutoLog") == "True")
+                {
+                    selected = true;
+                    selectedAcc = Int32.Parse(settingsFile.Read("SelectedAcc", "AutoLog"));
+                }
+                else if (!settingsFile.KeyExists("Selected", "AutoLog"))
+                {
+                    settingsFile.Write("Selected", "False", "AutoLog");
+                    settingsFile.Write("SelectedAcc", "-1", "AutoLog");
+                }
 
                 if (File.Exists("info.dat"))
                 {
@@ -114,7 +153,7 @@ namespace SAM
                     string temp = datReader.ReadLine();
                     datReader.Close();
 
-                    // If the user is some how using an older info.dat, delete it
+                    // If the user is some how using an older info.dat, delete it.
                     if (!temp.Contains("xml"))
                     {
                         MessageBox.Show("Your info.dat is out of date and must be deleted.\nSorry for the inconvenience!", "Invalid File", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -131,7 +170,15 @@ namespace SAM
                 }
                 settingsFile.Write("Version", AssemblyVer, "System");
             }
+
+            // Load window with account buttons.
             RefreshWindow();
+
+            // Login to auto log account if enabled.
+            if (recent == true)
+                Login(recentAcc);
+            else if (selected == true)
+                Login(selectedAcc);
         }
 
         private void RefreshWindow()
@@ -145,7 +192,7 @@ namespace SAM
                 // Deserialize file
                 encryptedAccounts = Deserialize();
                 postDeserializedRefresh(true);
-                
+
             }
             else
             {
@@ -155,7 +202,7 @@ namespace SAM
 
         private void postDeserializedRefresh(bool seedAcc)
         {
-           
+
             if (encryptedAccounts != null)
             {
                 int bCounter = 0;
@@ -231,7 +278,7 @@ namespace SAM
                     }
 
                     buttonGrid.Children.Add(accountButton);
-                    
+
                     accountButton.Click += new RoutedEventHandler(AccountButton_Click);
                     ContextMenu accountContext = new ContextMenu();
                     MenuItem deleteItem = new MenuItem();
@@ -296,7 +343,18 @@ namespace SAM
                 account = dialog.AccountText;
                 string password = dialog.PasswordText;
                 string aviUrl = htmlAviScrape(dialog.UrlText);
-                
+
+                // If the auto login checkbox was checked, update settings file and global variables. 
+                if (dialog.AutoLogAccountIndex == true)
+                {
+                    settingsFile.Write("SelectedAcc", (encryptedAccounts.Count + 1).ToString(), "AutoLog");
+                    settingsFile.Write("Selected", "True", "AutoLog");
+                    settingsFile.Write("Recent", "False", "AutoLog");
+                    selected = true;
+                    recent = false;
+                    selectedAcc = encryptedAccounts.Count + 1;
+                }
+
                 try
                 {
                     // Encrypt info before saving to file
@@ -325,27 +383,49 @@ namespace SAM
         private void editEntry(object butt)
         {
             Button button = butt as Button;
+            int index = Int32.Parse(button.Tag.ToString());
 
             var dialog = new TextDialog();
-            dialog.AccountText = decryptedAccounts[Int32.Parse(button.Tag.ToString())].Name;
-            dialog.PasswordText = decryptedAccounts[Int32.Parse(button.Tag.ToString())].Password;
-            dialog.UrlText = decryptedAccounts[Int32.Parse(button.Tag.ToString())].ProfUrl;
-            dialog.DescriptionText = decryptedAccounts[Int32.Parse(button.Tag.ToString())].Description;
+            dialog.AccountText = decryptedAccounts[index].Name;
+            dialog.PasswordText = decryptedAccounts[index].Password;
+            dialog.UrlText = decryptedAccounts[index].ProfUrl;
+            dialog.DescriptionText = decryptedAccounts[index].Description;
+
+            if (selectedAcc == index)
+                dialog.autoLogCheckBox.IsChecked = true;
 
             if (dialog.ShowDialog() == true)
             {
                 string aviUrl = htmlAviScrape(dialog.UrlText);
+
+                // If the auto login checkbox was checked, update settings file and global variables. 
+                if (dialog.AutoLogAccountIndex == true)
+                {
+                    settingsFile.Write("SelectedAcc", button.Tag.ToString(), "AutoLog");
+                    settingsFile.Write("Selected", "True", "AutoLog");
+                    settingsFile.Write("Recent", "False", "AutoLog");
+                    selected = true;
+                    recent = false;
+                    selectedAcc = index;
+                }
+                else
+                {
+                    settingsFile.Write("SelectedAcc", "-1", "AutoLog");
+                    settingsFile.Write("Selected", "False", "AutoLog");
+                    selected = false;
+                    selectedAcc = -1;
+                }
 
                 try
                 {
                     // Encrypt info before saving to file
                     ePassword = StringCipher.Encrypt(dialog.PasswordText, eKey);
 
-                    encryptedAccounts[Int32.Parse(button.Tag.ToString())].Name = dialog.AccountText;
-                    encryptedAccounts[Int32.Parse(button.Tag.ToString())].Password = ePassword;
-                    encryptedAccounts[Int32.Parse(button.Tag.ToString())].ProfUrl = dialog.UrlText;
-                    encryptedAccounts[Int32.Parse(button.Tag.ToString())].AviUrl = aviUrl;
-                    encryptedAccounts[Int32.Parse(button.Tag.ToString())].Description = dialog.DescriptionText;
+                    encryptedAccounts[index].Name = dialog.AccountText;
+                    encryptedAccounts[index].Password = ePassword;
+                    encryptedAccounts[index].ProfUrl = dialog.UrlText;
+                    encryptedAccounts[index].AviUrl = aviUrl;
+                    encryptedAccounts[index].Description = dialog.DescriptionText;
 
                     Serialize(encryptedAccounts);
                     RefreshWindow();
@@ -362,7 +442,7 @@ namespace SAM
         {
             MessageBoxResult result = MessageBox.Show("Are you sure you want to delete this entry?", "Delete", MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
 
-            if(result == MessageBoxResult.Yes)
+            if (result == MessageBoxResult.Yes)
             {
                 Button button = butt as Button;
                 encryptedAccounts.RemoveAt(Int32.Parse(button.Tag.ToString()));
@@ -371,137 +451,95 @@ namespace SAM
             }
         }
 
+        private void Login(int index)
+        {
+            // Update the most recently used account index.
+            recentAcc = index;
+            settingsFile.Write("RecentAcc", index.ToString(), "AutoLog");
+
+            // Kill steam process if it is already open
+            try
+            {
+                Process[] SteamProc = Process.GetProcessesByName("Steam");
+                SteamProc[0].Kill();
+                SteamProc[0].WaitForExit();
+            }
+            catch
+            {
+                Console.WriteLine("No steam process found.");
+            }
+
+            // If Steam's filepath was not specified in settings. Attempt to find it and save it.
+            if (steamPath == null || steamPath.Length < 3)
+            {
+                string defaultPath = @"C:\Program Files (x86)\Steam\";
+                string secondaryPath = @"D:\Program Files (x86)\Steam\";
+                string tertiaryPath = @"E:\Program Files (x86)\Steam\";
+
+                if (Directory.Exists(defaultPath))
+                {
+                    steamPath = defaultPath;
+                }
+                else if (Directory.Exists(secondaryPath))
+                {
+                    steamPath = secondaryPath;
+                }
+                else if (Directory.Exists(tertiaryPath))
+                {
+                    steamPath = tertiaryPath;
+                }
+                else
+                {
+                    // Prompt user to find steam install
+                    var settingsFile = new IniFile("SAMSettings.ini");
+
+                    // Create OpenFileDialog 
+                    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+                    // Set filter for file extension and default file extension 
+                    dlg.DefaultExt = ".exe";
+                    dlg.Filter = "Steam (*.exe)|*.exe";
+
+                    // Display OpenFileDialog by calling ShowDialog method 
+                    Nullable<bool> result = dlg.ShowDialog();
+
+                    // Get the selected file path
+                    if (result == true)
+                        steamPath = Path.GetDirectoryName(dlg.FileName) + "\\";
+                }
+
+                // Save path to settings file.
+                settingsFile.Write("Steam", steamPath, "Settings");
+            }
+
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.CreateNoWindow = false;
+            startInfo.UseShellExecute = true;
+            startInfo.FileName = steamPath + "Steam.exe";
+            startInfo.WorkingDirectory = steamPath;
+            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            startInfo.Arguments = "-login " + decryptedAccounts[index].Name + " " + decryptedAccounts[index].Password;
+
+            try
+            {
+                // Sart the process with the info specified
+                Process exeProcess = Process.Start(startInfo);
+            }
+            catch (Exception m)
+            {
+                MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+        }
+
         private void AccountButton_Click(object sender, RoutedEventArgs e)
         {
             var btn = sender as Button;
             if (btn != null)
             {
-                // Kill steam process if it is already open
-                try
-                {
-                    Process[] SteamProc = Process.GetProcessesByName("Steam");
-                    SteamProc[0].Kill();
-                    SteamProc[0].WaitForExit();
-                }
-                catch
-                {
-                    Console.WriteLine("No steam process found.");
-                }
-
-                string defaultPath = @"C:\Program Files (x86)\Steam\";
-                string secondaryPath = @"D:\Program Files (x86)\Steam\";
-                string tertiaryPath = @"E:\Program Files (x86)\Steam\";
-
-                string path = defaultPath;
-
-                if (Directory.Exists(defaultPath))
-                {
-                    path = defaultPath;  
-                }
-                else if (Directory.Exists(secondaryPath))
-                {
-                    path = secondaryPath;
-                }
-                else if (Directory.Exists(tertiaryPath))
-                {
-                    path = tertiaryPath;
-                }
-                else
-                {
-                    // Error
-                    // Prompt user to find steam install
-                    var settingsFile = new IniFile("SAMSettings.ini");
-
-                    if (settingsFile.KeyExists("Steam", "Settings"))
-                    {
-                        path = settingsFile.Read("Steam", "Settings");
-                    }
-                    else
-                    {
-                        // Create OpenFileDialog 
-                        Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-
-                        // Set filter for file extension and default file extension 
-                        dlg.DefaultExt = ".exe";
-                        dlg.Filter = "Steam (*.exe)|*.exe";
-
-                        // Display OpenFileDialog by calling ShowDialog method 
-                        Nullable<bool> result = dlg.ShowDialog();
-
-                        // Get the selected file path
-                        if (result == true)
-                        {
-                            path = Path.GetDirectoryName(dlg.FileName) + "\\";
-                            settingsFile.Write("Steam", path, "Settings");
-                        }
-                    }
-                }
-
-                ProcessStartInfo startInfo = new ProcessStartInfo();
-                startInfo.CreateNoWindow = false;
-                startInfo.UseShellExecute = true;
-                startInfo.FileName = path + "Steam.exe";
-                startInfo.WorkingDirectory = path;
-                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                startInfo.Arguments = "-login " + btn.Name.ToString() + " " + decryptedAccounts[Int32.Parse(btn.Tag.ToString())].Password.ToString();
-
-                try
-                {
-                    // Sart the process with the info specified
-                    Process exeProcess = Process.Start(startInfo);
-
-                    // SCAN FOR MEMORY TO ENABLE 'REMEMBER PASSWORD' CHECKBOX IF SETTING IS ENABLED
-                    if (rememberPassword)
-                        EnableRememberPassword();
-                }
-                catch (Exception m)
-                {
-                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
+                // Login with clicked button's index, which stored in Tag.
+                Login(Int32.Parse(btn.Tag.ToString()));
             }
-        }
-
-        private static int EnableRememberPassword()
-        {
-            AobMemScan scanner = new AobMemScan();
-
-            byte[] pattern = new byte[] { 0x03, 0x00, 0x00, 0x00, 0x00, 0x01, 0xA8, 0xA8, 0xA8, 0xFF };
-            IntPtr address = IntPtr.Zero;
-            string address_string;
-            bool foundSteam = false;
-            Process[] p = null;
-
-            // Wait for Steam's memory to be readable.
-            while (foundSteam == false)
-            {
-                try
-                {
-                    p = Process.GetProcessesByName("Steam");
-
-                    if (p.Length > 0)
-                        foundSteam = true;
-                }
-                catch
-                {
-                    foundSteam = false;
-                }
-            }
-            
-            // Get 'Remember my password' checkbox memory address.
-            while (address.ToInt32() < 0xFF)
-            {
-                address = scanner.Scan(p[0], pattern) + 29; 
-            }
-
-            address_string = string.Format("0x{0:X}", address.ToInt32());
-            AobMemScan.WriteProcessMemory(p[0].Handle, address, new byte[] { 0x01 }, 1, 0);
-
-            ProcessModuleCollection myProcessModuleCollection = p[0].Modules;
-            IntPtr processBaseAddress = myProcessModuleCollection[0].BaseAddress;
-            string baseAddressString = string.Format("0x{0:X}", processBaseAddress.ToInt32());
-
-            return 0;
         }
 
         private string htmlAviScrape(string htmlString)
@@ -593,11 +631,6 @@ namespace SAM
         #endregion
 
         #region File Menu Click Events
-
-        private void RememberPass_Click(object sender, RoutedEventArgs e)
-        {
-            EnableRememberPassword();
-        }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
