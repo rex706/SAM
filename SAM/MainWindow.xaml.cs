@@ -234,7 +234,7 @@ namespace SAM
                     accountText.Text = account.Name;
 
                     // If there is a description, set up tooltip.
-                    if (account.Description.Length > 0)
+                    if (account.Description != null && account.Description.Length > 0)
                         accountButton.ToolTip = account.Description;
 
                     accountButton.Height = 100;

@@ -130,9 +130,10 @@ namespace SAM
             {
                 int idx = Int32.Parse(recentAcc);
 
+                // If index is invalid, uncheck box.
                 if (idx < 0)
                 {
-                    selectedAccountCheckBox.IsChecked = false;
+                    mostRecentCheckBox.IsChecked = false;
                 }
                 else
                 {
