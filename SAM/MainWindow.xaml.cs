@@ -391,7 +391,13 @@ namespace SAM
             dialog.UrlText = decryptedAccounts[index].ProfUrl;
             dialog.DescriptionText = decryptedAccounts[index].Description;
 
-            if (selectedAcc == index)
+            // Reload slected boolean
+            if (settingsFile.Read("Selected", "AutoLog") == "True")
+                selected = true;
+            else
+                selected = false;
+
+            if (selected == true && selectedAcc == index)
                 dialog.autoLogCheckBox.IsChecked = true;
 
             if (dialog.ShowDialog() == true)
