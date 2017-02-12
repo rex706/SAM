@@ -3,21 +3,31 @@
 Easily switch between steam accounts.
 
 
-![alt tag](http://i.imgur.com/Z4ozFkJ.png)
+![alt tag](http://i.imgur.com/7sUxieF.png) ![alt tag](http://i.imgur.com/jEGV9kr.png) ![alt tag](http://i.imgur.com/8yf7Pvp.png)
 
-[**Download**](https://github.com/rex706/SAM/releases/download/v1.0.2.1/SAM.zip)
 
 **Features**
 
 * 1-click steam logins for multiple accounts.
-* Encrypts saved user info.
+* Start with windows.
+* Auto login a selected or the most recently used account.
+* Encrypts saved user password.
 * Adjust number of accounts per row.
 
 ------------------------------------
 
 **CHANGELOG**
 
-**Latest version:** 1.0.2.1
+**Latest version:** 1.1.0.0
+
+* Automatic login on program startup.
+	- Most recently used account via settings menu.
+	- Pre-selected account via new account/edit menu.
+* Enable minimize.
+* Do not display tooltip if description is empty/blank.
+* Fixed saving and loading steam path.
+
+1.0.2.1
 
 * Start with windows setting. 
 
