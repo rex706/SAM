@@ -5,6 +5,7 @@ Easily switch between steam accounts.
 
 ![alt tag](http://i.imgur.com/7sUxieF.png) ![alt tag](http://i.imgur.com/jEGV9kr.png) ![alt tag](http://i.imgur.com/8yf7Pvp.png)
 
+[**DOWNLOAD**](https://github.com/rex706/SAM/releases/download/v1.1.0.0/SAM_1.1.0.0.zip)
 
 **Features**
 
