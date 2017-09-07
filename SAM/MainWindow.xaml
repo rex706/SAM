@@ -25,6 +25,9 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="border" Property="BorderBrush" Value="#FF00DCFF" />
                             </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.5" />
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -52,6 +55,9 @@
                                     <Trigger Property="IsMouseOver" Value="True">
                                         <Setter TargetName="img" Property="Source" Value="4ncBpopTA_glow.png"/>
                                     </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="img" Property="Opacity" Value="0.5" />
+                                    </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
                         </Setter.Value>
@@ -69,6 +75,9 @@
                 <MenuItem Header="Edit">
                     <MenuItem Header="Refresh" Click="RefreshMenuItem_Click" />
                     <MenuItem Header="Settings" Click="SettingsButton_Click" />
+                    <MenuItem Header="Sort">
+                        <MenuItem Header="Alphabetical" Click="SortAlphabetical_Click"/>
+                    </MenuItem>
                 </MenuItem>
                 <MenuItem Header="Help">
                     <MenuItem Header="GitHub" Click="GitMenuItem_Click" />

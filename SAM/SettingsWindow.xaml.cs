@@ -1,6 +1,8 @@
 ﻿using IWshRuntimeLibrary;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -31,6 +33,7 @@ namespace SAM
         private IniFile settingsFile;
         
         private string start;
+        private string minimized;
         private string recent;
         private string recentAcc;
         private string selected;
@@ -50,6 +53,7 @@ namespace SAM
                 settingsFile = new IniFile("SAMSettings.ini");
                 textBox.Text = settingsFile.Read("AccountsPerRow", "Settings");
                 start = settingsFile.Read("StartWithWindows", "Settings");
+                minimized = settingsFile.Read("StartMinimized", "Settings");
                 recent = settingsFile.Read("Recent", "AutoLog");
                 recentAcc = settingsFile.Read("RecentAcc", "AutoLog");
                 selected = settingsFile.Read("Selected", "AutoLog");
@@ -57,6 +61,9 @@ namespace SAM
 
                 if (start == "True")
                     startupCheckBox.IsChecked = true;
+
+                if (minimized == "True")
+                    startupMinCheckBox.IsChecked = true;
 
                 if (recent == "True")
                 {
@@ -102,6 +109,11 @@ namespace SAM
 
                 settingsFile.Write("StartWithWindows", "False", "Settings");
             }
+
+            if (startupMinCheckBox.IsChecked == true)
+                settingsFile.Write("StartMinimized", "True", "Settings");
+            else
+                settingsFile.Write("StartMinimized", "False", "Settings");
 
             if (mostRecentCheckBox.IsChecked == true)
                 settingsFile.Write("Recent", "True", "AutoLog");
@@ -177,7 +189,15 @@ namespace SAM
                 Console.WriteLine(m.Message);
             }
         }
-  
+
+        public static string RandomString(int length)
+        {
+            Random random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+
+            return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
         private void selectedAccountLabel_Unchecked(object sender, RoutedEventArgs e)
         {
             selectedAccountLabel.Text = "";
@@ -186,6 +206,54 @@ namespace SAM
         private void cancelButton_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void generateKeyButton_Click(object sender, RoutedEventArgs e)
+        {
+            //keyTextBox.Text = RandomString(10);
+        }
+
+        private void importButton_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
+            dialog.DefaultExt = ".dat";
+            dialog.Filter = "SAM DAT Files (*.dat)|*.dat";
+
+            Nullable<bool> result = dialog.ShowDialog();
+
+            if (result == true)
+            {
+                try
+                {
+                    var tempAccounts = Utils.Deserialize(dialog.FileName);
+                    MainWindow.encryptedAccounts = MainWindow.encryptedAccounts.Concat(tempAccounts).ToList();
+                    Utils.Serialize(MainWindow.encryptedAccounts);
+                    MessageBox.Show("Accounts imported!");
+                }
+                catch (Exception m)
+                {
+                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void exportButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            var result = dialog.ShowDialog();
+
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                try
+                {
+                    System.IO.File.Copy("info.dat", dialog.SelectedPath + "info.dat");
+                    MessageBox.Show("File exported to:\n" + dialog.SelectedPath);
+                }
+                catch (Exception m)
+                {
+                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
     }
 }

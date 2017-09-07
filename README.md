@@ -3,23 +3,33 @@
 Easily switch between steam accounts.
 
 
-![alt tag](http://i.imgur.com/7sUxieF.png) ![alt tag](http://i.imgur.com/jEGV9kr.png) ![alt tag](http://i.imgur.com/8yf7Pvp.png)
+![alt tag](http://i.imgur.com/7sUxieF.png)
 
-[**DOWNLOAD**](https://github.com/rex706/SAM/releases/tag/v1.1.0.1)
+[**DOWNLOAD**](https://github.com/rex706/SAM/releases/tag/v1.2.0.0)
 
 **Features**
 
-* 1-click steam logins for multiple accounts.
-* Start with windows.
+* 1-click Steam logins for multiple accounts.
 * Auto login a selected or the most recently used account.
 * Encrypts saved user password.
 * Adjust number of accounts per row.
+* Import/Export accounts.
+* Start with windows.
+* Start minimized.
 
 ------------------------------------
 
 **CHANGELOG**
 
-**Latest version:** 1.1.0.1
+**Latest version:** 1.2.0.0
+* Sort accounts alphabetically through the 'Edit' dropdown.
+* Import/Export accounts data file in settings.
+* Start minimized setting.
+* Auto-Login now only triggers if Steam is not already open.
+* Account buttons now change opacity when clicked.
+* Redesign settings window.
+
+1.1.0.1
 * Fixed a bug that would not let emails be entered into the 'Name' field.
 
 1.1.0.0

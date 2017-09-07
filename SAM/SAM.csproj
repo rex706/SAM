@@ -76,7 +76,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AobMemScan.cs" />
     <Compile Include="IniFile.cs" />
     <Compile Include="StringCipher.cs" />
     <Compile Include="TextDialog.xaml.cs">
@@ -86,6 +85,7 @@
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="UpdateCheck.cs" />
+    <Compile Include="Utils.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

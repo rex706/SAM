@@ -104,7 +104,9 @@ namespace SAM
                 settingsFile = new IniFile("SAMSettings.ini");
                 settingsFile.Write("Version", AssemblyVer, "System");
                 settingsFile.Write("AccountsPerRow", "5", "Settings");
-                settingsFile.Write("StartWithWindows", "Settings");
+                settingsFile.Write("StartWithWindows", "False", "Settings");
+                settingsFile.Write("StartMinimized", "False", "Settings");
+                settingsFile.Write("AccountsPerRow", "5", "Settings");
                 settingsFile.Write("Recent", "False", "AutoLog");
                 settingsFile.Write("RecentAcc","", "AutoLog");
                 settingsFile.Write("Selected", "False", "AutoLog");
@@ -149,6 +151,15 @@ namespace SAM
                     settingsFile.Write("SelectedAcc", "-1", "AutoLog");
                 }
 
+                if (settingsFile.KeyExists("StartMinimized", "Settings") && settingsFile.Read("StartMinimized", "Settings") == "True")
+                {
+                    WindowState = WindowState.Minimized;
+                }
+                else if (!settingsFile.KeyExists("StartMinimized", "Settings"))
+                {
+                    settingsFile.Write("StartMinimized", "False", "Settings");
+                }
+
                 if (File.Exists("info.dat"))
                 {
                     StreamReader datReader = new StreamReader("info.dat");
@@ -176,14 +187,19 @@ namespace SAM
             // Load window with account buttons.
             RefreshWindow();
 
-            // Login to auto log account if enabled.
-            if (recent == true)
-                Login(recentAcc);
-            else if (selected == true)
-                Login(selectedAcc);
+            // Login to auto log account if enabled and steam is not already open.
+            Process[] SteamProc = Process.GetProcessesByName("Steam");
+
+            if (SteamProc.Length == 0)
+            {
+                if (recent == true)
+                    Login(recentAcc);
+                else if (selected == true)
+                    Login(selectedAcc);
+            }
         }
 
-        private void RefreshWindow()
+        public void RefreshWindow()
         {
             decryptedAccounts = new List<Account>();
             buttonGrid.Children.Clear();
@@ -192,9 +208,8 @@ namespace SAM
             if (File.Exists("info.dat"))
             {
                 // Deserialize file
-                encryptedAccounts = Deserialize();
+                encryptedAccounts = Utils.Deserialize("info.dat");
                 postDeserializedRefresh(true);
-
             }
             else
             {
@@ -364,7 +379,7 @@ namespace SAM
 
                     encryptedAccounts.Add(new Account() { Name = dialog.AccountText, Password = ePassword, ProfUrl = dialog.UrlText, AviUrl = aviUrl, Description = dialog.DescriptionText });
 
-                    Serialize(encryptedAccounts);
+                    Utils.Serialize(encryptedAccounts);
 
                     RefreshWindow();
                 }
@@ -375,7 +390,7 @@ namespace SAM
                     var itemToRemove = encryptedAccounts.Single(r => r.Name == dialog.AccountText);
                     encryptedAccounts.Remove(itemToRemove);
 
-                    Serialize(encryptedAccounts);
+                    Utils.Serialize(encryptedAccounts);
 
                     NewAccount();
                 }
@@ -435,7 +450,7 @@ namespace SAM
                     encryptedAccounts[index].AviUrl = aviUrl;
                     encryptedAccounts[index].Description = dialog.DescriptionText;
 
-                    Serialize(encryptedAccounts);
+                    Utils.Serialize(encryptedAccounts);
                     RefreshWindow();
                 }
                 catch (Exception m)
@@ -454,7 +469,7 @@ namespace SAM
             {
                 Button button = butt as Button;
                 encryptedAccounts.RemoveAt(Int32.Parse(button.Tag.ToString()));
-                Serialize(encryptedAccounts);
+                Utils.Serialize(encryptedAccounts);
                 RefreshWindow();
             }
         }
@@ -579,6 +594,20 @@ namespace SAM
             return "";
         }
 
+        private void sortAccounts(int type)
+        {
+            if (encryptedAccounts.Count > 0)
+            {
+                // Alphabetical sort based on account name.
+                if (type == 0)
+                {
+                    encryptedAccounts = encryptedAccounts.OrderBy(x => x.Name).ToList();
+                    Utils.Serialize(encryptedAccounts);
+                    RefreshWindow();
+                }
+            }
+        }
+
         #region Resize and Resize Timer
 
         public void resize(double _PassedHeight, double _PassedWidth)
@@ -617,27 +646,6 @@ namespace SAM
 
         #endregion
 
-        #region Serialize/Deserialize
-
-        public static void Serialize(List<Account> input)
-        {
-            var serializer = new XmlSerializer(input.GetType());
-            var sw = new StreamWriter("info.dat");
-            serializer.Serialize(sw, input);
-            sw.Close();
-        }
-
-        public static List<Account> Deserialize()
-        {
-            var stream = new StreamReader("info.dat");
-            var ser = new XmlSerializer(typeof(List<Account>));
-            object obj = ser.Deserialize(stream);
-            stream.Close();
-            return (List<Account>)obj;
-        }
-
-        #endregion
-
         #region File Menu Click Events
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
@@ -667,6 +675,11 @@ namespace SAM
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void SortAlphabetical_Click(object sender, RoutedEventArgs e)
+        {
+            sortAccounts(0);
         }
 
         #endregion
