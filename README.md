@@ -5,7 +5,7 @@ Easily switch between steam accounts.
 
 ![alt tag](http://i.imgur.com/7sUxieF.png) ![alt tag](http://i.imgur.com/jEGV9kr.png) ![alt tag](http://i.imgur.com/8yf7Pvp.png)
 
-[**DOWNLOAD**](https://github.com/rex706/SAM/releases/download/v1.1.0.0/SAM_1.1.0.0.zip)
+[**DOWNLOAD**](https://github.com/rex706/SAM/releases/tag/v1.1.0.1)
 
 **Features**
 
@@ -19,7 +19,10 @@ Easily switch between steam accounts.
 
 **CHANGELOG**
 
-**Latest version:** 1.1.0.0
+**Latest version:** 1.1.0.1
+* Fixed a bug that would not let emails be entered into the 'Name' field.
+
+1.1.0.0
 
 * Automatic login on program startup.
 	- Most recently used account via settings menu.

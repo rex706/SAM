@@ -11,6 +11,8 @@ using System.Linq;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using System.Text.RegularExpressions;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace SAM
 {
@@ -229,8 +231,8 @@ namespace SAM
 
                     accountButton.Tag = bCounter.ToString();
 
-                    accountButton.Name = account.Name;
-                    accountText.Name = account.Name + "Label";
+                    //accountButton.Name = account.Name;
+                    //accountText.Name = account.Name + "Label";
                     accountText.Text = account.Name;
 
                     // If there is a description, set up tooltip.
@@ -256,15 +258,15 @@ namespace SAM
                     if (account.ProfUrl == "" || account.AviUrl == null || account.AviUrl == "" || account.AviUrl == " ")
                     {
                         accountButton.Content = account.Name;
-                        accountButton.Background = Brushes.LightGray;
+                        accountButton.Background = System.Windows.Media.Brushes.LightGray;
                     }
                     else
                     {
                         try
                         {
                             ImageBrush brush1 = new ImageBrush();
-                            BitmapImage image = new BitmapImage(new Uri(account.AviUrl));
-                            brush1.ImageSource = image;
+                            BitmapImage image1 = new BitmapImage(new Uri(account.AviUrl));
+                            brush1.ImageSource = image1;
                             accountButton.Background = brush1;
                             buttonGrid.Children.Add(accountText);
                         }
