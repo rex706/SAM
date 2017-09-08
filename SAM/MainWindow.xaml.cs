@@ -9,10 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Linq;
 using System.Windows.Media;
-using System.Xml.Serialization;
 using System.Text.RegularExpressions;
-using System.Drawing;
-using System.Drawing.Imaging;
 
 namespace SAM
 {
@@ -680,6 +677,17 @@ namespace SAM
         private void SortAlphabetical_Click(object sender, RoutedEventArgs e)
         {
             sortAccounts(0);
+        }
+
+        private void ImportMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Utils.importAccountFile();
+            RefreshWindow();
+        }
+
+        private void ExportMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Utils.exportAccountFile();
         }
 
         #endregion

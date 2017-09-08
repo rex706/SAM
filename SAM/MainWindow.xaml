@@ -69,6 +69,8 @@
             <Menu x:Name="FileMenu" DockPanel.Dock="Top" Height="20" VerticalAlignment="Top">
                 <MenuItem Header="File">
                     <MenuItem Header="New" Click="NewButton_Click" />
+                    <MenuItem Header="Import" Click="ImportMenuItem_Click" />
+                    <MenuItem Header="Export" Click="ExportMenuItem_Click" />
                     <Separator />
                     <MenuItem Header="Exit" Click="ExitMenuItem_Click" />
                 </MenuItem>

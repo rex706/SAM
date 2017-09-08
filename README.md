@@ -5,7 +5,7 @@ Easily switch between steam accounts.
 
 ![alt tag](http://i.imgur.com/7sUxieF.png)
 
-[**DOWNLOAD**](https://github.com/rex706/SAM/releases/tag/v1.2.0.0)
+[**DOWNLOAD**](https://github.com/rex706/SAM/releases/tag/v1.2.1.0)
 
 **Features**
 
@@ -21,7 +21,11 @@ Easily switch between steam accounts.
 
 **CHANGELOG**
 
-**Latest version:** 1.2.0.0
+**Latest version:** 1.2.1.0
+* Fixed file export bug.
+* Import and Export have been moved to the 'File' dropdown.
+
+1.2.0.0
 * Sort accounts alphabetically through the 'Edit' dropdown.
 * Import/Export accounts data file in settings.
 * Start minimized setting.

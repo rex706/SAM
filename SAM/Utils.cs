@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 using System.Xml.Serialization;
 
 namespace SAM
@@ -25,6 +24,49 @@ namespace SAM
             object obj = ser.Deserialize(stream);
             stream.Close();
             return (List<Account>)obj;
+        }
+
+        public static void importAccountFile()
+        {
+            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
+            dialog.DefaultExt = ".dat";
+            dialog.Filter = "SAM DAT Files (*.dat)|*.dat";
+
+            Nullable<bool> result = dialog.ShowDialog();
+
+            if (result == true)
+            {
+                try
+                {
+                    var tempAccounts = Deserialize(dialog.FileName);
+                    MainWindow.encryptedAccounts = MainWindow.encryptedAccounts.Concat(tempAccounts).ToList();
+                    Serialize(MainWindow.encryptedAccounts);
+                    MessageBox.Show("Accounts imported!");
+                }
+                catch (Exception m)
+                {
+                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+        
+        public static void exportAccountFile()
+        {
+            var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            var result = dialog.ShowDialog();
+
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                try
+                {
+                    File.Copy("info.dat", dialog.SelectedPath + "\\info.dat");
+                    MessageBox.Show("File exported to:\n" + dialog.SelectedPath);
+                }
+                catch (Exception m)
+                {
+                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
     }
 }

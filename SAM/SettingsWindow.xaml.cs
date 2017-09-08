@@ -1,6 +1,5 @@
 ﻿using IWshRuntimeLibrary;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -211,49 +210,6 @@ namespace SAM
         private void generateKeyButton_Click(object sender, RoutedEventArgs e)
         {
             //keyTextBox.Text = RandomString(10);
-        }
-
-        private void importButton_Click(object sender, RoutedEventArgs e)
-        {
-            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
-            dialog.DefaultExt = ".dat";
-            dialog.Filter = "SAM DAT Files (*.dat)|*.dat";
-
-            Nullable<bool> result = dialog.ShowDialog();
-
-            if (result == true)
-            {
-                try
-                {
-                    var tempAccounts = Utils.Deserialize(dialog.FileName);
-                    MainWindow.encryptedAccounts = MainWindow.encryptedAccounts.Concat(tempAccounts).ToList();
-                    Utils.Serialize(MainWindow.encryptedAccounts);
-                    MessageBox.Show("Accounts imported!");
-                }
-                catch (Exception m)
-                {
-                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-        }
-
-        private void exportButton_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new System.Windows.Forms.FolderBrowserDialog();
-            var result = dialog.ShowDialog();
-
-            if (result == System.Windows.Forms.DialogResult.OK)
-            {
-                try
-                {
-                    System.IO.File.Copy("info.dat", dialog.SelectedPath + "info.dat");
-                    MessageBox.Show("File exported to:\n" + dialog.SelectedPath);
-                }
-                catch (Exception m)
-                {
-                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
         }
     }
 }

@@ -27,13 +27,13 @@
                     <Label Content="Only triggers if Steam is Closed" HorizontalAlignment="Left" Margin="50,10,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Import/Export">
+            <!--<TabItem Header="Import/Export">
                 <Grid>
                     <Button x:Name="importButton" Content="Import" HorizontalAlignment="Left" Margin="10,56,0,0" VerticalAlignment="Top" Width="128" Height="35" Click="importButton_Click"/>
                     <Button x:Name="exportButton" Content="Export" HorizontalAlignment="Left" Margin="143,56,0,0" VerticalAlignment="Top" Width="129" Height="35" Click="exportButton_Click"/>
                     <Label Content="Import or Export Account Data Files" HorizontalAlignment="Left" Margin="43,11,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
                 </Grid>
-            </TabItem>
+            </TabItem>-->
             <!--<TabItem Header="Key">
                 <Grid>
                     <Button x:Name="generateKeyButton" Content="Generate" HorizontalAlignment="Left" Margin="106,69,0,0" VerticalAlignment="Top" Width="75" Height="25" ToolTip="Generates a new private key used to encrypt user passwords. Keep this a secret!" Click="generateKeyButton_Click"/>
