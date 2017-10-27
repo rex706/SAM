@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -21,11 +22,18 @@ namespace SAM
         /// </summary>
         public static async Task<int> CheckForUpdate(string url)
         {
-            //Nkosi Note: Always use asynchronous versions of network and IO methods.
+            // Nkosi Note: Always use asynchronous versions of network and IO methods.
 
-            //Check for version updates
+            // Check for version updates
             var client = new HttpClient();
             client.Timeout = new TimeSpan(0, 0, 0, 10);
+
+            // If a new version of the updater was downloaded, replace the old one.
+            if (File.Exists("Updater_new.exe"))
+            {
+                File.Delete("Updater.exe");
+                File.Move("Updater_new.exe", "Updater.exe");
+            }
 
             try
             {
@@ -42,18 +50,15 @@ namespace SAM
                     latestVersion = latest.ToString();
 
                     // Initialize variables.
-                    string parameters = "";
-                    int counter = 0;
+                    StringBuilder parameters = new StringBuilder();
 
-                    // Load parameters string with file names.
+                    // First parameter is the name of the running application to be opened after the update is complete.
+                    parameters.Append(System.AppDomain.CurrentDomain.FriendlyName + " ");
+
+                    // Load parameters string with urls and file names.
                     while (!reader.EndOfStream)
                     {
-                        if (counter == 0)
-                            parameters += await reader.ReadLineAsync(); 
-                        else
-                            parameters += " " + await reader.ReadLineAsync();
-
-                        counter++;
+                        parameters.Append(await reader.ReadLineAsync() + " ");
                     }
 
                     // If the version from the online text is newer than the current version,
@@ -61,7 +66,7 @@ namespace SAM
                     if (latest > current)
                     {
                         // Show message box that an update is available.
-                        MessageBoxResult answer = MessageBox.Show("A new version of " + 
+                        MessageBoxResult answer = MessageBox.Show("A new version of " +
                             AppDomain.CurrentDomain.FriendlyName.Substring(0, AppDomain.CurrentDomain.FriendlyName.IndexOf('.')) +
                             " is available!\n\nCurrent Version     " + current + "\nLatest Version        " + latest +
                             "\n\nUpdate now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
@@ -76,7 +81,7 @@ namespace SAM
                             startInfo.FileName = "Updater.exe";
                             startInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
                             startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                            startInfo.Arguments = parameters;
+                            startInfo.Arguments = parameters.ToString();
 
                             // Launch updater and exit.
                             Process.Start(startInfo);
