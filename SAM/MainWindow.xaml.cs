@@ -580,8 +580,8 @@ namespace SAM
 
                     foreach (string url in urls)
                     {
-                        if ((url.Contains("http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/")
-                            || url.Contains("http://cdn.edgecast.steamstatic.com/steamcommunity/public/images/avatars/")) && url.Contains("full.jpg"))
+                        if ((url.Contains("https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/")
+                            || url.Contains("https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/")) && url.Contains("full.jpg"))
                         {
                             return url;
                         }
