@@ -581,24 +581,27 @@ namespace SAM
             }
         }
 
-        private string htmlAviScrape(string htmlString)
+        private string htmlAviScrape(string profUrl)
         {
-            HtmlDocument document = null;
-
             // If user entered profile url, get avatar jpg url
-            if (htmlString.Length > 2)
+            if (profUrl.Length > 2)
             {
-                if (htmlString.StartsWith("https://"))
+                // Verify url starts with valid prefix for HtmlWeb
+                if (!profUrl.StartsWith("https://") && !profUrl.StartsWith("http://"))
                 {
-                    htmlString = htmlString.Remove(4, 1);
+                    profUrl = "https://" + profUrl;
                 }
-                if (htmlString.Contains("http://steamcommunity.com/"))
-                {
-                    document = new HtmlWeb().Load(htmlString);
-                    string aviUrl = document.DocumentNode.Descendants().Where(n => n.HasClass("playerAvatarAutoSizeInner")).First().FirstChild.GetAttributeValue("src", null);
 
-                    return aviUrl;
+                try
+                {
+                    HtmlDocument document = new HtmlWeb().Load(profUrl);
+                    return document.DocumentNode.Descendants().Where(n => n.HasClass("playerAvatarAutoSizeInner")).First().FirstChild.GetAttributeValue("src", null);
                 }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+                
             }
             return "";
         }
@@ -704,16 +707,11 @@ namespace SAM
             Utils.exportAccountFile();
         }
 
-        #endregion
-
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private void ReloadImages_Click(object sender, RoutedEventArgs e)
         {
             ReloadImages();
         }
+
+        #endregion
     }
 }
