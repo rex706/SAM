@@ -55,7 +55,7 @@ namespace SAM
 
         IniFile settingsFile;
 
-        // Resize animation vars
+        // Resize animation variables
         private static System.Windows.Forms.Timer _Timer = new System.Windows.Forms.Timer();
         private int _Stop = 0;
         private double _RatioHeight;
@@ -113,72 +113,7 @@ namespace SAM
             // Else load settings from preexisting file.
             else
             {
-                settingsFile = new IniFile("SAMSettings.ini");
-                accPerRow = settingsFile.Read("AccountsPerRow", "Settings");
-
-                if (!Regex.IsMatch(accPerRow, @"^\d+$") || Int32.Parse(accPerRow) < 1)
-                    accPerRow = "1";
-
-                if (settingsFile.KeyExists("Steam", "Settings"))
-                    steamPath = settingsFile.Read("Steam", "Settings");
-
-                // If the recent autolog entry exists and is set to true.
-                // else create defualt settings file entry.
-                if (settingsFile.KeyExists("Recent", "AutoLog") && settingsFile.Read("Recent", "AutoLog") == "True" && Int32.Parse(settingsFile.Read("RecentAcc", "AutoLog")) >=0)
-                {
-                    recent = true;
-                    recentAcc = Int32.Parse(settingsFile.Read("RecentAcc", "AutoLog"));
-                }
-                else if (!settingsFile.KeyExists("Recent", "AutoLog"))
-                {
-                    settingsFile.Write("Recent", "False", "AutoLog");
-                    settingsFile.Write("RecentAcc", "-1", "AutoLog");
-                }
-
-                // If the selected autolog entry exists and is set to true.
-                // else create defualt settings file entry.
-                if (settingsFile.KeyExists("Selected", "AutoLog") && settingsFile.Read("Selected", "AutoLog") == "True")
-                {
-                    selected = true;
-                    selectedAcc = Int32.Parse(settingsFile.Read("SelectedAcc", "AutoLog"));
-                }
-                else if (!settingsFile.KeyExists("Selected", "AutoLog"))
-                {
-                    settingsFile.Write("Selected", "False", "AutoLog");
-                    settingsFile.Write("SelectedAcc", "-1", "AutoLog");
-                }
-
-                if (settingsFile.KeyExists("StartMinimized", "Settings") && settingsFile.Read("StartMinimized", "Settings") == "True")
-                {
-                    WindowState = WindowState.Minimized;
-                }
-                else if (!settingsFile.KeyExists("StartMinimized", "Settings"))
-                {
-                    settingsFile.Write("StartMinimized", "False", "Settings");
-                }
-
-                if (File.Exists("info.dat"))
-                {
-                    StreamReader datReader = new StreamReader("info.dat");
-                    string temp = datReader.ReadLine();
-                    datReader.Close();
-
-                    // If the user is some how using an older info.dat, delete it.
-                    if (!temp.Contains("xml"))
-                    {
-                        MessageBox.Show("Your info.dat is out of date and must be deleted.\nSorry for the inconvenience!", "Invalid File", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                        try
-                        {
-                            File.Delete("info.dat");
-                        }
-                        catch (Exception m)
-                        {
-                            Console.WriteLine(m.Message);
-                        }
-                    }
-                }
-                settingsFile.Write("Version", AssemblyVer, "System");
+                LoadSettings();
             }
 
             // Load window with account buttons.
@@ -194,6 +129,76 @@ namespace SAM
                 else if (selected == true)
                     Login(selectedAcc);
             }
+        }
+
+        private void LoadSettings()
+        {
+            settingsFile = new IniFile("SAMSettings.ini");
+            accPerRow = settingsFile.Read("AccountsPerRow", "Settings");
+
+            if (!Regex.IsMatch(accPerRow, @"^\d+$") || Int32.Parse(accPerRow) < 1)
+                accPerRow = "1";
+
+            if (settingsFile.KeyExists("Steam", "Settings"))
+                steamPath = settingsFile.Read("Steam", "Settings");
+
+            // If the recent autolog entry exists and is set to true.
+            // else create defualt settings file entry.
+            if (settingsFile.KeyExists("Recent", "AutoLog") && settingsFile.Read("Recent", "AutoLog") == "True" && Int32.Parse(settingsFile.Read("RecentAcc", "AutoLog")) >= 0)
+            {
+                recent = true;
+                recentAcc = Int32.Parse(settingsFile.Read("RecentAcc", "AutoLog"));
+            }
+            else if (!settingsFile.KeyExists("Recent", "AutoLog"))
+            {
+                settingsFile.Write("Recent", "False", "AutoLog");
+                settingsFile.Write("RecentAcc", "-1", "AutoLog");
+            }
+
+            // If the selected autolog entry exists and is set to true.
+            // else create defualt settings file entry.
+            if (settingsFile.KeyExists("Selected", "AutoLog") && settingsFile.Read("Selected", "AutoLog") == "True")
+            {
+                selected = true;
+                selectedAcc = Int32.Parse(settingsFile.Read("SelectedAcc", "AutoLog"));
+            }
+            else if (!settingsFile.KeyExists("Selected", "AutoLog"))
+            {
+                settingsFile.Write("Selected", "False", "AutoLog");
+                settingsFile.Write("SelectedAcc", "-1", "AutoLog");
+            }
+
+            if (settingsFile.KeyExists("StartMinimized", "Settings") && settingsFile.Read("StartMinimized", "Settings") == "True")
+            {
+                WindowState = WindowState.Minimized;
+            }
+            else if (!settingsFile.KeyExists("StartMinimized", "Settings"))
+            {
+                settingsFile.Write("StartMinimized", "False", "Settings");
+            }
+
+            if (File.Exists("info.dat"))
+            {
+                StreamReader datReader = new StreamReader("info.dat");
+                string temp = datReader.ReadLine();
+                datReader.Close();
+
+                // If the user is some how using an older info.dat, delete it.
+                if (!temp.Contains("xml"))
+                {
+                    MessageBox.Show("Your info.dat is out of date and must be deleted.\nSorry for the inconvenience!", "Invalid File", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    try
+                    {
+                        File.Delete("info.dat");
+                    }
+                    catch (Exception m)
+                    {
+                        Console.WriteLine(m.Message);
+                    }
+                }
+            }
+            settingsFile.Write("Version", AssemblyVer, "System");
         }
 
         public void RefreshWindow()
@@ -212,6 +217,20 @@ namespace SAM
             {
                 encryptedAccounts = new List<Account>();
             }
+        }
+
+        public void ReloadImages()
+        {
+            foreach (var account in encryptedAccounts)
+            {
+                account.AviUrl = htmlAviScrape(account.ProfUrl);
+            }
+
+            Utils.Serialize(encryptedAccounts);
+
+            RefreshWindow();
+
+            MessageBox.Show("Done!");
         }
 
         private void postDeserializedRefresh(bool seedAcc)
@@ -569,23 +588,16 @@ namespace SAM
             // If user entered profile url, get avatar jpg url
             if (htmlString.Length > 2)
             {
-                if (htmlString.Contains("https://"))
+                if (htmlString.StartsWith("https://"))
                 {
-                    htmlString = htmlString.Remove(4,1);
+                    htmlString = htmlString.Remove(4, 1);
                 }
                 if (htmlString.Contains("http://steamcommunity.com/"))
                 {
                     document = new HtmlWeb().Load(htmlString);
-                    var urls = document.DocumentNode.Descendants("img").Select(t => t.GetAttributeValue("src", null)).Where(s => !String.IsNullOrEmpty(s));
+                    string aviUrl = document.DocumentNode.Descendants().Where(n => n.HasClass("playerAvatarAutoSizeInner")).First().FirstChild.GetAttributeValue("src", null);
 
-                    foreach (string url in urls)
-                    {
-                        if ((url.Contains("http://cdn.akamai.steamstatic.com/steamcommunity/public/images/avatars/")
-                            || url.Contains("http://cdn.edgecast.steamstatic.com/steamcommunity/public/images/avatars/")) && url.Contains("full.jpg"))
-                        {
-                            return url;
-                        }
-                    }
+                    return aviUrl;
                 }
             }
             return "";
@@ -651,6 +663,8 @@ namespace SAM
             settingsDialog.ShowDialog();
 
             accPerRow = settingsDialog.ResponseText;
+
+            LoadSettings();
             RefreshWindow();
         }
 
@@ -691,5 +705,15 @@ namespace SAM
         }
 
         #endregion
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ReloadImages_Click(object sender, RoutedEventArgs e)
+        {
+            ReloadImages();
+        }
     }
 }

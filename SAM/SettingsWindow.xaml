@@ -24,9 +24,16 @@
                     <CheckBox x:Name="selectedAccountCheckBox" Content="Pre-selected:" HorizontalAlignment="Left" Margin="17,77,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.465,-0.933" Foreground="#FFD1D1D1" Checked="selectedAccountLabel_Checked" Unchecked="selectedAccountLabel_Unchecked"/>
                     <TextBlock x:Name="selectedAccountLabel" Text="" HorizontalAlignment="Left" Margin="110,75,0,0" VerticalAlignment="Top" Foreground="White"/>
                     <TextBlock x:Name="recentAccountLabel" Text="" HorizontalAlignment="Left" Margin="110,47,0,0" VerticalAlignment="Top" Foreground="White"/>
-                    <Label Content="Only triggers if Steam is Closed" HorizontalAlignment="Left" Margin="50,10,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <TextBlock Text="Only triggers if Steam is closed" HorizontalAlignment="Left" Margin="50,10,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" TextDecorations="Underline"/>
                 </Grid>
             </TabItem>
+            <TabItem Header="Steam Path">
+                <Grid>
+                    <Button x:Name="ChangePathButton" Content="Change" Width="75" Margin="102,63,105,23" Click="ChangePathButton_Click"/>
+                    <TextBox x:Name="SteamPathTextBox" Height="23" Text="" Margin="10,34,10,57" IsReadOnly="True"/>
+                </Grid>
+            </TabItem>
+
             <!--<TabItem Header="Import/Export">
                 <Grid>
                     <Button x:Name="importButton" Content="Import" HorizontalAlignment="Left" Margin="10,56,0,0" VerticalAlignment="Top" Width="128" Height="35" Click="importButton_Click"/>

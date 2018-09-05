@@ -73,7 +73,9 @@ namespace SAM
                 {
                     selectedAccountCheckBox.IsChecked = true;
                     selectedAccountLabel.Text = MainWindow.encryptedAccounts[Int32.Parse(selectedAcc)].Name;
-                }  
+                }
+
+                SteamPathTextBox.Text = settingsFile.Read("Steam", "Settings");
             }
         }
 
@@ -123,6 +125,8 @@ namespace SAM
                 settingsFile.Write("Selected", "True", "AutoLog");
             else
                 settingsFile.Write("Selected", "False", "AutoLog");
+
+            settingsFile.Write("Steam", SteamPathTextBox.Text, "Settings");
         }
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
@@ -210,6 +214,31 @@ namespace SAM
         private void generateKeyButton_Click(object sender, RoutedEventArgs e)
         {
             //keyTextBox.Text = RandomString(10);
+        }
+
+        private void ChangePathButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Prompt user to find steam install
+            string path = "";
+
+            // Create OpenFileDialog 
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+            // Set filter for file extension and default file extension 
+            dlg.DefaultExt = ".exe";
+            dlg.Filter = "Steam (*.exe)|*.exe";
+            dlg.InitialDirectory = Environment.SpecialFolder.MyComputer.ToString();
+
+            // Display OpenFileDialog by calling ShowDialog method 
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Get the selected file path
+            if (result == true)
+            {
+                // Save path to settings file.
+                path = Path.GetDirectoryName(dlg.FileName) + "\\";
+                SteamPathTextBox.Text = path;
+            }
         }
     }
 }
