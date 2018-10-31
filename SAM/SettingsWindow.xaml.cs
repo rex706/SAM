@@ -79,12 +79,7 @@ namespace SAM
             }
         }
 
-        private void textBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
-        }
-
-        private void saveSettings(string apr)
+        private void SaveSettings(string apr)
         {
             var settingsFile = new IniFile("SAMSettings.ini");
             settingsFile.Write("AccountsPerRow", apr, "Settings");
@@ -132,14 +127,14 @@ namespace SAM
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
             if (!Regex.IsMatch(textBox.Text, @"^\d+$") || Int32.Parse(textBox.Text) < 1)
-                saveSettings("1");
+                SaveSettings("1");
             else
-                saveSettings(textBox.Text);
+                SaveSettings(textBox.Text);
 
             Close();
         }
 
-        private void autologRecentCheckBox_Checked(object sender, RoutedEventArgs e)
+        private void AutologRecentCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -164,12 +159,12 @@ namespace SAM
             }
         }
 
-        private void autologRecentCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        private void AutologRecentCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             recentAccountLabel.Text = "";
         }
 
-        private void selectedAccountLabel_Checked(object sender, RoutedEventArgs e)
+        private void SelectedAccountLabel_Checked(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -201,17 +196,17 @@ namespace SAM
             return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-        private void selectedAccountLabel_Unchecked(object sender, RoutedEventArgs e)
+        private void SelectedAccountLabel_Unchecked(object sender, RoutedEventArgs e)
         {
             selectedAccountLabel.Text = "";
         }
 
-        private void cancelButton_Click(object sender, RoutedEventArgs e)
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }
 
-        private void generateKeyButton_Click(object sender, RoutedEventArgs e)
+        private void GenerateKeyButton_Click(object sender, RoutedEventArgs e)
         {
             //keyTextBox.Text = RandomString(10);
         }
@@ -222,12 +217,12 @@ namespace SAM
             string path = "";
 
             // Create OpenFileDialog 
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-
-            // Set filter for file extension and default file extension 
-            dlg.DefaultExt = ".exe";
-            dlg.Filter = "Steam (*.exe)|*.exe";
-            dlg.InitialDirectory = Environment.SpecialFolder.MyComputer.ToString();
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                DefaultExt = ".exe",
+                Filter = "Steam (*.exe)|*.exe",
+                InitialDirectory = Environment.SpecialFolder.MyComputer.ToString()
+            };
 
             // Display OpenFileDialog by calling ShowDialog method 
             Nullable<bool> result = dlg.ShowDialog();

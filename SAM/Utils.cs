@@ -26,11 +26,13 @@ namespace SAM
             return (List<Account>)obj;
         }
 
-        public static void importAccountFile()
+        public static void ImportAccountFile()
         {
-            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
-            dialog.DefaultExt = ".dat";
-            dialog.Filter = "SAM DAT Files (*.dat)|*.dat";
+            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                DefaultExt = ".dat",
+                Filter = "SAM DAT Files (*.dat)|*.dat"
+            };
 
             Nullable<bool> result = dialog.ShowDialog();
 
@@ -50,7 +52,7 @@ namespace SAM
             }
         }
         
-        public static void exportAccountFile()
+        public static void ExportAccountFile()
         {
             var dialog = new System.Windows.Forms.FolderBrowserDialog();
             var result = dialog.ShowDialog();

@@ -17,11 +17,21 @@ Easily switch between steam accounts.
 * Start with windows.
 * Start minimized.
 
+
+**External Packages**
+
+* HtmlAgilityPack
 ------------------------------------
 
 **CHANGELOG**
 
-**Latest version:** 1.2.1.0
+**Latest version:** 1.2.2.0
+* Much better handling of profile image scrape.
+	- No longer relies on image source pattern.
+* Reload all images from edit drop down.
+* Change Steam file path in settings.
+
+1.2.1.0
 * Fixed file export bug.
 * Import and Export have been moved to the 'File' dropdown.
 

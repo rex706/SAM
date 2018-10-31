@@ -71,7 +71,7 @@ namespace SAM
 
             this.Loaded += new RoutedEventHandler(MainWindow_Loaded);
 
-            _Timer.Tick += new EventHandler(timer_Tick);
+            _Timer.Tick += new EventHandler(Timer_Tick);
             _Timer.Interval = (10);
         }
 
@@ -87,7 +87,7 @@ namespace SAM
             newExistMenuItem.Items.Add(ver);
 
             // Check for a new version.
-            if (await UpdateCheck.CheckForUpdate("http://textuploader.com/58mva/raw") == 1)
+            if (await UpdateCheck.CheckForUpdate("https://textuploader.com/58mva/raw") == 1)
             {
                 // An update is available, but user has chosen not to update.
                 ver.Header = "Update Available!";
@@ -211,7 +211,7 @@ namespace SAM
             {
                 // Deserialize file
                 encryptedAccounts = Utils.Deserialize("info.dat");
-                postDeserializedRefresh(true);
+                PostDeserializedRefresh(true);
             }
             else
             {
@@ -223,7 +223,7 @@ namespace SAM
         {
             foreach (var account in encryptedAccounts)
             {
-                account.AviUrl = htmlAviScrape(account.ProfUrl);
+                account.AviUrl = HtmlAviScrape(account.ProfUrl);
             }
 
             Utils.Serialize(encryptedAccounts);
@@ -233,7 +233,7 @@ namespace SAM
             MessageBox.Show("Done!");
         }
 
-        private void postDeserializedRefresh(bool seedAcc)
+        private void PostDeserializedRefresh(bool seedAcc)
         {
 
             if (encryptedAccounts != null)
@@ -241,6 +241,12 @@ namespace SAM
                 int bCounter = 0;
                 int xcounter = 0;
                 int ycounter = 0;
+
+                int height = 100;
+                int width = 100;
+
+                double heightOffset = height + (height * 0.2);
+                double widthOffset = width + (width * 0.2);
 
                 // Create new button and textblock for each account
                 foreach (var account in encryptedAccounts)
@@ -270,8 +276,8 @@ namespace SAM
                     if (account.Description != null && account.Description.Length > 0)
                         accountButton.ToolTip = account.Description;
 
-                    accountButton.Height = 100;
-                    accountButton.Width = 100;
+                    accountButton.Height = height;
+                    accountButton.Width = width;
                     accountText.Height = 30;
                     accountText.Width = 100;
 
@@ -280,8 +286,8 @@ namespace SAM
                     accountText.HorizontalAlignment = HorizontalAlignment.Left;
                     accountText.VerticalAlignment = VerticalAlignment.Top;
 
-                    accountButton.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 14, 0, 0);
-                    accountText.Margin = new Thickness(15 + (xcounter * 120), (ycounter * 120) + 113, 0, 0);
+                    accountButton.Margin = new Thickness(15 + (xcounter * widthOffset), (ycounter * heightOffset) + 14, 0, 0);
+                    accountText.Margin = new Thickness(15 + (xcounter * widthOffset), (ycounter * heightOffset) + 113, 0, 0);
 
                     accountButton.BorderBrush = null;
                     accountText.Foreground = new SolidColorBrush(Colors.White);
@@ -321,8 +327,8 @@ namespace SAM
                     accountContext.Items.Add(editItem);
                     accountContext.Items.Add(deleteItem);
                     accountButton.ContextMenu = accountContext;
-                    deleteItem.Click += delegate { deleteEntry(accountButton); };
-                    editItem.Click += delegate { editEntry(accountButton); };
+                    deleteItem.Click += delegate { DeleteEntry(accountButton); };
+                    editItem.Click += delegate { EditEntry(accountButton); };
 
                     bCounter++;
                     xcounter++;
@@ -353,11 +359,11 @@ namespace SAM
 
                 int newWidth = (xval * 120) + 25;
 
-                resize(newHeight, newWidth);
+                Resize(newHeight, newWidth);
                 buttonGrid.Width = newWidth;
 
                 // Adjust new account button
-                NewButton.Margin = new Thickness(33 + (xcounter * 120), (ycounter * 120) + 52, 0, 0);
+                NewButton.Margin = new Thickness(33 + (xcounter * widthOffset), (ycounter * heightOffset) + 52, 0, 0);
             }
         }
 
@@ -375,7 +381,7 @@ namespace SAM
             {
                 account = dialog.AccountText;
                 string password = dialog.PasswordText;
-                string aviUrl = htmlAviScrape(dialog.UrlText);
+                string aviUrl = HtmlAviScrape(dialog.UrlText);
 
                 // If the auto login checkbox was checked, update settings file and global variables. 
                 if (dialog.AutoLogAccountIndex == true)
@@ -413,29 +419,28 @@ namespace SAM
             }
         }
 
-        private void editEntry(object butt)
+        private void EditEntry(object butt)
         {
             Button button = butt as Button;
             int index = Int32.Parse(button.Tag.ToString());
 
-            var dialog = new TextDialog();
-            dialog.AccountText = decryptedAccounts[index].Name;
-            dialog.PasswordText = decryptedAccounts[index].Password;
-            dialog.UrlText = decryptedAccounts[index].ProfUrl;
-            dialog.DescriptionText = decryptedAccounts[index].Description;
+            var dialog = new TextDialog
+            {
+                AccountText = decryptedAccounts[index].Name,
+                PasswordText = decryptedAccounts[index].Password,
+                UrlText = decryptedAccounts[index].ProfUrl,
+                DescriptionText = decryptedAccounts[index].Description
+            };
 
             // Reload slected boolean
-            if (settingsFile.Read("Selected", "AutoLog") == "True")
-                selected = true;
-            else
-                selected = false;
+            selected = settingsFile.Read("Selected", "AutoLog") == "True" ? true : false;
 
             if (selected == true && selectedAcc == index)
                 dialog.autoLogCheckBox.IsChecked = true;
 
             if (dialog.ShowDialog() == true)
             {
-                string aviUrl = htmlAviScrape(dialog.UrlText);
+                string aviUrl = HtmlAviScrape(dialog.UrlText);
 
                 // If the auto login checkbox was checked, update settings file and global variables. 
                 if (dialog.AutoLogAccountIndex == true)
@@ -472,12 +477,12 @@ namespace SAM
                 catch (Exception m)
                 {
                     MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    editEntry(butt);
+                    EditEntry(butt);
                 }
             }
         }
 
-        private void deleteEntry(object butt)
+        private void DeleteEntry(object butt)
         {
             MessageBoxResult result = MessageBox.Show("Are you sure you want to delete this entry?", "Delete", MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
 
@@ -533,11 +538,11 @@ namespace SAM
                     var settingsFile = new IniFile("SAMSettings.ini");
 
                     // Create OpenFileDialog 
-                    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-
-                    // Set filter for file extension and default file extension 
-                    dlg.DefaultExt = ".exe";
-                    dlg.Filter = "Steam (*.exe)|*.exe";
+                    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog
+                    {
+                        DefaultExt = ".exe",
+                        Filter = "Steam (*.exe)|*.exe"
+                    };
 
                     // Display OpenFileDialog by calling ShowDialog method 
                     Nullable<bool> result = dlg.ShowDialog();
@@ -551,13 +556,15 @@ namespace SAM
                 settingsFile.Write("Steam", steamPath, "Settings");
             }
 
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.CreateNoWindow = false;
-            startInfo.UseShellExecute = true;
-            startInfo.FileName = steamPath + "Steam.exe";
-            startInfo.WorkingDirectory = steamPath;
-            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            startInfo.Arguments = "-login " + decryptedAccounts[index].Name + " " + decryptedAccounts[index].Password;
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                CreateNoWindow = false,
+                UseShellExecute = true,
+                FileName = steamPath + "Steam.exe",
+                WorkingDirectory = steamPath,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                Arguments = "-login " + decryptedAccounts[index].Name + " " + decryptedAccounts[index].Password
+            };
 
             try
             {
@@ -573,15 +580,14 @@ namespace SAM
 
         private void AccountButton_Click(object sender, RoutedEventArgs e)
         {
-            var btn = sender as Button;
-            if (btn != null)
+            if (sender is Button btn)
             {
                 // Login with clicked button's index, which stored in Tag.
                 Login(Int32.Parse(btn.Tag.ToString()));
             }
         }
 
-        private string htmlAviScrape(string profUrl)
+        private string HtmlAviScrape(string profUrl)
         {
             // If user entered profile url, get avatar jpg url
             if (profUrl.Length > 2)
@@ -606,7 +612,7 @@ namespace SAM
             return "";
         }
 
-        private void sortAccounts(int type)
+        private void SortAccounts(int type)
         {
             if (encryptedAccounts.Count > 0)
             {
@@ -622,7 +628,7 @@ namespace SAM
 
         #region Resize and Resize Timer
 
-        public void resize(double _PassedHeight, double _PassedWidth)
+        public void Resize(double _PassedHeight, double _PassedWidth)
         {
             _Height = _PassedHeight;
             _Width = _PassedWidth;
@@ -631,7 +637,7 @@ namespace SAM
             _Timer.Start();
         }
 
-        private void timer_Tick(Object myObject, EventArgs myEventArgs)
+        private void Timer_Tick(Object myObject, EventArgs myEventArgs)
         {
             if (_Stop == 0)
             {
@@ -693,18 +699,18 @@ namespace SAM
 
         private void SortAlphabetical_Click(object sender, RoutedEventArgs e)
         {
-            sortAccounts(0);
+            SortAccounts(0);
         }
 
         private void ImportMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            Utils.importAccountFile();
+            Utils.ImportAccountFile();
             RefreshWindow();
         }
 
         private void ExportMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            Utils.exportAccountFile();
+            Utils.ExportAccountFile();
         }
 
         private void ReloadImages_Click(object sender, RoutedEventArgs e)

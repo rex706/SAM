@@ -8,20 +8,20 @@
         Title="Settings" Height="251" Width="324" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" Icon="steam_alt-10.ico" Background="#FF333638">
     <Grid>
         <Button Name="OKButton" Content="OK" Margin="10,165,0,0" Click="OKButton_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Height="38" Width="141" />
-        <Button Name="CancelButton" Content="Cancel"  Click="cancelButton_Click" Margin="156,165,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="38" Width="142" />
+        <Button Name="CancelButton" Content="Cancel"  Click="CancelButton_Click" Margin="156,165,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="38" Width="142" />
         <TabControl HorizontalAlignment="Left" Height="142" VerticalAlignment="Top" Width="288" Margin="10,10,0,0" Background="{x:Null}">
             <TabItem Header="General">
                 <Grid>
                     <Label x:Name="NumPerRowLabel" Content="Accounts/Row" HorizontalAlignment="Left" Margin="116,18,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
-                    <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="19" Margin="83,21,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="30" MaxLines="1" MaxLength="2" TextChanged="textBox_TextChanged" TextAlignment="Center" ToolTip="Adjust the number of accounts displayed per row" BorderBrush="#FF707070"/>
+                    <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="19" Margin="83,21,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="30" MaxLines="1" MaxLength="2" TextAlignment="Center" ToolTip="Adjust the number of accounts displayed per row" BorderBrush="#FF707070"/>
                     <CheckBox x:Name="startupCheckBox" Content="Start with Windows" HorizontalAlignment="Left" Margin="83,48,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
                     <CheckBox x:Name="startupMinCheckBox" Content="Start Minimized" HorizontalAlignment="Left" Margin="83,68,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Auto-Login">
                 <Grid>
-                    <CheckBox x:Name="mostRecentCheckBox" Content="Most recent:" HorizontalAlignment="Left" Margin="17,49,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" Checked="autologRecentCheckBox_Checked" Unchecked="autologRecentCheckBox_Unchecked"/>
-                    <CheckBox x:Name="selectedAccountCheckBox" Content="Pre-selected:" HorizontalAlignment="Left" Margin="17,77,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.465,-0.933" Foreground="#FFD1D1D1" Checked="selectedAccountLabel_Checked" Unchecked="selectedAccountLabel_Unchecked"/>
+                    <CheckBox x:Name="mostRecentCheckBox" Content="Most recent:" HorizontalAlignment="Left" Margin="17,49,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" Checked="AutologRecentCheckBox_Checked" Unchecked="AutologRecentCheckBox_Unchecked"/>
+                    <CheckBox x:Name="selectedAccountCheckBox" Content="Pre-selected:" HorizontalAlignment="Left" Margin="17,77,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.465,-0.933" Foreground="#FFD1D1D1" Checked="SelectedAccountLabel_Checked" Unchecked="SelectedAccountLabel_Unchecked"/>
                     <TextBlock x:Name="selectedAccountLabel" Text="" HorizontalAlignment="Left" Margin="110,75,0,0" VerticalAlignment="Top" Foreground="White"/>
                     <TextBlock x:Name="recentAccountLabel" Text="" HorizontalAlignment="Left" Margin="110,47,0,0" VerticalAlignment="Top" Foreground="White"/>
                     <TextBlock Text="Only triggers if Steam is closed" HorizontalAlignment="Left" Margin="50,10,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" TextDecorations="Underline"/>
