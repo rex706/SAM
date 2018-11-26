@@ -77,7 +77,7 @@ namespace SAM
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            // Verion number from assembly
+            // Version number from assembly
             AssemblyVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             MenuItem ver = new MenuItem();
