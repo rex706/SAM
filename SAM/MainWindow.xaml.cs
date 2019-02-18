@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using SteamAuth;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,6 +11,7 @@ using System.Windows.Media.Imaging;
 using System.Linq;
 using System.Windows.Media;
 using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
 
 namespace SAM
 {
@@ -23,6 +25,8 @@ namespace SAM
 
         public string Password { get; set; }
 
+        public string SharedSecret { get; set; }
+
         public string ProfUrl { get; set; }
 
         public string AviUrl { get; set; }
@@ -35,6 +39,13 @@ namespace SAM
     {
         #region Globals
 
+        [DllImport("user32.dll", EntryPoint = "FindWindow")]
+        private static extern IntPtr FindWindow(string lp1, string lp2);
+
+        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
         public static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
 
@@ -42,6 +53,7 @@ namespace SAM
 
         private static string account;
         private static string ePassword;
+        private static string eSharedSecret;
 
         private static string accPerRow;
         private static string steamPath;
@@ -252,10 +264,11 @@ namespace SAM
                 foreach (var account in encryptedAccounts)
                 {
                     string temppass = StringCipher.Decrypt(account.Password, eKey);
+                    string temp2fa = StringCipher.Decrypt(account.SharedSecret, eKey);
 
                     if (seedAcc)
                     {
-                        decryptedAccounts.Add(new Account() { Name = account.Name, Password = temppass, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, Description = account.Description });
+                        decryptedAccounts.Add(new Account() { Name = account.Name, Password = temppass, SharedSecret = temp2fa, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, Description = account.Description });
                     }
 
                     //Console.WriteLine("Name = {0}, Pass = {1}, Url = {2}", account.Name, account.Password, account.Url);
@@ -381,6 +394,7 @@ namespace SAM
             {
                 account = dialog.AccountText;
                 string password = dialog.PasswordText;
+                string sharedSecret = dialog.SharedSecretText;
                 string aviUrl = HtmlAviScrape(dialog.UrlText);
 
                 // If the auto login checkbox was checked, update settings file and global variables. 
@@ -398,8 +412,9 @@ namespace SAM
                 {
                     // Encrypt info before saving to file
                     ePassword = StringCipher.Encrypt(password, eKey);
+                    eSharedSecret = StringCipher.Encrypt(sharedSecret, eKey);
 
-                    encryptedAccounts.Add(new Account() { Name = dialog.AccountText, Password = ePassword, ProfUrl = dialog.UrlText, AviUrl = aviUrl, Description = dialog.DescriptionText });
+                    encryptedAccounts.Add(new Account() { Name = dialog.AccountText, Password = ePassword, SharedSecret = eSharedSecret, ProfUrl = dialog.UrlText, AviUrl = aviUrl, Description = dialog.DescriptionText });
 
                     Utils.Serialize(encryptedAccounts);
 
@@ -428,6 +443,7 @@ namespace SAM
             {
                 AccountText = decryptedAccounts[index].Name,
                 PasswordText = decryptedAccounts[index].Password,
+                SharedSecretText = decryptedAccounts[index].SharedSecret,
                 UrlText = decryptedAccounts[index].ProfUrl,
                 DescriptionText = decryptedAccounts[index].Description
             };
@@ -464,9 +480,11 @@ namespace SAM
                 {
                     // Encrypt info before saving to file
                     ePassword = StringCipher.Encrypt(dialog.PasswordText, eKey);
+                    eSharedSecret = StringCipher.Encrypt(dialog.SharedSecretText, eKey);
 
                     encryptedAccounts[index].Name = dialog.AccountText;
                     encryptedAccounts[index].Password = ePassword;
+                    encryptedAccounts[index].SharedSecret = eSharedSecret;
                     encryptedAccounts[index].ProfUrl = dialog.UrlText;
                     encryptedAccounts[index].AviUrl = aviUrl;
                     encryptedAccounts[index].Description = dialog.DescriptionText;
@@ -576,6 +594,30 @@ namespace SAM
                 MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+            // Wait for steam 2FA window popup
+            IntPtr handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
+            while (handle.Equals(IntPtr.Zero))
+            {
+                handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
+            }
+            if (SetForegroundWindow(handle))
+            {
+                // Generate 2FA code, then send it to the client
+                System.Windows.Forms.SendKeys.SendWait(Generate2FACode(decryptedAccounts[index].SharedSecret));
+                System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+            }
+        }
+
+        private string Generate2FACode(string shared_secret)
+        {
+            SteamGuardAccount authaccount = new SteamGuardAccount
+            {
+                SharedSecret = shared_secret
+            };
+            long steamtime = SteamAuth.TimeAligner.GetSteamTime();
+            string code = authaccount.GenerateSteamGuardCodeForTime(steamtime);
+
+            return code;
         }
 
         private void AccountButton_Click(object sender, RoutedEventArgs e)

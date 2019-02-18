@@ -27,6 +27,12 @@ namespace SAM
             set { PasswordBox.Password = value; }
         }
 
+        public string SharedSecretText
+        {
+            get { return SharedSecretBox.Text; }
+            set { SharedSecretBox.Text = value; }
+        }
+
         public string UrlText
         {
             get { return UrlBox.Text; }
