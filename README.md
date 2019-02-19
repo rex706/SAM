@@ -10,6 +10,7 @@ Easily switch between steam accounts.
 **Features**
 
 * 1-click Steam logins for multiple accounts.
+* 2FA Support.
 * Auto login a selected or the most recently used account.
 * Encrypts saved user password.
 * Adjust number of accounts per row.
@@ -17,15 +18,18 @@ Easily switch between steam accounts.
 * Start with windows.
 * Start minimized.
 
-
-**External Packages**
-
-* HtmlAgilityPack
 ------------------------------------
 
 **CHANGELOG**
 
-**Latest version:** 1.2.2.0
+**Latest version:** 1.2.3.0
+* 2FA Support thanks to [gmmanonymus111](https://github.com/gmmanonymus111)
+    - Your 'Shared Secret' can be found in your decrypted .maFile generated from [SteamDesktopAuthenticator](https://github.com/Jessecar96/SteamDesktopAuthenticator)
+    - SAM will encrypt your 'Shared Secret' before saving it for future use like your password. 
+* Update some NuGet Packages.
+
+
+1.2.2.0
 * Much better handling of profile image scrape.
 	- No longer relies on image source pattern.
 * Reload all images from edit drop down.

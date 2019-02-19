@@ -594,17 +594,30 @@ namespace SAM
                 MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            // Wait for steam 2FA window popup
-            IntPtr handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
-            while (handle.Equals(IntPtr.Zero))
+
+            // Only handle 2FA if shared secret was entered.
+            if (decryptedAccounts[index].SharedSecret != null && decryptedAccounts[index].SharedSecret.Length > 0)
             {
-                handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
-            }
-            if (SetForegroundWindow(handle))
-            {
-                // Generate 2FA code, then send it to the client
-                System.Windows.Forms.SendKeys.SendWait(Generate2FACode(decryptedAccounts[index].SharedSecret));
-                System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+                // Wait for steam 2FA window popup
+                IntPtr handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
+                while (handle.Equals(IntPtr.Zero))
+                {
+                    handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
+
+                    // Check for steam warning window.
+                    IntPtr warningHandle = FindWindow("vguiPopupWindow", "Steam - Warning");
+                    if (!warningHandle.Equals(IntPtr.Zero))
+                    {
+                        //Cancel the 2FA process since Steam connection is unavailable. 
+                        return;
+                    }
+                }
+                if (SetForegroundWindow(handle))
+                {
+                    // Generate 2FA code, then send it to the client
+                    System.Windows.Forms.SendKeys.SendWait(Generate2FACode(decryptedAccounts[index].SharedSecret));
+                    System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+                }
             }
         }
 
