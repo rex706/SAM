@@ -11,8 +11,8 @@
         <TextBox Name="UsernameBox" Padding="3,3,3,3" />
         <TextBlock x:Name="TitleTextBox1" Margin="0,0,0,10" Foreground="White" ><Run/><LineBreak/><Run Text="Password*"/></TextBlock>
         <PasswordBox Name="PasswordBox" PasswordChar="•"  Padding="3,3,3,3" />
-        <TextBlock x:Name="TitleTextBox2" Margin="0,0,0,10" Foreground="White" ><Run/><LineBreak/><Run Text="Shared Secret*"/></TextBlock>
-        <TextBox Name="SharedSecretBox" Padding="3,3,3,3" />
+        <TextBlock x:Name="TitleTextBox2" Margin="0,0,0,10" Foreground="White" ToolTip="Can be found in your .maFile from Steam Desktop Authenticator" ><Run/><LineBreak/><Run Text="2FA Shared Secret"/></TextBlock>
+        <PasswordBox Name="SharedSecretBox" PasswordChar="•" Padding="3,3,3,3" />
         <TextBlock x:Name="TitleTextBox3" Margin="0,0,0,10" Foreground="White" ToolTip="Enter steam profile url to get user avatar" ><Run/><LineBreak/><Run Text="Profile Url"/></TextBlock>
         <TextBox Name="UrlBox" Padding="3,3,3,3" />
         <TextBlock x:Name="TitleTextBox4" Margin="0,0,0,10" Foreground="White" ToolTip="Enter a description for this entry" ><Run/><LineBreak/><Run Text="Description"/></TextBlock>

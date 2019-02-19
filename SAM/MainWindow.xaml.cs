@@ -213,6 +213,12 @@ namespace SAM
             settingsFile.Write("Version", AssemblyVer, "System");
         }
 
+        public static string RequestEKey()
+        {
+            // Return eKey to Utils to encrypt passwords/secrets
+            return eKey;
+        }
+
         public void RefreshWindow()
         {
             decryptedAccounts = new List<Account>();
@@ -264,11 +270,22 @@ namespace SAM
                 foreach (var account in encryptedAccounts)
                 {
                     string temppass = StringCipher.Decrypt(account.Password, eKey);
-                    string temp2fa = StringCipher.Decrypt(account.SharedSecret, eKey);
 
-                    if (seedAcc)
+                    if (account.SharedSecret != null && account.SharedSecret.Length > 0)
                     {
-                        decryptedAccounts.Add(new Account() { Name = account.Name, Password = temppass, SharedSecret = temp2fa, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, Description = account.Description });
+                        string temp2fa = StringCipher.Decrypt(account.SharedSecret, eKey);
+
+                        if (seedAcc)
+                        {
+                            decryptedAccounts.Add(new Account() { Name = account.Name, Password = temppass, SharedSecret = temp2fa, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, Description = account.Description });
+                        }
+                    }
+                    else
+                    {
+                        if (seedAcc)
+                        {
+                            decryptedAccounts.Add(new Account() { Name = account.Name, Password = temppass, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, Description = account.Description });
+                        }
                     }
 
                     //Console.WriteLine("Name = {0}, Pass = {1}, Url = {2}", account.Name, account.Password, account.Url);
@@ -594,17 +611,30 @@ namespace SAM
                 MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            // Wait for steam 2FA window popup
-            IntPtr handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
-            while (handle.Equals(IntPtr.Zero))
+
+            // Only handle 2FA if shared secret was entered.
+            if (decryptedAccounts[index].SharedSecret != null && decryptedAccounts[index].SharedSecret.Length > 0)
             {
-                handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
-            }
-            if (SetForegroundWindow(handle))
-            {
-                // Generate 2FA code, then send it to the client
-                System.Windows.Forms.SendKeys.SendWait(Generate2FACode(decryptedAccounts[index].SharedSecret));
-                System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+                // Wait for steam 2FA window popup
+                IntPtr handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
+                while (handle.Equals(IntPtr.Zero))
+                {
+                    handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
+
+                    // Check for steam warning window.
+                    IntPtr warningHandle = FindWindow("vguiPopupWindow", "Steam - Warning");
+                    if (!warningHandle.Equals(IntPtr.Zero))
+                    {
+                        //Cancel the 2FA process since Steam connection is unavailable. 
+                        return;
+                    }
+                }
+                if (SetForegroundWindow(handle))
+                {
+                    // Generate 2FA code, then send it to the client
+                    System.Windows.Forms.SendKeys.SendWait(Generate2FACode(decryptedAccounts[index].SharedSecret));
+                    System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+                }
             }
         }
 
@@ -747,6 +777,12 @@ namespace SAM
         private void ImportMenuItem_Click(object sender, RoutedEventArgs e)
         {
             Utils.ImportAccountFile();
+            RefreshWindow();
+        }
+
+        private void MassImportMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Utils.ImportMassAccountFile();
             RefreshWindow();
         }
 

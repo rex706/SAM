@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -51,7 +52,38 @@ namespace SAM
                 }
             }
         }
-        
+
+        public static void ImportMassAccountFile()
+        {
+            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                DefaultExt = ".json",
+                Filter = "SAM JSON Files (*.json)|*.json"
+            };
+
+            Nullable<bool> result = dialog.ShowDialog();
+
+            if (result == true)
+            {
+                try
+                {
+                    List<Account> array = JsonConvert.DeserializeObject<List<Account>>(File.ReadAllText(dialog.FileName));
+                    foreach (var account in array)
+                    {
+                        account.Password = StringCipher.Encrypt(account.Password, MainWindow.RequestEKey());
+                        account.SharedSecret = StringCipher.Encrypt(account.SharedSecret, MainWindow.RequestEKey());
+                    }
+                    MainWindow.encryptedAccounts = MainWindow.encryptedAccounts.Concat(array).ToList();
+                    Serialize(MainWindow.encryptedAccounts);
+                    MessageBox.Show("Accounts mass imported!");
+                }
+                catch (Exception m)
+                {
+                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
         public static void ExportAccountFile()
         {
             var dialog = new System.Windows.Forms.FolderBrowserDialog();
