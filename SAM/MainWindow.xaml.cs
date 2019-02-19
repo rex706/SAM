@@ -264,11 +264,22 @@ namespace SAM
                 foreach (var account in encryptedAccounts)
                 {
                     string temppass = StringCipher.Decrypt(account.Password, eKey);
-                    string temp2fa = StringCipher.Decrypt(account.SharedSecret, eKey);
 
-                    if (seedAcc)
+                    if (account.SharedSecret != null && account.SharedSecret.Length > 0)
                     {
-                        decryptedAccounts.Add(new Account() { Name = account.Name, Password = temppass, SharedSecret = temp2fa, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, Description = account.Description });
+                        string temp2fa = StringCipher.Decrypt(account.SharedSecret, eKey);
+
+                        if (seedAcc)
+                        {
+                            decryptedAccounts.Add(new Account() { Name = account.Name, Password = temppass, SharedSecret = temp2fa, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, Description = account.Description });
+                        }
+                    }
+                    else
+                    {
+                        if (seedAcc)
+                        {
+                            decryptedAccounts.Add(new Account() { Name = account.Name, Password = temppass, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, Description = account.Description });
+                        }
                     }
 
                     //Console.WriteLine("Name = {0}, Pass = {1}, Url = {2}", account.Name, account.Password, account.Url);
