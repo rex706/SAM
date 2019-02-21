@@ -12,6 +12,7 @@ using System.Linq;
 using System.Windows.Media;
 using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace SAM
 {
@@ -42,6 +43,9 @@ namespace SAM
         [DllImport("user32.dll", EntryPoint = "FindWindow")]
         private static extern IntPtr FindWindow(string lp1, string lp2);
 
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern int GetWindowThreadProcessId(IntPtr handle, out int processId);
+
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
@@ -49,7 +53,7 @@ namespace SAM
         public static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
 
-        private static string eKey = "PRIVATE_KEY"; // Change this before release
+        private static string eKey = "PRIVATE_KEY"; // This is changed before releases/updates
 
         private static string account;
         private static string ePassword;
@@ -265,25 +269,18 @@ namespace SAM
                 {
                     string temppass = StringCipher.Decrypt(account.Password, eKey);
 
-                    if (account.SharedSecret != null && account.SharedSecret.Length > 0)
+                    if (seedAcc)
                     {
-                        string temp2fa = StringCipher.Decrypt(account.SharedSecret, eKey);
-
-                        if (seedAcc)
+                        if (account.SharedSecret != null && account.SharedSecret.Length > 0)
                         {
+                            string temp2fa = StringCipher.Decrypt(account.SharedSecret, eKey);
                             decryptedAccounts.Add(new Account() { Name = account.Name, Password = temppass, SharedSecret = temp2fa, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, Description = account.Description });
                         }
-                    }
-                    else
-                    {
-                        if (seedAcc)
+                        else
                         {
                             decryptedAccounts.Add(new Account() { Name = account.Name, Password = temppass, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, Description = account.Description });
                         }
                     }
-
-                    //Console.WriteLine("Name = {0}, Pass = {1}, Url = {2}", account.Name, account.Password, account.Url);
-                    //Console.WriteLine("Name = {0}, Pass = {1}, Url = {2}", account.Name, temppass, account.Url);
 
                     Button accountButton = new Button();
                     TextBlock accountText = new TextBlock();
@@ -530,18 +527,6 @@ namespace SAM
             recentAcc = index;
             settingsFile.Write("RecentAcc", index.ToString(), "AutoLog");
 
-            // Kill steam process if it is already open
-            try
-            {
-                Process[] SteamProc = Process.GetProcessesByName("Steam");
-                SteamProc[0].Kill();
-                SteamProc[0].WaitForExit();
-            }
-            catch
-            {
-                Console.WriteLine("No steam process found.");
-            }
-
             // If Steam's filepath was not specified in settings. Attempt to find it and save it.
             if (steamPath == null || steamPath.Length < 3)
             {
@@ -578,13 +563,40 @@ namespace SAM
 
                     // Get the selected file path
                     if (result == true)
+                    {
                         steamPath = Path.GetDirectoryName(dlg.FileName) + "\\";
+                    }
                 }
 
                 // Save path to settings file.
                 settingsFile.Write("Steam", steamPath, "Settings");
             }
 
+            // Shutdown Steam process via command if it is already open.
+            ProcessStartInfo stopInfo = new ProcessStartInfo
+            {
+                CreateNoWindow = false,
+                UseShellExecute = true,
+                FileName = steamPath + "Steam.exe",
+                WorkingDirectory = steamPath,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                Arguments = "-shutdown"
+            };
+
+            try
+            {
+                Process SteamProc = Process.GetProcessesByName("Steam")[0];
+
+                Process.Start(stopInfo);
+
+                SteamProc.WaitForExit();
+            }
+            catch
+            {
+                Console.WriteLine("No steam process found or steam failed to shutdown.");
+            }
+
+            // Start Steam process with the selected path.
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
                 CreateNoWindow = false,
@@ -597,8 +609,7 @@ namespace SAM
 
             try
             {
-                // Sart the process with the info specified
-                Process exeProcess = Process.Start(startInfo);
+                Process steamProcess = Process.Start(startInfo);
             }
             catch (Exception m)
             {
@@ -623,6 +634,32 @@ namespace SAM
                         return;
                     }
                 }
+
+                Process steamGuardProcess = null;
+
+                // Wait for valid process to wait for input idle.
+                while (steamGuardProcess == null)
+                {
+                    int procId = 0;
+
+                    // Wait for valid process id from handle.
+                    while (procId == 0)
+                    {
+                        GetWindowThreadProcessId(handle, out procId);
+                    }
+                    
+                    try
+                    {
+                        steamGuardProcess = Process.GetProcessById(procId);
+                    }
+                    catch
+                    {
+                        steamGuardProcess = null;
+                    }
+                }
+                    
+                steamGuardProcess.WaitForInputIdle();
+
                 if (SetForegroundWindow(handle))
                 {
                     // Generate 2FA code, then send it to the client
