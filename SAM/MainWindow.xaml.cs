@@ -675,6 +675,7 @@ namespace SAM
                 Console.WriteLine("Typing code...");
                 System.Windows.Forms.SendKeys.SendWait(Generate2FACode(decryptedAccounts[index].SharedSecret));
                 System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+                
                 // Need a little pause here to reliably check for popup later
                 System.Threading.Thread.Sleep(2000);
             }
