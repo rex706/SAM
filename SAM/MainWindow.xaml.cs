@@ -620,52 +620,76 @@ namespace SAM
             // Only handle 2FA if shared secret was entered.
             if (decryptedAccounts[index].SharedSecret != null && decryptedAccounts[index].SharedSecret.Length > 0)
             {
-                // Wait for steam 2FA window popup
-                IntPtr handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
-                while (handle.Equals(IntPtr.Zero))
-                {
-                    handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
+                Type2FA(index, 0);
+            }
+        }
 
-                    // Check for steam warning window.
-                    IntPtr warningHandle = FindWindow("vguiPopupWindow", "Steam - Warning");
-                    if (!warningHandle.Equals(IntPtr.Zero))
-                    {
-                        //Cancel the 2FA process since Steam connection is unavailable. 
-                        return;
-                    }
+        private void Type2FA(int index, int failCounter)
+        {
+            IntPtr handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
+            while (handle.Equals(IntPtr.Zero))
+            {
+                handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
+
+                // Check for steam warning window.
+                IntPtr warningHandle = FindWindow("vguiPopupWindow", "Steam - Warning");
+                if (!warningHandle.Equals(IntPtr.Zero))
+                {
+                    //Cancel the 2FA process since Steam connection is unavailable. 
+                    return;
+                }
+            }
+
+            Console.WriteLine("Found it.");
+
+            Process steamGuardProcess = null;
+
+            // Wait for valid process to wait for input idle.
+            Console.WriteLine("Waiting for it to be idle.");
+            while (steamGuardProcess == null)
+            {
+                int procId = 0;
+
+                // Wait for valid process id from handle.
+                while (procId == 0)
+                {
+                    GetWindowThreadProcessId(handle, out procId);
                 }
 
-                Process steamGuardProcess = null;
-
-                // Wait for valid process to wait for input idle.
-                while (steamGuardProcess == null)
+                try
                 {
-                    int procId = 0;
-
-                    // Wait for valid process id from handle.
-                    while (procId == 0)
-                    {
-                        GetWindowThreadProcessId(handle, out procId);
-                    }
-                    
-                    try
-                    {
-                        steamGuardProcess = Process.GetProcessById(procId);
-                    }
-                    catch
-                    {
-                        steamGuardProcess = null;
-                    }
+                    steamGuardProcess = Process.GetProcessById(procId);
                 }
-                    
-                steamGuardProcess.WaitForInputIdle();
-
-                if (SetForegroundWindow(handle))
+                catch
                 {
-                    // Generate 2FA code, then send it to the client
-                    System.Windows.Forms.SendKeys.SendWait(Generate2FACode(decryptedAccounts[index].SharedSecret));
-                    System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+                    steamGuardProcess = null;
                 }
+            }
+
+            steamGuardProcess.WaitForInputIdle();
+            Console.WriteLine("It is idle now, bringing it up.");
+
+            if (SetForegroundWindow(handle))
+            {
+                // Generate 2FA code, then send it to the client
+                Console.WriteLine("Typing code...");
+                System.Windows.Forms.SendKeys.SendWait(Generate2FACode(decryptedAccounts[index].SharedSecret));
+                System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+                
+                // Need a little pause here to reliably check for popup later
+                System.Threading.Thread.Sleep(2000);
+            }
+
+            // Check if we still have a 2FA popup, which means, the previous one failed
+            handle = IntPtr.Zero; // just to make sure
+            handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
+            if (failCounter < 2 && !handle.Equals(IntPtr.Zero))
+            {
+                Console.WriteLine("2FA code failed, retrying...");
+                Type2FA(index, failCounter+1);
+            } else if (failCounter >= 2 && !handle.Equals(IntPtr.Zero))
+            {
+                MessageBox.Show("Failed to log in! Please make sure you set your shared secret correctly!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
