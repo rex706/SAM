@@ -70,7 +70,6 @@
                 <MenuItem Header="File">
                     <MenuItem Header="New" Click="NewButton_Click" />
                     <MenuItem Header="Import" Click="ImportMenuItem_Click" />
-                    <MenuItem Header="Mass Import" Click="MassImportMenuItem_Click" />
                     <MenuItem Header="Export" Click="ExportMenuItem_Click" />
                     <Separator />
                     <MenuItem Header="Exit" Click="ExitMenuItem_Click" />
