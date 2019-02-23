@@ -22,16 +22,17 @@ Easily switch between steam accounts.
 
 **CHANGELOG**
 
-**Latest version:** 1.2.3.1
-* Fixed an issue that would cause a crash if an old account did not have the new 2FA field, which all accounts with the previous update did not have.
+**Latest version:** 1.2.3.2
+* Better handle waiting for the 2FA Steam Guard window when logging in.
 
+1.2.3.1
+* Fixed an issue that would cause a crash if an old account did not have the new 2FA field, which all accounts with the previous update did not have.
 
 1.2.3.0
 * 2FA Support thanks to [gmmanonymus111](https://github.com/gmmanonymus111)
     - Your 'Shared Secret' can be found in your decrypted .maFile generated from [SteamDesktopAuthenticator](https://github.com/Jessecar96/SteamDesktopAuthenticator)
     - SAM will encrypt your 'Shared Secret' before saving it for future use like your password. 
 * Update some NuGet Packages.
-
 
 1.2.2.0
 * Much better handling of profile image scrape.
