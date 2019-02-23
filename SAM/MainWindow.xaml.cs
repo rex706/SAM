@@ -667,12 +667,17 @@ namespace SAM
             }
 
             steamGuardProcess.WaitForInputIdle();
+
+            // Wait a second for the window to fully initialize just in case.
+            System.Threading.Thread.Sleep(1000);
+
             Console.WriteLine("It is idle now, bringing it up.");
 
             if (SetForegroundWindow(handle))
             {
                 // Generate 2FA code, then send it to the client
                 Console.WriteLine("Typing code...");
+
                 System.Windows.Forms.SendKeys.SendWait(Generate2FACode(decryptedAccounts[index].SharedSecret));
                 System.Windows.Forms.SendKeys.SendWait("{ENTER}");
                 
@@ -680,14 +685,16 @@ namespace SAM
                 System.Threading.Thread.Sleep(2000);
             }
 
-            // Check if we still have a 2FA popup, which means, the previous one failed
+            // Check if we still have a 2FA popup, which means, the previous one failed.
             handle = IntPtr.Zero; // just to make sure
             handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
+
             if (failCounter < 2 && !handle.Equals(IntPtr.Zero))
             {
                 Console.WriteLine("2FA code failed, retrying...");
-                Type2FA(index, failCounter+1);
-            } else if (failCounter >= 2 && !handle.Equals(IntPtr.Zero))
+                Type2FA(index, failCounter + 1);
+            }
+            else if (failCounter >= 2 && !handle.Equals(IntPtr.Zero))
             {
                 MessageBox.Show("Failed to log in! Please make sure you set your shared secret correctly!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -695,12 +702,9 @@ namespace SAM
 
         private string Generate2FACode(string shared_secret)
         {
-            SteamGuardAccount authaccount = new SteamGuardAccount
-            {
-                SharedSecret = shared_secret
-            };
-            long steamtime = SteamAuth.TimeAligner.GetSteamTime();
-            string code = authaccount.GenerateSteamGuardCodeForTime(steamtime);
+            SteamGuardAccount authaccount = new SteamGuardAccount { SharedSecret = shared_secret };
+
+            string code = authaccount.GenerateSteamGuardCode();
 
             return code;
         }
