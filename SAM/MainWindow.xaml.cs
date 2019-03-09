@@ -282,7 +282,7 @@ namespace SAM
                 }
                 else
                 {
-                    account.AviUrl = HtmlAviScrape(account.ProfUrl);
+                    account.AviUrl = Utils.HtmlAviScrape(account.ProfUrl);
                 }
             }
 
@@ -468,7 +468,7 @@ namespace SAM
                 }
                 else
                 {
-                    aviUrl = HtmlAviScrape(dialog.UrlText);
+                    aviUrl = Utils.HtmlAviScrape(dialog.UrlText);
                 }
 
                 string steamId = dialog.SteamId;
@@ -539,7 +539,7 @@ namespace SAM
                 }
                 else
                 {
-                    aviUrl = HtmlAviScrape(dialog.UrlText);
+                    aviUrl = Utils.HtmlAviScrape(dialog.UrlText);
                 }
 
                 string steamId = dialog.SteamId;
@@ -792,31 +792,6 @@ namespace SAM
                 // Login with clicked button's index, which stored in Tag.
                 Login(Int32.Parse(btn.Tag.ToString()));
             }
-        }
-
-        private string HtmlAviScrape(string profUrl)
-        {
-            // If user entered profile url, get avatar jpg url
-            if (profUrl.Length > 2)
-            {
-                // Verify url starts with valid prefix for HtmlWeb
-                if (!profUrl.StartsWith("https://") && !profUrl.StartsWith("http://"))
-                {
-                    profUrl = "https://" + profUrl;
-                }
-
-                try
-                {
-                    HtmlDocument document = new HtmlWeb().Load(profUrl);
-                    return document.DocumentNode.Descendants().Where(n => n.HasClass("playerAvatarAutoSizeInner")).First().FirstChild.GetAttributeValue("src", null);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-                
-            }
-            return "";
         }
 
         private void SortAccounts(int type)

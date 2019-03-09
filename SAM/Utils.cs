@@ -10,6 +10,7 @@ using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using Gameloop.Vdf;
 using Gameloop.Vdf.Linq;
+using HtmlAgilityPack;
 
 namespace SAM
 {
@@ -187,12 +188,37 @@ namespace SAM
                     userJson = JValue.Parse(userJsonString);
                 }
             }
-            catch(Exception e)
+            catch(Exception m)
             {
                 //MessageBox.Show(m.Message);
             }
 
             return userJson;
+        }
+
+        public static string HtmlAviScrape(string profUrl)
+        {
+            // If user entered profile url, get avatar jpg url
+            if (profUrl != null && profUrl.Length > 2)
+            {
+                // Verify url starts with valid prefix for HtmlWeb
+                if (!profUrl.StartsWith("https://") && !profUrl.StartsWith("http://"))
+                {
+                    profUrl = "https://" + profUrl;
+                }
+
+                try
+                {
+                    HtmlDocument document = new HtmlWeb().Load(profUrl);
+                    return document.DocumentNode.Descendants().Where(n => n.HasClass("playerAvatarAutoSizeInner")).First().FirstChild.GetAttributeValue("src", null);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
+
+            return "";
         }
     }
 }
