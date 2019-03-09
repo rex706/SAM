@@ -3,8 +3,6 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
-using Gameloop.Vdf;
-using Gameloop.Vdf.Linq;
 using Newtonsoft.Json.Linq;
 
 namespace SAM
@@ -79,39 +77,28 @@ namespace SAM
 
         private async Task GetAviUrlFromConfig()
         {
-            string steamPath = new IniFile("SAMSettings.ini").Read("Steam", "Settings");
+            string steamPath = settingsFile.Read("Steam", "Settings");
 
             try
             {
-                // Attempt to find user profile image automatically from steam config and web api.
-                dynamic config = VdfConvert.Deserialize(File.ReadAllText(steamPath + "config\\config.vdf"));
-
-                dynamic accounts = config.Value.Software.Valve.steam.Accounts;
-
+                // Attempt to find user profile image automatically from web api.
                 string userName = UsernameBox.Text;
 
-                VObject accountsObj = accounts;
-
-                VToken value;
-
-                accountsObj.TryGetValue(userName, out value);
-
-                dynamic user = value;
-
-                VValue userId = user.SteamID;
-
-                string userIdValue = userId.Value.ToString();
-
-                Uri apiUri = new Uri("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + apiKey + "&steamids=" + userIdValue);
+                Uri vanityUri = new Uri("http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + apiKey + "&vanityurl=" + userName);
 
                 using (WebClient client = new WebClient())
                 {
-                    string jsonString = await client.DownloadStringTaskAsync(apiUri);
+                    string vanityJson = await client.DownloadStringTaskAsync(vanityUri);
+                    dynamic vanityValue = JValue.Parse(vanityJson);
 
+                    dynamic steamId = vanityValue.response.steamid;
+
+                    Uri userUri = new Uri("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + apiKey + "&steamids=" + steamId);
+
+                    string jsonString = await client.DownloadStringTaskAsync(userUri);
                     dynamic jsonValue = JValue.Parse(jsonString);
 
                     dynamic profileUrl = jsonValue.response.players[0].profileurl;
-
                     dynamic avatarUrl = jsonValue.response.players[0].avatarfull;
 
                     UrlBox.Text = profileUrl;
