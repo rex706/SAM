@@ -31,6 +31,8 @@ namespace SAM
 
         public string AviUrl { get; set; }
 
+        public string SteamId { get; set; }
+
         public string Description { get; set; }
     }
 
@@ -53,7 +55,7 @@ namespace SAM
         private static List<Account> decryptedAccounts;
 
         // Keys are changed before releases/updates
-        private static string eKey = "PRIVATE_KEY"; 
+        private static string eKey = "PRIVATE_KEY";
 
         private static string account;
         private static string ePassword;
@@ -255,11 +257,33 @@ namespace SAM
             }
         }
 
-        public void ReloadImages()
+        public async System.Threading.Tasks.Task ReloadAccountsAsync()
         {
             foreach (var account in encryptedAccounts)
             {
-                account.AviUrl = HtmlAviScrape(account.ProfUrl);
+                dynamic userJson = null;
+
+                if (account.SteamId != null && account.SteamId.Length > 0)
+                {
+                    userJson = await Utils.GetUrlsFromWebApiBySteamId(account.SteamId);
+                }
+                else
+                {
+                    userJson = await Utils.GetUrlsFromWebApiByName(account.Name);
+                }
+
+                if (userJson != null)
+                {
+                    account.ProfUrl = userJson.response.players[0].profileurl;
+                    account.AviUrl = userJson.response.players[0].avatarfull;
+                    account.SteamId = userJson.response.players[0].steamid;
+
+                    System.Threading.Thread.Sleep(500);
+                }
+                else
+                {
+                    account.AviUrl = HtmlAviScrape(account.ProfUrl);
+                }
             }
 
             Utils.Serialize(encryptedAccounts);
@@ -271,7 +295,6 @@ namespace SAM
 
         private void PostDeserializedRefresh(bool seedAcc)
         {
-
             if (encryptedAccounts != null)
             {
                 int bCounter = 0;
@@ -287,19 +310,23 @@ namespace SAM
                 // Create new button and textblock for each account
                 foreach (var account in encryptedAccounts)
                 {
-                    string temppass = StringCipher.Decrypt(account.Password, eKey);
+                    string tempPass = StringCipher.Decrypt(account.Password, eKey);
 
                     if (seedAcc)
                     {
+                        string temp2fa = null;
+                        string steamId = null;
+
                         if (account.SharedSecret != null && account.SharedSecret.Length > 0)
                         {
-                            string temp2fa = StringCipher.Decrypt(account.SharedSecret, eKey);
-                            decryptedAccounts.Add(new Account() { Name = account.Name, Password = temppass, SharedSecret = temp2fa, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, Description = account.Description });
+                             temp2fa = StringCipher.Decrypt(account.SharedSecret, eKey);
                         }
-                        else
+                        if (account.SteamId != null && account.SteamId.Length > 0)
                         {
-                            decryptedAccounts.Add(new Account() { Name = account.Name, Password = temppass, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, Description = account.Description });
+                            steamId = account.SteamId;
                         }
+
+                        decryptedAccounts.Add(new Account() { Name = account.Name, Password = tempPass, SharedSecret = temp2fa, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, SteamId = steamId, Description = account.Description });
                     }
 
                     Button accountButton = new Button();
@@ -433,7 +460,18 @@ namespace SAM
                 account = dialog.AccountText;
                 string password = dialog.PasswordText;
                 string sharedSecret = dialog.SharedSecretText;
-                string aviUrl = HtmlAviScrape(dialog.UrlText);
+
+                string aviUrl;
+                if (dialog.AviText != null && dialog.AviText.Length > 1)
+                {
+                    aviUrl = dialog.AviText;
+                }
+                else
+                {
+                    aviUrl = HtmlAviScrape(dialog.UrlText);
+                }
+
+                string steamId = dialog.SteamId;
 
                 // If the auto login checkbox was checked, update settings file and global variables. 
                 if (dialog.AutoLogAccountIndex == true)
@@ -452,7 +490,7 @@ namespace SAM
                     ePassword = StringCipher.Encrypt(password, eKey);
                     eSharedSecret = StringCipher.Encrypt(sharedSecret, eKey);
 
-                    encryptedAccounts.Add(new Account() { Name = dialog.AccountText, Password = ePassword, SharedSecret = eSharedSecret, ProfUrl = dialog.UrlText, AviUrl = aviUrl, Description = dialog.DescriptionText });
+                    encryptedAccounts.Add(new Account() { Name = dialog.AccountText, Password = ePassword, SharedSecret = eSharedSecret, ProfUrl = dialog.UrlText, AviUrl = aviUrl, SteamId = steamId, Description = dialog.DescriptionText });
 
                     Utils.Serialize(encryptedAccounts);
 
@@ -494,7 +532,17 @@ namespace SAM
 
             if (dialog.ShowDialog() == true)
             {
-                string aviUrl = HtmlAviScrape(dialog.UrlText);
+                string aviUrl;
+                if (dialog.AviText != null && dialog.AviText.Length > 1)
+                {
+                    aviUrl = dialog.AviText;
+                }
+                else
+                {
+                    aviUrl = HtmlAviScrape(dialog.UrlText);
+                }
+
+                string steamId = dialog.SteamId;
 
                 // If the auto login checkbox was checked, update settings file and global variables. 
                 if (dialog.AutoLogAccountIndex == true)
@@ -525,6 +573,7 @@ namespace SAM
                     encryptedAccounts[index].SharedSecret = eSharedSecret;
                     encryptedAccounts[index].ProfUrl = dialog.UrlText;
                     encryptedAccounts[index].AviUrl = aviUrl;
+                    encryptedAccounts[index].SteamId = dialog.SteamId;
                     encryptedAccounts[index].Description = dialog.DescriptionText;
 
                     Utils.Serialize(encryptedAccounts);
@@ -889,9 +938,9 @@ namespace SAM
             
         }
 
-        private void ReloadImages_Click(object sender, RoutedEventArgs e)
+        private async void ReloadAccounts_Click(object sender, RoutedEventArgs e)
         {
-            ReloadImages();
+            await ReloadAccountsAsync();
         }
 
         #endregion

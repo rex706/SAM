@@ -14,8 +14,6 @@ namespace SAM
     {
         private IniFile settingsFile;
 
-        private static string apiKey = "API_KEY";
-
         public TextDialog()
         {
             InitializeComponent();
@@ -54,6 +52,10 @@ namespace SAM
 
         public bool AutoLogAccountIndex { get; set; }
 
+        public string AviText { get; set; }
+
+        public string SteamId { get; set; }
+
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
             if (autoLogCheckBox.IsChecked == true)
@@ -72,42 +74,27 @@ namespace SAM
 
         private async void UsernameBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            await GetAviUrlFromConfig();
-        }
+            OKButton.IsEnabled = false;
+            dynamic userJson = await Utils.GetUrlsFromWebApiByName(UsernameBox.Text);
 
-        private async Task GetAviUrlFromConfig()
-        {
-            string steamPath = settingsFile.Read("Steam", "Settings");
-
-            try
+            if (userJson != null)
             {
-                // Attempt to find user profile image automatically from web api.
-                string userName = UsernameBox.Text;
+                dynamic profileUrl = userJson.response.players[0].profileurl;
+                dynamic avatarUrl = userJson.response.players[0].avatarfull;
+                dynamic steamId = userJson.response.players[0].steamid;
 
-                Uri vanityUri = new Uri("http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + apiKey + "&vanityurl=" + userName);
+                UrlBox.Text = profileUrl;
 
-                using (WebClient client = new WebClient())
-                {
-                    string vanityJson = await client.DownloadStringTaskAsync(vanityUri);
-                    dynamic vanityValue = JValue.Parse(vanityJson);
-
-                    dynamic steamId = vanityValue.response.steamid;
-
-                    Uri userUri = new Uri("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + apiKey + "&steamids=" + steamId);
-
-                    string jsonString = await client.DownloadStringTaskAsync(userUri);
-                    dynamic jsonValue = JValue.Parse(jsonString);
-
-                    dynamic profileUrl = jsonValue.response.players[0].profileurl;
-                    dynamic avatarUrl = jsonValue.response.players[0].avatarfull;
-
-                    UrlBox.Text = profileUrl;
-                }
+                SteamId = steamId;
+                AviText = avatarUrl;
             }
-            catch (Exception m)
+            else
             {
-                //MessageBox.Show(m.Message);
+                SteamId = null;
+                AviText = null;
             }
+
+            OKButton.IsEnabled = true;
         }
     }
 }

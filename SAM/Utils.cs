@@ -2,14 +2,21 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Serialization;
 using Microsoft.Win32;
+using Newtonsoft.Json.Linq;
+using Gameloop.Vdf;
+using Gameloop.Vdf.Linq;
 
 namespace SAM
 {
     class Utils
     {
+        private static string apiKey = "API_KEY";
+
         public static void Serialize(List<Account> input)
         {
             var serializer = new XmlSerializer(input.GetType());
@@ -52,7 +59,7 @@ namespace SAM
                 }
             }
         }
-        
+
         public static void ExportAccountFile()
         {
             var dialog = new System.Windows.Forms.FolderBrowserDialog();
@@ -118,6 +125,74 @@ namespace SAM
 
             }
             return registryValue;
+        }
+
+        public static async Task<dynamic> GetUrlsFromWebApiByName(string userName)
+        {
+            dynamic userJson = null;
+
+            try
+            {
+                // Attempt to find user profile image automatically from web api.
+
+                Uri vanityUri = new Uri("http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + apiKey + "&vanityurl=" + userName);
+
+                using (WebClient client = new WebClient())
+                {
+                    string vanityJson = await client.DownloadStringTaskAsync(vanityUri);
+                    dynamic vanityValue = JValue.Parse(vanityJson);
+
+                    dynamic steamId = vanityValue.response.steamid;
+
+                    // Not found.
+                    if (steamId == null)
+                    {
+                        string steamPath = new IniFile("SAMSettings.ini").Read("Steam", "Settings");
+
+                        // Attempt to find userId from steam config.
+                        dynamic config = VdfConvert.Deserialize(File.ReadAllText(steamPath + "config\\config.vdf"));
+                        dynamic accounts = config.Value.Software.Valve.steam.Accounts;
+
+                        VObject accountsObj = accounts;
+                        VToken value;
+
+                        accountsObj.TryGetValue(userName, out value);
+
+                        dynamic user = value;
+                        VValue userId = user.SteamID;
+                        steamId = userId.Value.ToString();
+                    }
+
+                    userJson = await GetUrlsFromWebApiBySteamId(steamId);
+                }
+            }
+            catch (Exception m)
+            {
+                //MessageBox.Show(m.Message);
+            }
+
+            return userJson;
+        }
+
+        public static async Task<dynamic> GetUrlsFromWebApiBySteamId(string steamId)
+        {
+            dynamic userJson = null;
+            try
+            {
+                Uri userUri = new Uri("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + apiKey + "&steamids=" + steamId);
+
+                using (WebClient client = new WebClient())
+                {
+                    string userJsonString = await client.DownloadStringTaskAsync(userUri);
+                    userJson = JValue.Parse(userJsonString);
+                }
+            }
+            catch(Exception e)
+            {
+                //MessageBox.Show(m.Message);
+            }
+
+            return userJson;
         }
     }
 }
