@@ -12,7 +12,6 @@ using System.Linq;
 using System.Windows.Media;
 using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace SAM
 {
@@ -53,7 +52,8 @@ namespace SAM
         public static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
 
-        private static string eKey = "PRIVATE_KEY"; // This is changed before releases/updates
+        // Keys are changed before releases/updates
+        private static string eKey = "PRIVATE_KEY"; 
 
         private static string account;
         private static string ePassword;
@@ -160,10 +160,20 @@ namespace SAM
 
             // If the recent autolog entry exists and is set to true.
             // else create defualt settings file entry.
-            if (settingsFile.KeyExists("Recent", "AutoLog") && settingsFile.Read("Recent", "AutoLog") == "True" && Int32.Parse(settingsFile.Read("RecentAcc", "AutoLog")) >= 0)
+            if (settingsFile.KeyExists("Recent", "AutoLog") && settingsFile.Read("Recent", "AutoLog") == "True")
             {
-                recent = true;
-                recentAcc = Int32.Parse(settingsFile.Read("RecentAcc", "AutoLog"));
+                int tryParseResult = -1;
+                Int32.TryParse(settingsFile.Read("RecentAcc", "AutoLog"), out tryParseResult);
+
+                if (tryParseResult != -1)
+                {
+                    recent = true;
+                    recentAcc = tryParseResult;
+                }
+                else
+                {
+                    settingsFile.Write("Recent", "False", "AutoLog");
+                }
             }
             else if (!settingsFile.KeyExists("Recent", "AutoLog"))
             {
@@ -175,8 +185,18 @@ namespace SAM
             // else create defualt settings file entry.
             if (settingsFile.KeyExists("Selected", "AutoLog") && settingsFile.Read("Selected", "AutoLog") == "True")
             {
-                selected = true;
-                selectedAcc = Int32.Parse(settingsFile.Read("SelectedAcc", "AutoLog"));
+                int tryParseResult = -1;
+                Int32.TryParse(settingsFile.Read("SelectedAcc", "AutoLog"), out tryParseResult);
+
+                if (tryParseResult != -1)
+                {
+                    selected = true;
+                    selectedAcc = tryParseResult;
+                }
+                else
+                {
+                    settingsFile.Write("Selected", "False", "AutoLog");
+                }
             }
             else if (!settingsFile.KeyExists("Selected", "AutoLog"))
             {
@@ -340,16 +360,26 @@ namespace SAM
                     buttonGrid.Children.Add(accountButton);
 
                     accountButton.Click += new RoutedEventHandler(AccountButton_Click);
+
                     ContextMenu accountContext = new ContextMenu();
+
                     MenuItem deleteItem = new MenuItem();
                     MenuItem editItem = new MenuItem();
+                    MenuItem exportItem = new MenuItem();
+
                     deleteItem.Header = "Delete";
                     editItem.Header = "Edit";
+                    exportItem.Header = "Export";
+
                     accountContext.Items.Add(editItem);
                     accountContext.Items.Add(deleteItem);
+                    accountContext.Items.Add(exportItem);
+
                     accountButton.ContextMenu = accountContext;
+
                     deleteItem.Click += delegate { DeleteEntry(accountButton); };
                     editItem.Click += delegate { EditEntry(accountButton); };
+                    exportItem.Click += delegate { ExportAccount(Int32.Parse(accountButton.Tag.ToString())); };
 
                     bCounter++;
                     xcounter++;
@@ -530,21 +560,11 @@ namespace SAM
             // If Steam's filepath was not specified in settings. Attempt to find it and save it.
             if (steamPath == null || steamPath.Length < 3)
             {
-                string defaultPath = @"C:\Program Files (x86)\Steam\";
-                string secondaryPath = @"D:\Program Files (x86)\Steam\";
-                string tertiaryPath = @"E:\Program Files (x86)\Steam\";
+                string regPath = Utils.GetSteamPathFromRegistry();
 
-                if (Directory.Exists(defaultPath))
+                if (Directory.Exists(regPath))
                 {
-                    steamPath = defaultPath;
-                }
-                else if (Directory.Exists(secondaryPath))
-                {
-                    steamPath = secondaryPath;
-                }
-                else if (Directory.Exists(tertiaryPath))
-                {
-                    steamPath = tertiaryPath;
+                    steamPath = regPath;
                 }
                 else
                 {
@@ -601,7 +621,7 @@ namespace SAM
             {
                 CreateNoWindow = false,
                 UseShellExecute = true,
-                FileName = steamPath + "Steam.exe",
+                FileName = steamPath + "steam.exe",
                 WorkingDirectory = steamPath,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 Arguments = "-login " + decryptedAccounts[index].Name + " " + decryptedAccounts[index].Password
@@ -678,9 +698,16 @@ namespace SAM
                 // Generate 2FA code, then send it to the client
                 Console.WriteLine("Typing code...");
 
-                System.Windows.Forms.SendKeys.SendWait(Generate2FACode(decryptedAccounts[index].SharedSecret));
+                // Make sure the the window is set to foreground for each character input.
+                foreach (string s in Generate2FACode(decryptedAccounts[index].SharedSecret).Split())
+                {
+                    SetForegroundWindow(handle);
+                    System.Windows.Forms.SendKeys.SendWait(s);
+                }
+
+                SetForegroundWindow(handle);
                 System.Windows.Forms.SendKeys.SendWait("{ENTER}");
-                
+
                 // Need a little pause here to reliably check for popup later
                 System.Threading.Thread.Sleep(2000);
             }
@@ -755,6 +782,11 @@ namespace SAM
                     RefreshWindow();
                 }
             }
+        }
+
+        private void ExportAccount(int index)
+        {
+            Utils.ExportSelectedAccounts(new List<Account>() { encryptedAccounts[index] });
         }
 
         #region Resize and Resize Timer
@@ -839,9 +871,22 @@ namespace SAM
             RefreshWindow();
         }
 
-        private void ExportMenuItem_Click(object sender, RoutedEventArgs e)
+        private void ExportAllMenuItem_Click(object sender, RoutedEventArgs e)
         {
             Utils.ExportAccountFile();
+        }
+
+        private void ExportSelectedAccount_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                ExportAccount(Int32.Parse(btn.Tag.ToString()));
+            }
+        }
+
+        private void ExportSelectedAccounts_Click(object sender, RoutedEventArgs e)
+        {
+            
         }
 
         private void ReloadImages_Click(object sender, RoutedEventArgs e)

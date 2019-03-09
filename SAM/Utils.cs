@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Xml.Serialization;
+using Microsoft.Win32;
 
 namespace SAM
 {
@@ -69,6 +70,54 @@ namespace SAM
                     MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+        }
+
+        public static void ExportSelectedAccounts(List<Account> accounts)
+        {
+            var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            var result = dialog.ShowDialog();
+
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                try
+                {
+                    var serializer = new XmlSerializer(accounts.GetType());
+                    var sw = new StreamWriter(dialog.SelectedPath + "\\info.dat");
+                    serializer.Serialize(sw, accounts);
+                    sw.Close();
+
+                    MessageBox.Show("File exported to:\n" + dialog.SelectedPath);
+                }
+                catch (Exception m)
+                {
+                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        public static string GetSteamPathFromRegistry()
+        {
+            string registryValue = string.Empty;
+            RegistryKey localKey = null;
+            if (Environment.Is64BitOperatingSystem)
+            {
+                localKey = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.CurrentUser, RegistryView.Registry64);
+            }
+            else
+            {
+                localKey = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.CurrentUser, RegistryView.Registry32);
+            }
+
+            try
+            {
+                localKey = localKey.OpenSubKey(@"Software\\Valve\\Steam");
+                registryValue = localKey.GetValue("SteamPath").ToString() + "/";
+            }
+            catch (NullReferenceException nre)
+            {
+
+            }
+            return registryValue;
         }
     }
 }

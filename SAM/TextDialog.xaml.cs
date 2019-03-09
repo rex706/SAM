@@ -1,4 +1,11 @@
-﻿using System.Windows;
+﻿using System;
+using System.IO;
+using System.Net;
+using System.Threading.Tasks;
+using System.Windows;
+using Gameloop.Vdf;
+using Gameloop.Vdf.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace SAM
 {
@@ -8,6 +15,8 @@ namespace SAM
     public partial class TextDialog : Window
     {
         private IniFile settingsFile;
+
+        private static string apiKey = "API_KEY";
 
         public TextDialog()
         {
@@ -61,6 +70,57 @@ namespace SAM
         {
             DialogResult = false;
             Close();
+        }
+
+        private async void UsernameBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            await GetAviUrlFromConfig();
+        }
+
+        private async Task GetAviUrlFromConfig()
+        {
+            string steamPath = new IniFile("SAMSettings.ini").Read("Steam", "Settings");
+
+            try
+            {
+                // Attempt to find user profile image automatically from steam config and web api.
+                dynamic config = VdfConvert.Deserialize(File.ReadAllText(steamPath + "config\\config.vdf"));
+
+                dynamic accounts = config.Value.Software.Valve.steam.Accounts;
+
+                string userName = UsernameBox.Text;
+
+                VObject accountsObj = accounts;
+
+                VToken value;
+
+                accountsObj.TryGetValue(userName, out value);
+
+                dynamic user = value;
+
+                VValue userId = user.SteamID;
+
+                string userIdValue = userId.Value.ToString();
+
+                Uri apiUri = new Uri("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + apiKey + "&steamids=" + userIdValue);
+
+                using (WebClient client = new WebClient())
+                {
+                    string jsonString = await client.DownloadStringTaskAsync(apiUri);
+
+                    dynamic jsonValue = JValue.Parse(jsonString);
+
+                    dynamic profileUrl = jsonValue.response.players[0].profileurl;
+
+                    dynamic avatarUrl = jsonValue.response.players[0].avatarfull;
+
+                    UrlBox.Text = profileUrl;
+                }
+            }
+            catch (Exception m)
+            {
+                //MessageBox.Show(m.Message);
+            }
         }
     }
 }

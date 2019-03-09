@@ -7,9 +7,9 @@
         mc:Ignorable="d"
         Title="Login Info" Height="461" Width="300" Background="#FF333638" ResizeMode="NoResize" Icon="steam_alt-10.ico" WindowStartupLocation="CenterScreen" Topmost="True">
     <StackPanel Margin="5,5,5,5">
-        <TextBlock Name="TitleTextBox" Margin="0,0,0,10" Text="Username*" Foreground="White" />
-        <TextBox Name="UsernameBox" Padding="3,3,3,3" />
-        <TextBlock x:Name="TitleTextBox1" Margin="0,0,0,10" Foreground="White" ><Run/><LineBreak/><Run Text="Password*"/></TextBlock>
+        <TextBlock Name="TitleTextBox" Margin="0,0,0,10" Text="Username *" Foreground="White" />
+        <TextBox Name="UsernameBox" Padding="3,3,3,3" LostFocus="UsernameBox_LostFocus"  />
+        <TextBlock x:Name="TitleTextBox1" Margin="0,0,0,10" Foreground="White" ><Run/><LineBreak/><Run Text="Password *"/></TextBlock>
         <PasswordBox Name="PasswordBox" PasswordChar="•"  Padding="3,3,3,3" />
         <TextBlock x:Name="TitleTextBox2" Margin="0,0,0,10" Foreground="White" ToolTip="Can be found in your .maFile from Steam Desktop Authenticator" ><Run/><LineBreak/><Run Text="2FA Shared Secret"/></TextBlock>
         <PasswordBox Name="SharedSecretBox" PasswordChar="•" Padding="3,3,3,3" />
