@@ -202,11 +202,14 @@ namespace SAM
             if (profUrl != null && profUrl.Length > 2)
             {
                 // Verify url starts with valid prefix for HtmlWeb
-                Uri profileUri = new Uri(profUrl);
+                if (!profUrl.StartsWith("https://") && !profUrl.StartsWith("http://"))
+                {
+                    profUrl = "https://" + profUrl;
+                }
 
                 try
                 {
-                    HtmlDocument document = new HtmlWeb().Load(profileUri);
+                    HtmlDocument document = new HtmlWeb().Load(new Uri(profUrl));
                     return document.DocumentNode.Descendants().Where(n => n.HasClass("playerAvatarAutoSizeInner")).First().FirstChild.GetAttributeValue("src", null);
                 }
                 catch (Exception e)
