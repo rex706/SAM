@@ -7,7 +7,7 @@
         mc:Ignorable="d" Height="190" Width="138" WindowStartupLocation="CenterScreen" Icon="steam_alt-10.ico" ResizeMode="CanMinimize" Title="SAM" Background="#FF333638">
     <Window.Resources>
         <!-- This style is used for buttons, to remove the WPF default 'animated' mouse over effect -->
-        <Style x:Key="MyButtonStyle" TargetType="Button">
+        <Style x:Key="SAMButtonStyle" TargetType="Button">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="Margin" Value="5"/>
             <Setter Property="Template">
@@ -24,6 +24,32 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="border" Property="BorderBrush" Value="#FF00DCFF" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ExportButtonStyle" TargetType="Button">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="border" 
+                            BorderThickness="1"
+                            Padding="4,2" 
+                            BorderBrush="DarkGray" 
+                            CornerRadius="3" 
+                            Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#21FF00" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter Property="Opacity" Value="0.5" />
@@ -65,19 +91,21 @@
                 </Style>
             </Button.Style>
         </Button>
+        <Button x:Name="ExportButton" Content="Export" HorizontalAlignment="Left" Margin="27,64,0,0" VerticalAlignment="Top" Height="30" Width="75" Click="ExportButton_Click" Visibility="Hidden"/>
+        <Button x:Name="CancelExportButton" Content="Cancel" HorizontalAlignment="Left" Margin="27,95,0,0" VerticalAlignment="Top" Height="30" Width="75" Click="CancelExportButton_Click" Visibility="Hidden"/>
         <DockPanel>
             <Menu x:Name="FileMenu" DockPanel.Dock="Top" Height="20" VerticalAlignment="Top">
-                <MenuItem Header="File">
+                <MenuItem x:Name="FileMenuItem" Header="File">
                     <MenuItem Header="New" Click="NewButton_Click" />
                     <MenuItem Header="Import" Click="ImportMenuItem_Click" />
                     <MenuItem Header="Export">
                         <MenuItem Header="All" Click="ExportAllMenuItem_Click"/>
-                        <MenuItem Header="Selected" />
+                        <MenuItem Header="Select" Click="ExportSelectedMenuItem_Click" />
                     </MenuItem>
                     <Separator />
                     <MenuItem Header="Exit" Click="ExitMenuItem_Click" />
                 </MenuItem>
-                <MenuItem Header="Edit">
+                <MenuItem x:Name="EditMenuItem" Header="Edit">
                     <MenuItem Header="Refresh" Click="RefreshMenuItem_Click" ToolTip="Refresh entire window"/>
                     <MenuItem Header="Reload Accounts" Click="ReloadAccounts_Click" ToolTip="Reload account web data"/>
                     <MenuItem Header="Settings" Click="SettingsButton_Click" />

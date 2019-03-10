@@ -37,7 +37,7 @@ namespace SAM
 
         public static void ImportAccountFile()
         {
-            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog
+            OpenFileDialog dialog = new OpenFileDialog
             {
                 DefaultExt = ".dat",
                 Filter = "SAM DAT Files (*.dat)|*.dat"
@@ -202,14 +202,11 @@ namespace SAM
             if (profUrl != null && profUrl.Length > 2)
             {
                 // Verify url starts with valid prefix for HtmlWeb
-                if (!profUrl.StartsWith("https://") && !profUrl.StartsWith("http://"))
-                {
-                    profUrl = "https://" + profUrl;
-                }
+                Uri profileUri = new Uri(profUrl);
 
                 try
                 {
-                    HtmlDocument document = new HtmlWeb().Load(profUrl);
+                    HtmlDocument document = new HtmlWeb().Load(profileUri);
                     return document.DocumentNode.Descendants().Where(n => n.HasClass("playerAvatarAutoSizeInner")).First().FirstChild.GetAttributeValue("src", null);
                 }
                 catch (Exception e)

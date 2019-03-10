@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
@@ -28,6 +29,42 @@ namespace SAM
             var client = new HttpClient();
             client.Timeout = new TimeSpan(0, 0, 0, 10);
 
+            // Check for new Updater past version 1.0.0.0.
+            // Old updater was hard coded to serve only one specific url and cannot be aquired automatically through itself like the new one.
+            FileVersionInfo updaterVersionInfo = FileVersionInfo.GetVersionInfo("Updater.exe");
+            if (updaterVersionInfo.FileVersion == "1.0.0.0")
+            {
+                // Show message box that an update is available.
+                MessageBoxResult answer = MessageBox.Show("A new version of the Updater is available!\n\n" +
+                    "This will be required for future SAM updates\n" +
+                    "as the old updater used hard coded URLs,\n" + 
+                    "which obviously isn't ideal.\n" +
+                    "\n\nDownload now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
+
+                // Update is available, and user wants to update.
+                if (answer == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        // Open the text file using a stream reader.
+                        using (Stream stream = await client.GetStreamAsync("https://raw.githubusercontent.com/rex706/Updater/master/latest.txt"))
+                        {
+                            StreamReader reader = new StreamReader(stream);
+
+                            string latestUpdaterUrl = await reader.ReadLineAsync();
+
+                            // Start downloading the file.
+                            await new WebClient().DownloadFileTaskAsync(latestUpdaterUrl, AppDomain.CurrentDomain.BaseDirectory + "Updater_new.exe");
+                            MessageBox.Show("Done!");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                }
+            }
+
             // If a new version of the updater was downloaded, replace the old one.
             if (File.Exists("Updater_new.exe"))
             {
@@ -49,18 +86,6 @@ namespace SAM
                     // Update latest version string class member.
                     latestVersion = latest.ToString();
 
-                    // Initialize variables.
-                    StringBuilder parameters = new StringBuilder();
-
-                    // First parameter is the name of the running application to be opened after the update is complete.
-                    parameters.Append(System.AppDomain.CurrentDomain.FriendlyName + " ");
-
-                    // Load parameters string with urls and file names.
-                    while (!reader.EndOfStream)
-                    {
-                        parameters.Append(await reader.ReadLineAsync() + " ");
-                    }
-
                     // If the version from the online text is newer than the current version,
                     // ask user if they would like to download and install update now.
                     if (latest > current)
@@ -81,7 +106,7 @@ namespace SAM
                             startInfo.FileName = "Updater.exe";
                             startInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
                             startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                            startInfo.Arguments = parameters.ToString();
+                            startInfo.Arguments = url;
 
                             // Launch updater and exit.
                             Process.Start(startInfo);

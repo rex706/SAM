@@ -52,6 +52,7 @@ namespace SAM
 
         public static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
+        private static Dictionary<int, Account> exportAccounts;
 
         // Keys are changed before releases/updates
         private static string eKey = "PRIVATE_KEY";
@@ -69,6 +70,8 @@ namespace SAM
         private static int recentAcc = -1;
 
         private static string AssemblyVer;
+
+        private static bool exporting = false;
 
         IniFile settingsFile;
 
@@ -298,8 +301,8 @@ namespace SAM
             if (encryptedAccounts != null)
             {
                 int bCounter = 0;
-                int xcounter = 0;
-                int ycounter = 0;
+                int xCounter = 0;
+                int yCounter = 0;
 
                 int height = 100;
                 int width = 100;
@@ -332,7 +335,7 @@ namespace SAM
                     Button accountButton = new Button();
                     TextBlock accountText = new TextBlock();
 
-                    accountButton.Style = (Style)Resources["MyButtonStyle"];
+                    accountButton.Style = (Style)Resources["SAMButtonStyle"];
 
                     accountButton.Tag = bCounter.ToString();
 
@@ -354,8 +357,8 @@ namespace SAM
                     accountText.HorizontalAlignment = HorizontalAlignment.Left;
                     accountText.VerticalAlignment = VerticalAlignment.Top;
 
-                    accountButton.Margin = new Thickness(15 + (xcounter * widthOffset), (ycounter * heightOffset) + 14, 0, 0);
-                    accountText.Margin = new Thickness(15 + (xcounter * widthOffset), (ycounter * heightOffset) + 113, 0, 0);
+                    accountButton.Margin = new Thickness(15 + (xCounter * widthOffset), (yCounter * heightOffset) + 14, 0, 0);
+                    accountText.Margin = new Thickness(15 + (xCounter * widthOffset), (yCounter * heightOffset) + 113, 0, 0);
 
                     accountButton.BorderBrush = null;
                     accountText.Foreground = new SolidColorBrush(Colors.White);
@@ -363,7 +366,7 @@ namespace SAM
                     if (account.ProfUrl == "" || account.AviUrl == null || account.AviUrl == "" || account.AviUrl == " ")
                     {
                         accountButton.Content = account.Name;
-                        accountButton.Background = System.Windows.Media.Brushes.LightGray;
+                        accountButton.Background = Brushes.LightGray;
                     }
                     else
                     {
@@ -403,45 +406,51 @@ namespace SAM
                     accountContext.Items.Add(exportItem);
 
                     accountButton.ContextMenu = accountContext;
+                    accountButton.ContextMenuOpening += new ContextMenuEventHandler(ContextMenu_ContextMenuOpening);
 
                     deleteItem.Click += delegate { DeleteEntry(accountButton); };
                     editItem.Click += delegate { EditEntry(accountButton); };
                     exportItem.Click += delegate { ExportAccount(Int32.Parse(accountButton.Tag.ToString())); };
 
                     bCounter++;
-                    xcounter++;
+                    xCounter++;
 
-                    if ((xcounter % Int32.Parse(accPerRow) == 0) && xcounter != 0)
+                    if ((xCounter % Int32.Parse(accPerRow) == 0) && xCounter != 0)
                     {
-                        ycounter++;
-                        xcounter = 0;
+                        yCounter++;
+                        xCounter = 0;
                     }
                 }
 
-                int xval = 0;
+                int xVal = 0;
                 int newHeight;
 
                 // Adjust window size and info positions
-                if (ycounter == 0)
+                if (yCounter == 0)
                 {
-                    xval = xcounter + 1;
+                    xVal = xCounter + 1;
                     newHeight = 190;
                     buttonGrid.Height = 141;
                 }
                 else
                 {
-                    xval = Int32.Parse(accPerRow);
-                    newHeight = 185 + (125 * ycounter);
-                    buttonGrid.Height = 141 * (125 + ycounter);
+                    xVal = Int32.Parse(accPerRow);
+                    newHeight = 185 + (125 * yCounter);
+                    buttonGrid.Height = 141 * (125 + yCounter);
                 }
 
-                int newWidth = (xval * 120) + 25;
+                int newWidth = (xVal * 120) + 25;
 
                 Resize(newHeight, newWidth);
                 buttonGrid.Width = newWidth;
 
-                // Adjust new account button
-                NewButton.Margin = new Thickness(33 + (xcounter * widthOffset), (ycounter * heightOffset) + 52, 0, 0);
+                // Adjust new account and export buttons
+                Thickness newThickness = new Thickness(33 + (xCounter * widthOffset), (yCounter * heightOffset) + 52, 0, 0);
+                Thickness offsetThickness = new Thickness(33 + (xCounter * widthOffset), (yCounter * heightOffset) + 92, 0, 0);
+
+                NewButton.Margin = newThickness;
+                ExportButton.Margin = newThickness;
+                CancelExportButton.Margin = offsetThickness;
             }
         }
 
@@ -794,6 +803,27 @@ namespace SAM
             }
         }
 
+        private void AccountButtonExport_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                int index = Int32.Parse(btn.Tag.ToString());
+
+                // Check if this index has already been added.
+                // Remove if it is, add if it isn't.
+                if (exportAccounts.ContainsKey(index))
+                {
+                    exportAccounts.Remove(index);
+                    btn.Opacity = 1;
+                }
+                else
+                {
+                    exportAccounts.Add(index, encryptedAccounts[index]);
+                    btn.Opacity = 0.5;
+                }
+            }
+        }
+
         private void SortAccounts(int type)
         {
             if (encryptedAccounts.Count > 0)
@@ -919,5 +949,74 @@ namespace SAM
         }
 
         #endregion
+
+        private void ExportSelectedMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            exporting = true;
+
+            exportAccounts = new Dictionary<int, Account>();
+
+            NewButton.Visibility = Visibility.Hidden;
+            ExportButton.Visibility = Visibility.Visible;
+            CancelExportButton.Visibility = Visibility.Visible;
+            FileMenuItem.IsEnabled = false;
+            EditMenuItem.IsEnabled = false;
+
+            IEnumerable<Button> buttonCollection = buttonGrid.Children.OfType<Button>();
+
+            foreach (Button accountButton in buttonCollection)
+            {
+                accountButton.Style = (Style)Resources["ExportButtonStyle"];
+                accountButton.Click -= new RoutedEventHandler(AccountButton_Click);
+                accountButton.Click += new RoutedEventHandler(AccountButtonExport_Click);
+            }
+        }
+
+        private void ExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (exportAccounts.Count > 0)
+            {
+                Utils.ExportSelectedAccounts(exportAccounts.Values.ToList());
+                ResetFromExport();
+            }
+            else
+            {
+                MessageBox.Show("No accounts selected to export!");
+            }
+        }
+
+        private void CancelExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            ResetFromExport();
+        }
+
+        private void ResetFromExport()
+        {
+            NewButton.Visibility = Visibility.Visible;
+            ExportButton.Visibility = Visibility.Hidden;
+            CancelExportButton.Visibility = Visibility.Hidden;
+            FileMenuItem.IsEnabled = true;
+            EditMenuItem.IsEnabled = true;
+
+            IEnumerable<Button> buttonCollection = buttonGrid.Children.OfType<Button>();
+
+            foreach (Button accountButton in buttonCollection)
+            {
+                accountButton.Style = (Style)Resources["SAMButtonStyle"];
+                accountButton.Click -= new RoutedEventHandler(AccountButtonExport_Click);
+                accountButton.Click += new RoutedEventHandler(AccountButton_Click);
+                accountButton.Opacity = 1;
+            }
+
+            exporting = false;
+        }
+
+        private void ContextMenu_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if (exporting == true)
+            {
+                e.Handled = true;
+            }
+        }
     }
 }
