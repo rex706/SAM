@@ -1,5 +1,4 @@
-﻿using HtmlAgilityPack;
-using SteamAuth;
+﻿using SteamAuth;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -236,6 +235,7 @@ namespace SAM
                     }
                 }
             }
+
             settingsFile.Write("Version", AssemblyVer, "System");
         }
 

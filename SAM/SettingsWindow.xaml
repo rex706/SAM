@@ -29,8 +29,9 @@
             </TabItem>
             <TabItem Header="Steam Path">
                 <Grid>
-                    <Button x:Name="ChangePathButton" Content="Change" Width="75" Margin="102,63,105,23" Click="ChangePathButton_Click"/>
                     <TextBox x:Name="SteamPathTextBox" Height="23" Text="" Margin="10,34,10,57" IsReadOnly="True"/>
+                    <Button x:Name="ChangePathButton" Content="Change" Width="75" Margin="63,62,144,24" Click="ChangePathButton_Click"/>
+                    <Button x:Name="AutoPathButton" Content="Auto" Width="75" Margin="143,62,64,24" Click="AutoPathButton_Click"/>
                 </Grid>
             </TabItem>
 

@@ -235,5 +235,17 @@ namespace SAM
                 SteamPathTextBox.Text = path;
             }
         }
+
+        private void AutoPathButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                SteamPathTextBox.Text = Utils.GetSteamPathFromRegistry();
+            }
+            catch (Exception m)
+            {
+                MessageBox.Show(m.Message);
+            }
+        }
     }
 }
