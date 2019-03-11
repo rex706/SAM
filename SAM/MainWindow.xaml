@@ -25,9 +25,9 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="border" Property="BorderBrush" Value="#FF00DCFF" />
                             </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
+                            <!--<Trigger Property="IsPressed" Value="True">
                                 <Setter Property="Opacity" Value="0.5" />
-                            </Trigger>
+                            </Trigger>-->
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -51,9 +51,9 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="border" Property="BorderBrush" Value="#21FF00" />
                             </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
+                            <!--<Trigger Property="IsPressed" Value="True">
                                 <Setter Property="Opacity" Value="0.5" />
-                            </Trigger>
+                            </Trigger>-->
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>

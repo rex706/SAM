@@ -390,6 +390,9 @@ namespace SAM
                     buttonGrid.Children.Add(accountButton);
 
                     accountButton.Click += new RoutedEventHandler(AccountButton_Click);
+                    accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
+                    accountButton.PreviewMouseLeftButtonUp += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
+                    accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
 
                     ContextMenu accountContext = new ContextMenu();
 
@@ -451,6 +454,30 @@ namespace SAM
                 NewButton.Margin = newThickness;
                 ExportButton.Margin = newThickness;
                 CancelExportButton.Margin = offsetThickness;
+            }
+        }
+
+        private void AccountButton_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                btn.Opacity = 0.5;
+            }
+        }
+
+        private void AccountButton_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                btn.Opacity = 1;
+            }
+        }
+
+        private void AccountButton_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                btn.Opacity = 1;
             }
         }
 
@@ -938,17 +965,10 @@ namespace SAM
             }
         }
 
-        private void ExportSelectedAccounts_Click(object sender, RoutedEventArgs e)
-        {
-            
-        }
-
         private async void ReloadAccounts_Click(object sender, RoutedEventArgs e)
         {
             await ReloadAccountsAsync();
         }
-
-        #endregion
 
         private void ExportSelectedMenuItem_Click(object sender, RoutedEventArgs e)
         {
@@ -969,6 +989,9 @@ namespace SAM
                 accountButton.Style = (Style)Resources["ExportButtonStyle"];
                 accountButton.Click -= new RoutedEventHandler(AccountButton_Click);
                 accountButton.Click += new RoutedEventHandler(AccountButtonExport_Click);
+                accountButton.PreviewMouseLeftButtonDown -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
+                accountButton.PreviewMouseLeftButtonUp -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
+                accountButton.MouseLeave -= new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
             }
         }
 
@@ -990,6 +1013,9 @@ namespace SAM
             ResetFromExport();
         }
 
+        #endregion
+
+
         private void ResetFromExport()
         {
             NewButton.Visibility = Visibility.Visible;
@@ -1005,6 +1031,10 @@ namespace SAM
                 accountButton.Style = (Style)Resources["SAMButtonStyle"];
                 accountButton.Click -= new RoutedEventHandler(AccountButtonExport_Click);
                 accountButton.Click += new RoutedEventHandler(AccountButton_Click);
+                accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
+                accountButton.PreviewMouseLeftButtonUp += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
+                accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+
                 accountButton.Opacity = 1;
             }
 
