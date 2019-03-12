@@ -109,11 +109,11 @@ namespace SAM
             RegistryKey localKey = null;
             if (Environment.Is64BitOperatingSystem)
             {
-                localKey = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.CurrentUser, RegistryView.Registry64);
+                localKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64);
             }
             else
             {
-                localKey = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.CurrentUser, RegistryView.Registry32);
+                localKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32);
             }
 
             try
@@ -128,14 +128,31 @@ namespace SAM
             return registryValue;
         }
 
-        public static async Task<dynamic> GetUrlsFromWebApiByName(string userName)
+        public static async Task<dynamic> GetUserInfoFromConfigAndWebApi(string userName)
         {
             dynamic userJson = null;
+            dynamic steamId = null;
 
             try
             {
-                // Attempt to find user profile image automatically from web api.
+                string steamPath = new IniFile("SAMSettings.ini").Read("Steam", "Settings");
 
+                // Attempt to find Steam Id from steam config.
+                dynamic config = VdfConvert.Deserialize(File.ReadAllText(steamPath + "config\\config.vdf"));
+                dynamic accounts = config.Value.Software.Valve.steam.Accounts;
+
+                VObject accountsObj = accounts;
+                VToken value;
+
+                accountsObj.TryGetValue(userName, out value);
+
+                dynamic user = value;
+                VValue userId = user.SteamID;
+                steamId = userId.Value.ToString();
+            }
+            catch (Exception ex)
+            {
+                // Attempt to find Steam Id from web api.
                 Uri vanityUri = new Uri("http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + apiKey + "&vanityurl=" + userName);
 
                 using (WebClient client = new WebClient())
@@ -143,39 +160,22 @@ namespace SAM
                     string vanityJson = await client.DownloadStringTaskAsync(vanityUri);
                     dynamic vanityValue = JValue.Parse(vanityJson);
 
-                    dynamic steamId = vanityValue.response.steamid;
-
-                    // Not found.
-                    if (steamId == null)
-                    {
-                        string steamPath = new IniFile("SAMSettings.ini").Read("Steam", "Settings");
-
-                        // Attempt to find userId from steam config.
-                        dynamic config = VdfConvert.Deserialize(File.ReadAllText(steamPath + "config\\config.vdf"));
-                        dynamic accounts = config.Value.Software.Valve.steam.Accounts;
-
-                        VObject accountsObj = accounts;
-                        VToken value;
-
-                        accountsObj.TryGetValue(userName, out value);
-
-                        dynamic user = value;
-                        VValue userId = user.SteamID;
-                        steamId = userId.Value.ToString();
-                    }
-
-                    userJson = await GetUrlsFromWebApiBySteamId(steamId);
+                    steamId = vanityValue.response.steamid;
                 }
             }
-            catch (Exception m)
+
+            if (steamId != null)
             {
-                //MessageBox.Show(m.Message);
+                using (WebClient client = new WebClient())
+                {
+                    userJson = await GetUserInfoFromWebApiBySteamId(Convert.ToString(steamId));
+                }
             }
 
             return userJson;
         }
 
-        public static async Task<dynamic> GetUrlsFromWebApiBySteamId(string steamId)
+        public static async Task<dynamic> GetUserInfoFromWebApiBySteamId(string steamId)
         {
             dynamic userJson = null;
             try

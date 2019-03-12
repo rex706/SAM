@@ -268,11 +268,11 @@ namespace SAM
 
                 if (account.SteamId != null && account.SteamId.Length > 0)
                 {
-                    userJson = await Utils.GetUrlsFromWebApiBySteamId(account.SteamId);
+                    userJson = await Utils.GetUserInfoFromWebApiBySteamId(account.SteamId);
                 }
                 else
                 {
-                    userJson = await Utils.GetUrlsFromWebApiByName(account.Name);
+                    userJson = await Utils.GetUserInfoFromConfigAndWebApi(account.Name);
                 }
 
                 if (userJson != null)
@@ -280,8 +280,6 @@ namespace SAM
                     account.ProfUrl = userJson.response.players[0].profileurl;
                     account.AviUrl = userJson.response.players[0].avatarfull;
                     account.SteamId = userJson.response.players[0].steamid;
-
-                    System.Threading.Thread.Sleep(500);
                 }
                 else
                 {
@@ -1014,7 +1012,6 @@ namespace SAM
         }
 
         #endregion
-
 
         private void ResetFromExport()
         {

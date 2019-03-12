@@ -75,7 +75,7 @@ namespace SAM
         private async void UsernameBox_LostFocus(object sender, RoutedEventArgs e)
         {
             OKButton.IsEnabled = false;
-            dynamic userJson = await Utils.GetUrlsFromWebApiByName(UsernameBox.Text);
+            dynamic userJson = await Utils.GetUserInfoFromConfigAndWebApi(UsernameBox.Text.ToString());
 
             if (userJson != null)
             {
