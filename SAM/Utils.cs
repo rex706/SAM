@@ -137,7 +137,7 @@ namespace SAM
             int tryCount = 0;
 
             // If Steam's filepath was not specified in settings or is invalid, attempt to find it and save it.
-            while (steamPath == null || steamPath.Length < 3 || !Directory.Exists(steamPath))
+            while (steamPath == null || steamPath.Length < 3 || !File.Exists(steamPath + "\\steam.exe"))
             {
                 // Check registry keys first.
                 string regPath = GetSteamPathFromRegistry();
