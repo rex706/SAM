@@ -128,6 +128,77 @@ namespace SAM
             return registryValue;
         }
 
+        public static string CheckSteamPath()
+        {
+            var settingsFile = new IniFile("SAMSettings.ini");
+
+            string steamPath = settingsFile.Read("Steam", "Settings");
+
+            int tryCount = 0;
+
+            // If Steam's filepath was not specified in settings or is invalid, attempt to find it and save it.
+            while (steamPath == null || steamPath.Length < 3 || !Directory.Exists(steamPath))
+            {
+                // Check registry keys first.
+                string regPath = GetSteamPathFromRegistry();
+                string localPath = System.Windows.Forms.Application.StartupPath;
+
+                if (Directory.Exists(regPath))
+                {
+                    steamPath = regPath;
+                }
+
+                // Check if SAM is isntalled in Steam directory.
+                // Useful for users in portable mode.
+                else if (File.Exists(localPath + "\\steam.exe"))
+                {
+                    steamPath = localPath;
+                }
+
+                // Prompt user for manual selection.
+                else
+                {
+                    if (tryCount == 0)
+                    {
+                        MessageBox.Show("Could not find Steam path automatically.\n\nPlease select Steam manually.");
+                    }
+
+                    // Create OpenFileDialog 
+                    OpenFileDialog dlg = new OpenFileDialog
+                    {
+                        DefaultExt = ".exe",
+                        Filter = "Steam (*.exe)|*.exe"
+                    };
+
+                    // Display OpenFileDialog by calling ShowDialog method 
+                    Nullable<bool> result = dlg.ShowDialog();
+
+                    // Get the selected file path
+                    if (result == true)
+                    {
+                        steamPath = Path.GetDirectoryName(dlg.FileName) + "\\";
+                    }
+                }
+
+                if (steamPath == null || steamPath == string.Empty)
+                {
+                    MessageBoxResult messageBoxResult = MessageBox.Show("Steam path required!\n\nTry again?", "Confirm", MessageBoxButton.YesNo);
+                           
+                    if (messageBoxResult.Equals(MessageBoxResult.No))
+                    {
+                        Environment.Exit(0);
+                    }
+                }
+
+                tryCount++;
+            }
+
+            // Save path to settings file.
+            settingsFile.Write("Steam", steamPath, "Settings");
+
+            return steamPath;
+        }
+
         public static async Task<dynamic> GetUserInfoFromConfigAndWebApi(string userName)
         {
             dynamic userJson = null;

@@ -160,7 +160,14 @@ namespace SAM
                 accPerRow = "1";
 
             if (settingsFile.KeyExists("Steam", "Settings"))
+            {
                 steamPath = settingsFile.Read("Steam", "Settings");
+            }
+            else
+            {
+                // Find Steam
+                Utils.CheckSteamPath();
+            }
 
             // If the recent autolog entry exists and is set to true.
             // else create defualt settings file entry.
@@ -640,47 +647,14 @@ namespace SAM
             recentAcc = index;
             settingsFile.Write("RecentAcc", index.ToString(), "AutoLog");
 
-            // If Steam's filepath was not specified in settings. Attempt to find it and save it.
-            if (steamPath == null || steamPath.Length < 3)
-            {
-                string regPath = Utils.GetSteamPathFromRegistry();
-
-                if (Directory.Exists(regPath))
-                {
-                    steamPath = regPath;
-                }
-                else
-                {
-                    // Prompt user to find steam install
-                    var settingsFile = new IniFile("SAMSettings.ini");
-
-                    // Create OpenFileDialog 
-                    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog
-                    {
-                        DefaultExt = ".exe",
-                        Filter = "Steam (*.exe)|*.exe"
-                    };
-
-                    // Display OpenFileDialog by calling ShowDialog method 
-                    Nullable<bool> result = dlg.ShowDialog();
-
-                    // Get the selected file path
-                    if (result == true)
-                    {
-                        steamPath = Path.GetDirectoryName(dlg.FileName) + "\\";
-                    }
-                }
-
-                // Save path to settings file.
-                settingsFile.Write("Steam", steamPath, "Settings");
-            }
+            steamPath = Utils.CheckSteamPath();
 
             // Shutdown Steam process via command if it is already open.
             ProcessStartInfo stopInfo = new ProcessStartInfo
             {
                 CreateNoWindow = false,
                 UseShellExecute = true,
-                FileName = steamPath + "Steam.exe",
+                FileName = steamPath + "steam.exe",
                 WorkingDirectory = steamPath,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 Arguments = "-shutdown"

@@ -240,7 +240,7 @@ namespace SAM
         {
             try
             {
-                SteamPathTextBox.Text = Utils.GetSteamPathFromRegistry();
+                SteamPathTextBox.Text = Utils.CheckSteamPath();
             }
             catch (Exception m)
             {
