@@ -427,7 +427,7 @@ namespace SAM
                     deleteItem.Click += delegate { DeleteEntry(accountButton); };
                     editItem.Click += delegate { EditEntry(accountButton); };
                     exportItem.Click += delegate { ExportAccount(Int32.Parse(accountButton.Tag.ToString())); };
-                    reloadItem.Click += async delegate { await ReloadAccount(encryptedAccounts[Int32.Parse(accountButton.Tag.ToString())]); };
+                    reloadItem.Click += async delegate { await ReloadAccount_ClickAsync(Int32.Parse(accountButton.Tag.ToString())); };
 
                     bCounter++;
                     xCounter++;
@@ -469,35 +469,6 @@ namespace SAM
                 ExportButton.Margin = newThickness;
                 CancelExportButton.Margin = offsetThickness;
             }
-        }
-
-        private void AccountButton_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            if (sender is Button btn)
-            {
-                btn.Opacity = 0.5;
-            }
-        }
-
-        private void AccountButton_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            if (sender is Button btn)
-            {
-                btn.Opacity = 1;
-            }
-        }
-
-        private void AccountButton_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            if (sender is Button btn)
-            {
-                btn.Opacity = 1;
-            }
-        }
-
-        private void NewButton_Click(object sender, RoutedEventArgs e)
-        {
-            NewAccount();
         }
 
         private void NewAccount()
@@ -802,36 +773,6 @@ namespace SAM
             return code;
         }
 
-        private void AccountButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn)
-            {
-                // Login with clicked button's index, which stored in Tag.
-                Login(Int32.Parse(btn.Tag.ToString()));
-            }
-        }
-
-        private void AccountButtonExport_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn)
-            {
-                int index = Int32.Parse(btn.Tag.ToString());
-
-                // Check if this index has already been added.
-                // Remove if it is, add if it isn't.
-                if (exportAccounts.ContainsKey(index))
-                {
-                    exportAccounts.Remove(index);
-                    btn.Opacity = 1;
-                }
-                else
-                {
-                    exportAccounts.Add(index, encryptedAccounts[index]);
-                    btn.Opacity = 0.5;
-                }
-            }
-        }
-
         private void SortAccounts(int type)
         {
             if (encryptedAccounts.Count > 0)
@@ -889,7 +830,77 @@ namespace SAM
 
         #endregion
 
-        #region File Menu Click Events
+        #region Click Events
+
+        private void AccountButton_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                btn.Opacity = 0.5;
+            }
+        }
+
+        private void AccountButton_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                btn.Opacity = 1;
+            }
+        }
+
+        private void AccountButton_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                btn.Opacity = 1;
+            }
+        }
+
+        private void NewButton_Click(object sender, RoutedEventArgs e)
+        {
+            NewAccount();
+        }
+
+        private void AccountButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                // Login with clicked button's index, which stored in Tag.
+                Login(Int32.Parse(btn.Tag.ToString()));
+            }
+        }
+
+        private void AccountButtonExport_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                int index = Int32.Parse(btn.Tag.ToString());
+
+                // Check if this index has already been added.
+                // Remove if it is, add if it isn't.
+                if (exportAccounts.ContainsKey(index))
+                {
+                    exportAccounts.Remove(index);
+                    btn.Opacity = 1;
+                }
+                else
+                {
+                    exportAccounts.Add(index, encryptedAccounts[index]);
+                    btn.Opacity = 0.5;
+                }
+            }
+        }
+
+        public async System.Threading.Tasks.Task ReloadAccount_ClickAsync(int index)
+        {
+            await ReloadAccount(encryptedAccounts[index]);
+
+            Utils.Serialize(encryptedAccounts);
+
+            RefreshWindow();
+
+            MessageBox.Show("Done!");
+        }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
