@@ -267,31 +267,36 @@ namespace SAM
             }
         }
 
+        public async System.Threading.Tasks.Task ReloadAccount(Account account)
+        {
+            dynamic userJson = null;
+
+            if (account.SteamId != null && account.SteamId.Length > 0)
+            {
+                userJson = await Utils.GetUserInfoFromWebApiBySteamId(account.SteamId);
+            }
+            else
+            {
+                userJson = await Utils.GetUserInfoFromConfigAndWebApi(account.Name);
+            }
+
+            if (userJson != null)
+            {
+                account.ProfUrl = userJson.response.players[0].profileurl;
+                account.AviUrl = userJson.response.players[0].avatarfull;
+                account.SteamId = userJson.response.players[0].steamid;
+            }
+            else
+            {
+                account.AviUrl = Utils.HtmlAviScrape(account.ProfUrl);
+            }
+        }
+
         public async System.Threading.Tasks.Task ReloadAccountsAsync()
         {
             foreach (var account in encryptedAccounts)
             {
-                dynamic userJson = null;
-
-                if (account.SteamId != null && account.SteamId.Length > 0)
-                {
-                    userJson = await Utils.GetUserInfoFromWebApiBySteamId(account.SteamId);
-                }
-                else
-                {
-                    userJson = await Utils.GetUserInfoFromConfigAndWebApi(account.Name);
-                }
-
-                if (userJson != null)
-                {
-                    account.ProfUrl = userJson.response.players[0].profileurl;
-                    account.AviUrl = userJson.response.players[0].avatarfull;
-                    account.SteamId = userJson.response.players[0].steamid;
-                }
-                else
-                {
-                    account.AviUrl = Utils.HtmlAviScrape(account.ProfUrl);
-                }
+                await ReloadAccount(account);
             }
 
             Utils.Serialize(encryptedAccounts);
@@ -404,14 +409,17 @@ namespace SAM
                     MenuItem deleteItem = new MenuItem();
                     MenuItem editItem = new MenuItem();
                     MenuItem exportItem = new MenuItem();
+                    MenuItem reloadItem = new MenuItem();
 
                     deleteItem.Header = "Delete";
                     editItem.Header = "Edit";
                     exportItem.Header = "Export";
+                    reloadItem.Header = "Reload";
 
                     accountContext.Items.Add(editItem);
                     accountContext.Items.Add(deleteItem);
                     accountContext.Items.Add(exportItem);
+                    accountContext.Items.Add(reloadItem);
 
                     accountButton.ContextMenu = accountContext;
                     accountButton.ContextMenuOpening += new ContextMenuEventHandler(ContextMenu_ContextMenuOpening);
@@ -419,6 +427,7 @@ namespace SAM
                     deleteItem.Click += delegate { DeleteEntry(accountButton); };
                     editItem.Click += delegate { EditEntry(accountButton); };
                     exportItem.Click += delegate { ExportAccount(Int32.Parse(accountButton.Tag.ToString())); };
+                    reloadItem.Click += async delegate { await ReloadAccount(encryptedAccounts[Int32.Parse(accountButton.Tag.ToString())]); };
 
                     bCounter++;
                     xCounter++;

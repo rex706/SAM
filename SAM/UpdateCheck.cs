@@ -31,12 +31,11 @@ namespace SAM
 
             // Check for new Updater past version 1.0.0.0.
             // Old updater was hard coded to serve only one specific url and cannot be aquired automatically through itself like the new one.
-            FileVersionInfo updaterVersionInfo = FileVersionInfo.GetVersionInfo("Updater.exe");
-            if (updaterVersionInfo.FileVersion == "1.0.0.0")
+            if (!File.Exists("Updater.exe") || FileVersionInfo.GetVersionInfo("Updater.exe").FileVersion == "1.0.0.0")
             {
                 // Show message box that an update is available.
                 MessageBoxResult answer = MessageBox.Show("A new version of the Updater is available!\n\n" +
-                    "This will be required for future SAM updates\n" +
+                    "This will be required for future SAM auto-updates\n" +
                     "as the old updater used hard coded URLs,\n" + 
                     "which obviously isn't ideal.\n" +
                     "\n\nDownload now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
