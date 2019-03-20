@@ -1,6 +1,6 @@
 # SAM - Steam Account Manager
 
-Easily switch between steam accounts.
+Easily log in and switch between Steam accounts.
 
 
 ![alt tag](http://i.imgur.com/7sUxieF.png)
@@ -22,7 +22,17 @@ Easily switch between steam accounts.
 
 **CHANGELOG**
 
-**Latest version:** 1.2.3.2
+**Latest version:** 
+1.2.4.0
+* Multi-select accounts for export through the file drop down menu.
+	- Can also export individual account through the context menu.
+* Focus the 2FA window for every key press.
+* Auto Steam path button in Settings, which will try to find the installed Steam path from the registry or installed directory for portable users.
+* Utilize the Steam Web Api and parsing the Steam config.vdf with [Gameloop.vdf](https://github.com/shravan2x/Gameloop.Vdf) to try to automatically find profile information.
+* Auto login and SAMSettings.ini fixes.
+* Bundle new Updater.exe
+
+1.2.3.2
 * Better handle waiting for the 2FA Steam Guard window when logging in.
 
 1.2.3.1
