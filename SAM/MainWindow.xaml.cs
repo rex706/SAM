@@ -768,7 +768,9 @@ namespace SAM
         {
             SteamGuardAccount authaccount = new SteamGuardAccount { SharedSecret = shared_secret };
 
-            string code = authaccount.GenerateSteamGuardCode();
+            long steamTime = TimeAligner.GetSteamTime();
+
+            string code = authaccount.GenerateSteamGuardCodeForTime(steamTime);
 
             return code;
         }

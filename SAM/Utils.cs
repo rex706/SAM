@@ -237,10 +237,7 @@ namespace SAM
 
             if (steamId != null)
             {
-                using (WebClient client = new WebClient())
-                {
-                    userJson = await GetUserInfoFromWebApiBySteamId(Convert.ToString(steamId));
-                }
+                userJson = await GetUserInfoFromWebApiBySteamId(Convert.ToString(steamId));
             }
 
             return userJson;
