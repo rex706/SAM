@@ -11,6 +11,8 @@ using System.Linq;
 using System.Windows.Media;
 using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace SAM
 {
@@ -53,6 +55,8 @@ namespace SAM
         public static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
         private static Dictionary<int, Account> exportAccounts;
+
+        private static List<Thread> loginThreads;
 
         // Keys are changed before releases/updates
         private static string eKey = "PRIVATE_KEY";
@@ -135,6 +139,8 @@ namespace SAM
             {
                 LoadSettings();
             }
+
+            loginThreads = new List<Thread>();
 
             // Load window with account buttons.
             RefreshWindow();
@@ -623,6 +629,11 @@ namespace SAM
 
         private void Login(int index)
         {
+            foreach (Thread loginThread in loginThreads)
+            {
+                loginThread.Abort();
+            }
+
             // Update the most recently used account index.
             recentAcc = index;
             settingsFile.Write("RecentAcc", index.ToString(), "AutoLog");
@@ -677,12 +688,14 @@ namespace SAM
             // Only handle 2FA if shared secret was entered.
             if (decryptedAccounts[index].SharedSecret != null && decryptedAccounts[index].SharedSecret.Length > 0)
             {
-                Type2FA(index, 0);
+                Task.Run(() => Type2FA(index, 0));
             }
         }
 
         private void Type2FA(int index, int failCounter)
         {
+            loginThreads.Add(Thread.CurrentThread);
+
             IntPtr handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
             while (handle.Equals(IntPtr.Zero))
             {
