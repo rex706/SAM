@@ -58,6 +58,8 @@ namespace SAM
 
         private static List<Thread> loginThreads;
 
+        private static string updateCheckUrl = "https://raw.githubusercontent.com/rex706/SAM/master/latest.txt";
+
         // Keys are changed before releases/updates
         private static string eKey = "PRIVATE_KEY";
 
@@ -111,7 +113,7 @@ namespace SAM
             newExistMenuItem.Items.Add(ver);
 
             // Check for a new version.
-            if (await UpdateCheck.CheckForUpdate("https://textuploader.com/58mva/raw") == 1)
+            if (await UpdateCheck.CheckForUpdate(updateCheckUrl) == 1)
             {
                 // An update is available, but user has chosen not to update.
                 ver.Header = "Update Available!";
@@ -935,7 +937,10 @@ namespace SAM
 
         private async void Ver_Click(object sender, RoutedEventArgs e)
         {
-            await UpdateCheck.CheckForUpdate("http://textuploader.com/58mva/raw");
+            if (await UpdateCheck.CheckForUpdate(updateCheckUrl) < 1)
+            {
+                MessageBox.Show(Process.GetCurrentProcess().ProcessName + " is up to date!");
+            }
         }
 
         private void RefreshMenuItem_Click(object sender, RoutedEventArgs e)

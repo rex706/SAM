@@ -115,6 +115,7 @@
                 </MenuItem>
                 <MenuItem Header="Help">
                     <MenuItem Header="GitHub" Click="GitMenuItem_Click" />
+                    <MenuItem Header="Check Updates" Click="Ver_Click"/>
                     <Separator />
                 </MenuItem>
             </Menu>
