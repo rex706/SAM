@@ -65,6 +65,7 @@
             <ColumnDefinition/>
             <ColumnDefinition Width="0*"/>
         </Grid.ColumnDefinitions>
+        <Border x:Name="BackgroundBorder" Background="Transparent" Margin="0,25,0,0" Padding="0,25,0,0"/>
         <Button x:Name="NewButton" Margin="30,57,0,0" Width="64" Click="NewButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="63" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{x:Null}" RenderTransformOrigin="0.5,0.5">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
@@ -94,31 +95,33 @@
         <Button x:Name="ExportButton" Content="Export" HorizontalAlignment="Left" Margin="27,64,0,0" VerticalAlignment="Top" Height="30" Width="75" Click="ExportButton_Click" Visibility="Hidden"/>
         <Button x:Name="CancelExportButton" Content="Cancel" HorizontalAlignment="Left" Margin="27,95,0,0" VerticalAlignment="Top" Height="30" Width="75" Click="CancelExportButton_Click" Visibility="Hidden"/>
         <DockPanel>
-            <Menu x:Name="FileMenu" DockPanel.Dock="Top" Height="20" VerticalAlignment="Top">
-                <MenuItem x:Name="FileMenuItem" Header="File">
-                    <MenuItem Header="New" Click="NewButton_Click" />
-                    <MenuItem Header="Import" Click="ImportMenuItem_Click" />
-                    <MenuItem Header="Export">
-                        <MenuItem Header="All" Click="ExportAllMenuItem_Click"/>
-                        <MenuItem Header="Select" Click="ExportSelectedMenuItem_Click" />
+            <Border DockPanel.Dock="Top" Height="20" VerticalAlignment="Top" Background="#FFF0F0F0">
+                <Menu x:Name="FileMenu"  Margin="0,1,0,0">
+                    <MenuItem x:Name="FileMenuItem" Header="File">
+                        <MenuItem Header="New" Click="NewButton_Click" />
+                        <MenuItem Header="Import" Click="ImportMenuItem_Click" />
+                        <MenuItem Header="Export">
+                            <MenuItem Header="All" Click="ExportAllMenuItem_Click"/>
+                            <MenuItem Header="Select" Click="ExportSelectedMenuItem_Click" />
+                        </MenuItem>
+                        <Separator />
+                        <MenuItem Header="Exit" Click="ExitMenuItem_Click" />
                     </MenuItem>
-                    <Separator />
-                    <MenuItem Header="Exit" Click="ExitMenuItem_Click" />
-                </MenuItem>
-                <MenuItem x:Name="EditMenuItem" Header="Edit">
-                    <MenuItem Header="Refresh" Click="RefreshMenuItem_Click" ToolTip="Refresh entire window"/>
-                    <MenuItem Header="Reload Accounts" Click="ReloadAccounts_Click" ToolTip="Reload account web data"/>
-                    <MenuItem Header="Settings" Click="SettingsButton_Click" />
-                    <MenuItem Header="Sort">
-                        <MenuItem Header="Alphabetical" Click="SortAlphabetical_Click"/>
+                    <MenuItem x:Name="EditMenuItem" Header="Edit">
+                        <MenuItem Header="Refresh" Click="RefreshMenuItem_Click" ToolTip="Refresh entire window"/>
+                        <MenuItem Header="Reload Accounts" Click="ReloadAccounts_Click" ToolTip="Reload account web data"/>
+                        <MenuItem Header="Settings" Click="SettingsButton_Click" />
+                        <MenuItem Header="Sort">
+                            <MenuItem Header="Alphabetical" Click="SortAlphabetical_Click"/>
+                        </MenuItem>
                     </MenuItem>
-                </MenuItem>
-                <MenuItem Header="Help">
-                    <MenuItem Header="GitHub" Click="GitMenuItem_Click" />
-                    <MenuItem Header="Check Updates" Click="Ver_Click"/>
-                    <Separator />
-                </MenuItem>
-            </Menu>
+                    <MenuItem Header="Help">
+                        <MenuItem Header="GitHub" Click="GitMenuItem_Click" />
+                        <MenuItem Header="Check Updates" Click="Ver_Click"/>
+                        <Separator />
+                    </MenuItem>
+                </Menu>
+            </Border>
             <Grid x:Name="buttonGrid" Height="141" VerticalAlignment="Top" Width="131" RenderTransformOrigin="0.457,0.511"/>
         </DockPanel>
     </Grid>

@@ -96,6 +96,7 @@ namespace SAM
             InitializeComponent();
 
             this.Loaded += new RoutedEventHandler(MainWindow_Loaded);
+            this.BackgroundBorder.PreviewMouseLeftButtonDown += (s, e) => { DragMove(); };
 
             _Timer.Tick += new EventHandler(Timer_Tick);
             _Timer.Interval = (10);
@@ -460,11 +461,11 @@ namespace SAM
                 else
                 {
                     xVal = Int32.Parse(accPerRow);
-                    newHeight = 185 + (125 * yCounter);
-                    buttonGrid.Height = 141 * (125 + yCounter);
+                    newHeight = 185 + (120 * yCounter);
+                    buttonGrid.Height = 141 * (120 + yCounter);
                 }
 
-                int newWidth = (xVal * 120) + 25;
+                int newWidth = (xVal * 120) + 15;
 
                 Resize(newHeight, newWidth);
                 buttonGrid.Width = newWidth;
