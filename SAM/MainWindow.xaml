@@ -129,7 +129,7 @@
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu x:Name="TaskbarIconContextMenu">
                     <MenuItem Header="New Account" Click="NewButton_Click"/>
-                    <MenuItem x:Name="TaskBarIconLoginContextMenu" Header="Login">
+                    <MenuItem x:Name="TaskBarIconLoginContextMenu" Header="Login" IsEnabled="False">
                         
                     </MenuItem>
                     <Separator />

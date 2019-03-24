@@ -15,7 +15,6 @@ using System.Threading.Tasks;
 using System.Threading;
 using Win32Interop.WinHandles;
 using System.Windows.Threading;
-using AutoIt;
 
 namespace SAM
 {
@@ -56,6 +55,22 @@ namespace SAM
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr SetActiveWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, IntPtr lParam);
+
+        [return: MarshalAs(UnmanagedType.Bool)]
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+        public const int WM_SETTEXT = 0x000C;
+        public const int WM_KEYDOWN = 0x0100;
+        public const int WM_CHAR = 0x0102;
+
+        public const int VK_RETURN = 0x0D;
 
         public static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
@@ -264,6 +279,7 @@ namespace SAM
             decryptedAccounts = new List<Account>();
             buttonGrid.Children.Clear();
             TaskBarIconLoginContextMenu.Items.Clear();
+            TaskBarIconLoginContextMenu.IsEnabled = false;
 
             // Check if info.dat exists
             if (File.Exists("info.dat"))
@@ -428,7 +444,7 @@ namespace SAM
                     accountButton.Click += new RoutedEventHandler(AccountButton_Click);
                     accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
                     accountButton.PreviewMouseLeftButtonUp += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
-                    //accountButton.PreviewMouseMove += new System.Windows.Input.MouseEventHandler(AccountButton_MouseMove);
+                    accountButton.PreviewMouseMove += new System.Windows.Input.MouseEventHandler(AccountButton_MouseMove);
                     accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
 
                     ContextMenu accountContext = new ContextMenu();
@@ -461,8 +477,6 @@ namespace SAM
                     taskBarIconLoginItem.Tag = bCounter.ToString();
                     taskBarIconLoginItem.Click += new RoutedEventHandler(TaskbarIconLoginItem_Click);
 
-                    TaskBarIconLoginContextMenu.Items.Add(taskBarIconLoginItem);
-
                     if (account.Alias != null && account.Alias.Length > 0)
                     {
                         taskBarIconLoginItem.Header = account.Alias;
@@ -471,6 +485,9 @@ namespace SAM
                     {
                         taskBarIconLoginItem.Header = account.Name;
                     }
+
+                    TaskBarIconLoginContextMenu.IsEnabled = true;
+                    TaskBarIconLoginContextMenu.Items.Add(taskBarIconLoginItem);
 
                     bCounter++;
                     xCounter++;
@@ -499,7 +516,7 @@ namespace SAM
                     buttonGrid.Height = 141 * (120 + yCounter);
                 }
 
-                int newWidth = (xVal * 120) + 15;
+                int newWidth = (xVal * 120) + 25;
 
                 Resize(newHeight, newWidth);
                 buttonGrid.Width = newWidth;
@@ -731,14 +748,19 @@ namespace SAM
             }
         }
 
-        private void Type2FA(int index, int failCounter)
+        private void Type2FA(int index, int tryCount)
         {
             loginThreads.Add(Thread.CurrentThread);
 
+            // Need both the Steam Login and Steam Guard windows.
+            // Can't focus the Steam Guard window directly.
+            var steamLoginWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().Contains("Steam") && !wh.GetWindowText().Contains("-"));
             var steamGuardWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - "));
 
-            while (!steamGuardWindow.IsValid || !steamGuardWindow.IsVisible())
+            while (!steamLoginWindow.IsValid || !steamGuardWindow.IsValid)
             {
+                Thread.Sleep(10);
+                steamLoginWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().Contains("Steam") && !wh.GetWindowText().Contains("-"));
                 steamGuardWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - "));
 
                 // Check for steam warning window.
@@ -750,7 +772,7 @@ namespace SAM
                 }
             }
 
-            Console.WriteLine("Found it.");
+            Console.WriteLine("Found windows.");
 
             Process steamGuardProcess = null;
 
@@ -759,10 +781,12 @@ namespace SAM
             while (steamGuardProcess == null)
             {
                 int procId = 0;
+                GetWindowThreadProcessId(steamGuardWindow.RawPtr, out procId);
 
                 // Wait for valid process id from handle.
                 while (procId == 0)
                 {
+                    Thread.Sleep(10);
                     GetWindowThreadProcessId(steamGuardWindow.RawPtr, out procId);
                 }
 
@@ -777,43 +801,54 @@ namespace SAM
             }
 
             steamGuardProcess.WaitForInputIdle();
-            AutoItX.WinWaitActive(steamGuardWindow.RawPtr);
 
             // Wait a bit for the window to fully initialize just in case.
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
 
-            Console.WriteLine("It is idle now, bringing it up.");
+            // Generate 2FA code, then send it to the client
+            Console.WriteLine("It is idle now, typing code...");
 
-            if (SetForegroundWindow(steamGuardWindow.RawPtr))
+            SetForegroundWindow(steamLoginWindow.RawPtr);
+            //SetActiveWindow(steamLoginWindow.RawPtr);
+
+            foreach (char c in Generate2FACode(decryptedAccounts[index].SharedSecret).ToCharArray())
             {
-                // Generate 2FA code, then send it to the client
-                Console.WriteLine("Typing code...");
+                SetForegroundWindow(steamLoginWindow.RawPtr);
 
-                // Make sure the the window is set to foreground for each character input.
-                foreach (string s in Generate2FACode(decryptedAccounts[index].SharedSecret).Split())
-                {
-                    SetForegroundWindow(steamGuardWindow.RawPtr);
-                    System.Windows.Forms.SendKeys.SendWait(s);
-                }
+                Thread.Sleep(10);
 
-                SetForegroundWindow(steamGuardWindow.RawPtr);
-                System.Windows.Forms.SendKeys.SendWait("{ENTER}");
-
-                // Need a little pause here to reliably check for popup later
-                Thread.Sleep(3000);
+                System.Windows.Forms.SendKeys.SendWait(c.ToString());
+                //SendMessage(steamGuardWindow.RawPtr, WM_CHAR, c, IntPtr.Zero);
+                //PostMessage(steamGuardWindow.RawPtr, WM_CHAR, (IntPtr)c, IntPtr.Zero);
             }
 
-            // Check if we still have a 2FA popup, which means, the previous one failed.
+            SetForegroundWindow(steamLoginWindow.RawPtr);
+
+            Thread.Sleep(10);
+
+            System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+            //SendMessage(steamGuardWindow.RawPtr, WM_KEYDOWN, VK_RETURN, IntPtr.Zero);
+            //PostMessage(steamGuardWindow.RawPtr, WM_KEYDOWN, (IntPtr)VK_RETURN, IntPtr.Zero);
+
+            // Need a little pause here to more reliably check for popup later
+            Thread.Sleep(3000);
+
+            // Check if we still have a 2FA popup, which means the previous one failed.
             steamGuardWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - "));
 
-            if (failCounter < 2 && steamGuardWindow.IsValid)
+            if (tryCount < 2 && steamGuardWindow.IsValid)
             {
                 Console.WriteLine("2FA code failed, retrying...");
-                Type2FA(index, failCounter + 1);
+                Type2FA(index, tryCount + 1);
             }
-            else if (failCounter >= 2 && steamGuardWindow.IsValid)
+            else if (tryCount == 2 && steamGuardWindow.IsValid)
             {
-                MessageBox.Show("Failed to log in! Please make sure you set your shared secret correctly!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("2FA Failed\nPlease wait or bring the Steam Guard\nwindow to the front before clicking OK", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Type2FA(index, tryCount + 1);
+            }
+            else if (tryCount == 3 && steamGuardWindow.IsValid)
+            {
+                MessageBox.Show("2FA Failed\nPlease verify your shared secret is correct!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
