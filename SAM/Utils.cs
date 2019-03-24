@@ -210,7 +210,7 @@ namespace SAM
 
                 // Attempt to find Steam Id from steam config.
                 dynamic config = VdfConvert.Deserialize(File.ReadAllText(steamPath + "config\\config.vdf"));
-                dynamic accounts = config.Value.Software.Valve.steam.Accounts;
+                dynamic accounts = config.Value.Software.Valve.Steam.Accounts;
 
                 VObject accountsObj = accounts;
                 VToken value;

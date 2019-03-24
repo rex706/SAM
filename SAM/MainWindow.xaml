@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:tb="http://www.hardcodet.net/taskbar" 
         xmlns:local="clr-namespace:SAM"
         mc:Ignorable="d" Height="190" Width="138" WindowStartupLocation="CenterScreen" Icon="steam_alt-10.ico" ResizeMode="CanMinimize" Title="SAM" Background="#FF333638">
     <Window.Resources>
@@ -124,5 +125,18 @@
             </Border>
             <Grid x:Name="buttonGrid" Height="141" VerticalAlignment="Top" Width="131" RenderTransformOrigin="0.457,0.511"/>
         </DockPanel>
+        <tb:TaskbarIcon IconSource="steam_alt-10.ico" ToolTipText="SAM">
+            <tb:TaskbarIcon.ContextMenu>
+                <ContextMenu x:Name="TaskbarIconContextMenu">
+                    <MenuItem Header="New Account" Click="NewButton_Click"/>
+                    <MenuItem x:Name="TaskBarIconLoginContextMenu" Header="Login">
+                        
+                    </MenuItem>
+                    <Separator />
+                    <MenuItem Header="Show" Click="ShowWindowButton_Click" />
+                    <MenuItem Header="Exit" Click="ExitMenuItem_Click" />
+                </ContextMenu>
+            </tb:TaskbarIcon.ContextMenu>
+        </tb:TaskbarIcon>
     </Grid>
 </Window>

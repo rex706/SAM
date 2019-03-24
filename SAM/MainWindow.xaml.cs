@@ -13,6 +13,9 @@ using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Threading;
+using Win32Interop.WinHandles;
+using System.Windows.Threading;
+using AutoIt;
 
 namespace SAM
 {
@@ -23,6 +26,8 @@ namespace SAM
     public class Account
     {
         public string Name { get; set; }
+
+        public string Alias { get; set; }
 
         public string Password { get; set; }
 
@@ -78,6 +83,10 @@ namespace SAM
         private static string AssemblyVer;
 
         private static bool exporting = false;
+
+        private static Button holdingButton = null;
+        private static bool dragging = false;
+        private static System.Timers.Timer mouseHoldTimer;
 
         IniFile settingsFile;
 
@@ -168,15 +177,7 @@ namespace SAM
             if (!Regex.IsMatch(accPerRow, @"^\d+$") || Int32.Parse(accPerRow) < 1)
                 accPerRow = "1";
 
-            if (settingsFile.KeyExists("Steam", "Settings"))
-            {
-                steamPath = settingsFile.Read("Steam", "Settings");
-            }
-            else
-            {
-                // Find Steam
-                Utils.CheckSteamPath();
-            }
+            Utils.CheckSteamPath();
 
             // If the recent autolog entry exists and is set to true.
             // else create defualt settings file entry.
@@ -262,6 +263,7 @@ namespace SAM
         {
             decryptedAccounts = new List<Account>();
             buttonGrid.Children.Clear();
+            TaskBarIconLoginContextMenu.Items.Clear();
 
             // Check if info.dat exists
             if (File.Exists("info.dat"))
@@ -276,7 +278,7 @@ namespace SAM
             }
         }
 
-        public async System.Threading.Tasks.Task ReloadAccount(Account account)
+        public async Task ReloadAccount(Account account)
         {
             dynamic userJson = null;
 
@@ -301,7 +303,7 @@ namespace SAM
             }
         }
 
-        public async System.Threading.Tasks.Task ReloadAccountsAsync()
+        public async Task ReloadAccountsAsync()
         {
             foreach (var account in encryptedAccounts)
             {
@@ -348,7 +350,7 @@ namespace SAM
                             steamId = account.SteamId;
                         }
 
-                        decryptedAccounts.Add(new Account() { Name = account.Name, Password = tempPass, SharedSecret = temp2fa, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, SteamId = steamId, Description = account.Description });
+                        decryptedAccounts.Add(new Account() { Name = account.Name, Alias = account.Alias, Password = tempPass, SharedSecret = temp2fa, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, SteamId = steamId, Description = account.Description });
                     }
 
                     Button accountButton = new Button();
@@ -360,7 +362,15 @@ namespace SAM
 
                     //accountButton.Name = account.Name;
                     //accountText.Name = account.Name + "Label";
-                    accountText.Text = account.Name;
+
+                    if (account.Alias != null && account.Alias.Length > 0)
+                    {
+                        accountText.Text = account.Alias;
+                    }
+                    else
+                    {
+                        accountText.Text = account.Name;
+                    }
 
                     // If there is a description, set up tooltip.
                     if (account.Description != null && account.Description.Length > 0)
@@ -402,7 +412,14 @@ namespace SAM
                             // Probably no internet connection or avatar url is bad
                             Console.WriteLine("Error: " + m.Message);
 
-                            accountButton.Content = account.Name;
+                            if (account.Alias != null && account.Alias.Length > 0)
+                            {
+                                accountButton.Content = account.Alias;
+                            }
+                            else
+                            {
+                                accountButton.Content = account.Name;
+                            }
                         }
                     }
 
@@ -411,6 +428,7 @@ namespace SAM
                     accountButton.Click += new RoutedEventHandler(AccountButton_Click);
                     accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
                     accountButton.PreviewMouseLeftButtonUp += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
+                    //accountButton.PreviewMouseMove += new System.Windows.Input.MouseEventHandler(AccountButton_MouseMove);
                     accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
 
                     ContextMenu accountContext = new ContextMenu();
@@ -437,6 +455,22 @@ namespace SAM
                     editItem.Click += delegate { EditEntry(accountButton); };
                     exportItem.Click += delegate { ExportAccount(Int32.Parse(accountButton.Tag.ToString())); };
                     reloadItem.Click += async delegate { await ReloadAccount_ClickAsync(Int32.Parse(accountButton.Tag.ToString())); };
+
+                    // TaskbarIcon Context Menu Item
+                    MenuItem taskBarIconLoginItem = new MenuItem();
+                    taskBarIconLoginItem.Tag = bCounter.ToString();
+                    taskBarIconLoginItem.Click += new RoutedEventHandler(TaskbarIconLoginItem_Click);
+
+                    TaskBarIconLoginContextMenu.Items.Add(taskBarIconLoginItem);
+
+                    if (account.Alias != null && account.Alias.Length > 0)
+                    {
+                        taskBarIconLoginItem.Header = account.Alias;
+                    }
+                    else
+                    {
+                        taskBarIconLoginItem.Header = account.Name;
+                    }
 
                     bCounter++;
                     xCounter++;
@@ -520,7 +554,7 @@ namespace SAM
                     ePassword = StringCipher.Encrypt(password, eKey);
                     eSharedSecret = StringCipher.Encrypt(sharedSecret, eKey);
 
-                    encryptedAccounts.Add(new Account() { Name = dialog.AccountText, Password = ePassword, SharedSecret = eSharedSecret, ProfUrl = dialog.UrlText, AviUrl = aviUrl, SteamId = steamId, Description = dialog.DescriptionText });
+                    encryptedAccounts.Add(new Account() { Name = dialog.AccountText, Alias = dialog.AliasText, Password = ePassword, SharedSecret = eSharedSecret, ProfUrl = dialog.UrlText, AviUrl = aviUrl, SteamId = steamId, Description = dialog.DescriptionText });
 
                     Utils.Serialize(encryptedAccounts);
 
@@ -548,6 +582,7 @@ namespace SAM
             var dialog = new TextDialog
             {
                 AccountText = decryptedAccounts[index].Name,
+                AliasText = decryptedAccounts[index].Alias,
                 PasswordText = decryptedAccounts[index].Password,
                 SharedSecretText = decryptedAccounts[index].SharedSecret,
                 UrlText = decryptedAccounts[index].ProfUrl,
@@ -599,6 +634,7 @@ namespace SAM
                     eSharedSecret = StringCipher.Encrypt(dialog.SharedSecretText, eKey);
 
                     encryptedAccounts[index].Name = dialog.AccountText;
+                    encryptedAccounts[index].Alias = dialog.AliasText;
                     encryptedAccounts[index].Password = ePassword;
                     encryptedAccounts[index].SharedSecret = eSharedSecret;
                     encryptedAccounts[index].ProfUrl = dialog.UrlText;
@@ -699,16 +735,17 @@ namespace SAM
         {
             loginThreads.Add(Thread.CurrentThread);
 
-            IntPtr handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
-            while (handle.Equals(IntPtr.Zero))
+            var steamGuardWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - "));
+
+            while (!steamGuardWindow.IsValid || !steamGuardWindow.IsVisible())
             {
-                handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
+                steamGuardWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - "));
 
                 // Check for steam warning window.
-                IntPtr warningHandle = FindWindow("vguiPopupWindow", "Steam - Warning");
-                if (!warningHandle.Equals(IntPtr.Zero))
+                var steamWarningWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam - "));
+                if (steamWarningWindow.IsValid)
                 {
-                    //Cancel the 2FA process since Steam connection is unavailable. 
+                    //Cancel the 2FA process since Steam connection is likely unavailable. 
                     return;
                 }
             }
@@ -726,7 +763,7 @@ namespace SAM
                 // Wait for valid process id from handle.
                 while (procId == 0)
                 {
-                    GetWindowThreadProcessId(handle, out procId);
+                    GetWindowThreadProcessId(steamGuardWindow.RawPtr, out procId);
                 }
 
                 try
@@ -740,13 +777,14 @@ namespace SAM
             }
 
             steamGuardProcess.WaitForInputIdle();
+            AutoItX.WinWaitActive(steamGuardWindow.RawPtr);
 
-            // Wait a second for the window to fully initialize just in case.
-            System.Threading.Thread.Sleep(1000);
+            // Wait a bit for the window to fully initialize just in case.
+            Thread.Sleep(1000);
 
             Console.WriteLine("It is idle now, bringing it up.");
 
-            if (SetForegroundWindow(handle))
+            if (SetForegroundWindow(steamGuardWindow.RawPtr))
             {
                 // Generate 2FA code, then send it to the client
                 Console.WriteLine("Typing code...");
@@ -754,27 +792,26 @@ namespace SAM
                 // Make sure the the window is set to foreground for each character input.
                 foreach (string s in Generate2FACode(decryptedAccounts[index].SharedSecret).Split())
                 {
-                    SetForegroundWindow(handle);
+                    SetForegroundWindow(steamGuardWindow.RawPtr);
                     System.Windows.Forms.SendKeys.SendWait(s);
                 }
 
-                SetForegroundWindow(handle);
+                SetForegroundWindow(steamGuardWindow.RawPtr);
                 System.Windows.Forms.SendKeys.SendWait("{ENTER}");
 
                 // Need a little pause here to reliably check for popup later
-                System.Threading.Thread.Sleep(2000);
+                Thread.Sleep(3000);
             }
 
             // Check if we still have a 2FA popup, which means, the previous one failed.
-            handle = IntPtr.Zero; // just to make sure
-            handle = FindWindow("vguiPopupWindow", "Steam Guard - Computer Authorization Required");
+            steamGuardWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - "));
 
-            if (failCounter < 2 && !handle.Equals(IntPtr.Zero))
+            if (failCounter < 2 && steamGuardWindow.IsValid)
             {
                 Console.WriteLine("2FA code failed, retrying...");
                 Type2FA(index, failCounter + 1);
             }
-            else if (failCounter >= 2 && !handle.Equals(IntPtr.Zero))
+            else if (failCounter >= 2 && steamGuardWindow.IsValid)
             {
                 MessageBox.Show("Failed to log in! Please make sure you set your shared secret correctly!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -782,11 +819,9 @@ namespace SAM
 
         private string Generate2FACode(string shared_secret)
         {
-            SteamGuardAccount authaccount = new SteamGuardAccount { SharedSecret = shared_secret };
+            SteamGuardAccount authAccount = new SteamGuardAccount { SharedSecret = shared_secret };
 
-            long steamTime = TimeAligner.GetSteamTime();
-
-            string code = authaccount.GenerateSteamGuardCodeForTime(steamTime);
+            string code = authAccount.GenerateSteamGuardCode();
 
             return code;
         }
@@ -855,6 +890,24 @@ namespace SAM
             if (sender is Button btn)
             {
                 btn.Opacity = 0.5;
+
+                holdingButton = btn;
+
+                mouseHoldTimer = new System.Timers.Timer(1000);
+                mouseHoldTimer.Elapsed += MouseHoldTimer_Elapsed;
+                mouseHoldTimer.Enabled = true;
+                mouseHoldTimer.Start();
+            }
+        }
+
+        private void MouseHoldTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            mouseHoldTimer.Stop();
+
+            if (holdingButton != null)
+            {
+                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => holdingButton.Opacity = 1));
+                dragging = true;
             }
         }
 
@@ -862,7 +915,9 @@ namespace SAM
         {
             if (sender is Button btn)
             {
+                holdingButton = null;
                 btn.Opacity = 1;
+                dragging = false;
             }
         }
 
@@ -870,7 +925,29 @@ namespace SAM
         {
             if (sender is Button btn)
             {
+                holdingButton = null;
                 btn.Opacity = 1;
+                dragging = false;
+            }
+        }
+
+        private void AccountButton_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                if (dragging == false)
+                {
+                    return;
+                }
+
+                btn.Opacity = 1;
+
+                Point mousePoint = e.GetPosition(this);
+
+                int marginLeft = (int)mousePoint.X - ((int)btn.Width / 2);
+                int marginTop = (int)mousePoint.Y - ((int)btn.Height / 2);
+
+                btn.Margin = new Thickness(marginLeft, marginTop, 0, 0);
             }
         }
 
@@ -885,6 +962,14 @@ namespace SAM
             {
                 // Login with clicked button's index, which stored in Tag.
                 Login(Int32.Parse(btn.Tag.ToString()));
+            }
+        }
+
+        private void TaskbarIconLoginItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem item)
+            {
+                Login(Int32.Parse(item.Tag.ToString()));
             }
         }
 
@@ -909,7 +994,7 @@ namespace SAM
             }
         }
 
-        public async System.Threading.Tasks.Task ReloadAccount_ClickAsync(int index)
+        public async Task ReloadAccount_ClickAsync(int index)
         {
             await ReloadAccount(encryptedAccounts[index]);
 
@@ -1024,6 +1109,12 @@ namespace SAM
         private void CancelExportButton_Click(object sender, RoutedEventArgs e)
         {
             ResetFromExport();
+        }
+
+        private void ShowWindowButton_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState.Normal;
+            Focus();
         }
 
         #endregion

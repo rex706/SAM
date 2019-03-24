@@ -26,6 +26,12 @@ namespace SAM
             set { UsernameBox.Text = value; }
         }
 
+        public string AliasText
+        {
+            get { return AliasBox.Text;  }
+            set { AliasBox.Text = value; }
+        }
+
         public string PasswordText
         {
             get { return PasswordBox.Password; }
@@ -58,6 +64,19 @@ namespace SAM
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
+            if (AccountText == null || AccountText.Length == 0)
+            {
+                MessageBox.Show("Account login required!");
+                UsernameBox.Focus();
+                return;
+            }
+            if (PasswordText == null || PasswordText.Length == 0)
+            {
+                MessageBox.Show("Account password required!");
+                PasswordBox.Focus();
+                return;
+            }
+
             if (autoLogCheckBox.IsChecked == true)
                 AutoLogAccountIndex = true;
             else
@@ -74,7 +93,13 @@ namespace SAM
 
         private async void UsernameBox_LostFocus(object sender, RoutedEventArgs e)
         {
+            if (UsernameBox.Text.Length < 3)
+            {
+                return;
+            }
+
             OKButton.IsEnabled = false;
+
             dynamic userJson = await Utils.GetUserInfoFromConfigAndWebApi(UsernameBox.Text.ToString());
 
             if (userJson != null)
