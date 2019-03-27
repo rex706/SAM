@@ -444,7 +444,7 @@ namespace SAM
                     accountButton.Click += new RoutedEventHandler(AccountButton_Click);
                     accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
                     accountButton.PreviewMouseLeftButtonUp += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
-                    accountButton.PreviewMouseMove += new System.Windows.Input.MouseEventHandler(AccountButton_MouseMove);
+                    //accountButton.PreviewMouseMove += new System.Windows.Input.MouseEventHandler(AccountButton_MouseMove);
                     accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
 
                     ContextMenu accountContext = new ContextMenu();
@@ -811,18 +811,23 @@ namespace SAM
             SetForegroundWindow(steamLoginWindow.RawPtr);
             //SetActiveWindow(steamLoginWindow.RawPtr);
 
+            Thread.Sleep(10);
+
             foreach (char c in Generate2FACode(decryptedAccounts[index].SharedSecret).ToCharArray())
             {
                 SetForegroundWindow(steamLoginWindow.RawPtr);
+                //SetActiveWindow(steamLoginWindow.RawPtr);
 
                 Thread.Sleep(10);
 
+                // Can also send keys to login window handle, but nothing works unless it is the foreground window.
                 System.Windows.Forms.SendKeys.SendWait(c.ToString());
                 //SendMessage(steamGuardWindow.RawPtr, WM_CHAR, c, IntPtr.Zero);
                 //PostMessage(steamGuardWindow.RawPtr, WM_CHAR, (IntPtr)c, IntPtr.Zero);
             }
 
             SetForegroundWindow(steamLoginWindow.RawPtr);
+            //SetActiveWindow(steamLoginWindow.RawPtr);
 
             Thread.Sleep(10);
 
@@ -843,8 +848,12 @@ namespace SAM
             }
             else if (tryCount == 2 && steamGuardWindow.IsValid)
             {
-                MessageBox.Show("2FA Failed\nPlease wait or bring the Steam Guard\nwindow to the front before clicking OK", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                Type2FA(index, tryCount + 1);
+                MessageBoxResult result = MessageBox.Show("2FA Failed\nPlease wait or bring the Steam Guard\nwindow to the front before clicking OK", "Error", MessageBoxButton.OKCancel, MessageBoxImage.Error);
+
+                if (result == MessageBoxResult.OK)
+                {
+                    Type2FA(index, tryCount + 1);
+                }
             }
             else if (tryCount == 3 && steamGuardWindow.IsValid)
             {
@@ -869,9 +878,14 @@ namespace SAM
                 if (type == 0)
                 {
                     encryptedAccounts = encryptedAccounts.OrderBy(x => x.Name).ToList();
-                    Utils.Serialize(encryptedAccounts);
-                    RefreshWindow();
                 }
+                else if (type == 1)
+                {
+                    encryptedAccounts = encryptedAccounts.OrderBy(x => Guid.NewGuid()).ToList();
+                }
+
+                Utils.Serialize(encryptedAccounts);
+                RefreshWindow();
             }
         }
 
@@ -1077,6 +1091,11 @@ namespace SAM
         private void SortAlphabetical_Click(object sender, RoutedEventArgs e)
         {
             SortAccounts(0);
+        }
+
+        private void ShuffleAccounts_Click(object sender, RoutedEventArgs e)
+        {
+            SortAccounts(1);
         }
 
         private void ImportMenuItem_Click(object sender, RoutedEventArgs e)

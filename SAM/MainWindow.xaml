@@ -114,6 +114,7 @@
                         <MenuItem Header="Settings" Click="SettingsButton_Click" />
                         <MenuItem Header="Sort">
                             <MenuItem Header="Alphabetical" Click="SortAlphabetical_Click"/>
+                            <MenuItem Header="Shuffle" Click="ShuffleAccounts_Click" IsEnabled="False"/>
                         </MenuItem>
                     </MenuItem>
                     <MenuItem Header="Help">

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SAM"
         mc:Ignorable="d"
-        Title="Login Info" Height="535" Width="300" Background="#FF333638" ResizeMode="NoResize" Icon="steam_alt-10.ico" WindowStartupLocation="CenterScreen" Topmost="True">
+        Title="Login Info" Height="540" Width="300" Background="#FF333638" ResizeMode="NoResize" Icon="steam_alt-10.ico" WindowStartupLocation="CenterScreen" Topmost="True">
     <StackPanel Margin="5,5,5,5">
         <TextBlock Name="TitleTextBox" Margin="0,0,0,10" Foreground="White" Text="Username *" ToolTip="What you use to login to Steam. Could be an email address."></TextBlock>
         <TextBox Name="UsernameBox" Padding="3,3,3,3" LostFocus="UsernameBox_LostFocus"  />

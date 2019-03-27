@@ -23,6 +23,15 @@ Easily log in and switch between Steam accounts.
 **CHANGELOG**
 
 **Latest version:** 
+1.2.4.1
+* Steam Guard login fixes.
+	- Additional Language support.
+* Auto-login fixes when used with the Start With Windows option.
+* Fix config.vdf parse path.
+* Tray right click options and logging in.
+* Drag window while dragging background.
+* Login freeze fixes.
+
 1.2.4.0
 * Multi-select accounts for export through the file drop down menu.
 	- Can also export individual account through the context menu.
