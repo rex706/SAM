@@ -28,6 +28,7 @@ Easily log in and switch between Steam accounts.
 	- Additional Language support.
 * Auto-login fixes when used with the Start With Windows option.
 * Fix config.vdf parse path.
+* Alias input to display instead of username.
 * Tray right click options and logging in.
 * Drag window while dragging background.
 * Login freeze fixes.
