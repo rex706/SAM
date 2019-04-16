@@ -82,12 +82,11 @@ namespace SAM
 
         // Keys are changed before releases/updates
         private static string eKey = "PRIVATE_KEY";
+        private static string ePassword = "";
 
         private static string account;
-        private static string ePassword;
-        private static string eSharedSecret;
 
-        private static string accPerRow;
+        private static string accPerRow = "0";
         private static string steamPath;
 
         private static bool selected = false;
@@ -152,14 +151,21 @@ namespace SAM
                 settingsFile = new IniFile("SAMSettings.ini");
                 settingsFile.Write("Version", AssemblyVer, "System");
                 settingsFile.Write("AccountsPerRow", "5", "Settings");
-                settingsFile.Write("StartWithWindows", "False", "Settings");
-                settingsFile.Write("StartMinimized", "False", "Settings");
-                settingsFile.Write("AccountsPerRow", "5", "Settings");
-                settingsFile.Write("Recent", "False", "AutoLog");
-                settingsFile.Write("RecentAcc","", "AutoLog");
-                settingsFile.Write("Selected", "False", "AutoLog");
+                settingsFile.Write("StartWithWindows", "false", "Settings");
+                settingsFile.Write("StartMinimized", "false", "Settings");
+                settingsFile.Write("MinimizeToTray", "false", "Settings");
+                settingsFile.Write("Recent", "false", "AutoLog");
+                settingsFile.Write("RecentAcc", "", "AutoLog");
+                settingsFile.Write("Selected", "false", "AutoLog");
                 settingsFile.Write("SelectedAcc", "", "AutoLog");
                 accPerRow = "5";
+
+                MessageBoxResult messageBoxResult = MessageBox.Show("Do you want to password protect SAM?", "Protect", MessageBoxButton.YesNo, MessageBoxImage.Information);
+
+                if (messageBoxResult == MessageBoxResult.Yes)
+                {
+                    settingsFile.Write("PasswordProtect", ShowPasswordProtectionDialog(), "Settings");
+                }          
             }
             // Else load settings from preexisting file.
             else
@@ -184,19 +190,54 @@ namespace SAM
             }
         }
 
+        private string ShowPasswordProtectionDialog()
+        {
+            MessageBoxResult messageBoxResult = MessageBoxResult.No;
+
+            while (messageBoxResult == MessageBoxResult.No)
+            {
+                var passwordDialog = new PasswordWindow();
+
+                if (passwordDialog.ShowDialog() == true && passwordDialog.PasswordText != "")
+                {
+                    ePassword = passwordDialog.PasswordText;
+                
+                    return "true";
+                }
+                else if (passwordDialog.PasswordText == "")
+                {
+                    messageBoxResult = MessageBox.Show("No password detected, are you sure?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                }
+            }
+
+            return "false";
+        }
+
         private void LoadSettings()
         {
             settingsFile = new IniFile("SAMSettings.ini");
-            accPerRow = settingsFile.Read("AccountsPerRow", "Settings");
 
-            if (!Regex.IsMatch(accPerRow, @"^\d+$") || Int32.Parse(accPerRow) < 1)
-                accPerRow = "1";
+            if (!settingsFile.KeyExists("AccountsPerRow", "Settings"))
+            {
+                settingsFile.Write("AccountsPerRow", "5", "Settings");
+                accPerRow = "5";
+            }
+            else
+            {
+                accPerRow = settingsFile.Read("AccountsPerRow", "Settings");
+
+                if (!Regex.IsMatch(accPerRow, @"^\d+$") || Int32.Parse(accPerRow) < 1)
+                {
+                    settingsFile.Write("AccountsPerRow", "5", "Settings");
+                    accPerRow = "5";
+                }
+            }
 
             Utils.CheckSteamPath();
 
             // If the recent autolog entry exists and is set to true.
             // else create defualt settings file entry.
-            if (settingsFile.KeyExists("Recent", "AutoLog") && settingsFile.Read("Recent", "AutoLog") == "True")
+            if (settingsFile.KeyExists("Recent", "AutoLog") && settingsFile.Read("Recent", "AutoLog").ToLower().Equals("true"))
             {
                 int tryParseResult = -1;
                 Int32.TryParse(settingsFile.Read("RecentAcc", "AutoLog"), out tryParseResult);
@@ -208,18 +249,18 @@ namespace SAM
                 }
                 else
                 {
-                    settingsFile.Write("Recent", "False", "AutoLog");
+                    settingsFile.Write("Recent", "false", "AutoLog");
                 }
             }
             else if (!settingsFile.KeyExists("Recent", "AutoLog"))
             {
-                settingsFile.Write("Recent", "False", "AutoLog");
+                settingsFile.Write("Recent", "false", "AutoLog");
                 settingsFile.Write("RecentAcc", "-1", "AutoLog");
             }
 
             // If the selected autolog entry exists and is set to true.
             // else create defualt settings file entry.
-            if (settingsFile.KeyExists("Selected", "AutoLog") && settingsFile.Read("Selected", "AutoLog") == "True")
+            if (settingsFile.KeyExists("Selected", "AutoLog") && settingsFile.KeyExists("SelectedAcc", "AutoLog") && settingsFile.Read("Selected", "AutoLog").ToLower().Equals("true"))
             {
                 int tryParseResult = -1;
                 Int32.TryParse(settingsFile.Read("SelectedAcc", "AutoLog"), out tryParseResult);
@@ -231,44 +272,40 @@ namespace SAM
                 }
                 else
                 {
-                    settingsFile.Write("Selected", "False", "AutoLog");
+                    settingsFile.Write("Selected", "false", "AutoLog");
                 }
             }
             else if (!settingsFile.KeyExists("Selected", "AutoLog"))
             {
-                settingsFile.Write("Selected", "False", "AutoLog");
+                settingsFile.Write("Selected", "false", "AutoLog");
                 settingsFile.Write("SelectedAcc", "-1", "AutoLog");
             }
 
-            if (settingsFile.KeyExists("StartMinimized", "Settings") && settingsFile.Read("StartMinimized", "Settings") == "True")
+            if (settingsFile.KeyExists("MinimizeToTray", "Settings") && settingsFile.Read("MinimizeToTray", "Settings").ToLower().Equals("true"))
+            {
+
+            }
+            else
+            {
+                settingsFile.Write("MinimizeToTray", "false", "Settings");
+            }
+
+            if (settingsFile.KeyExists("StartMinimized", "Settings") && settingsFile.Read("StartMinimized", "Settings").ToLower().Equals("true"))
             {
                 WindowState = WindowState.Minimized;
             }
-            else if (!settingsFile.KeyExists("StartMinimized", "Settings"))
+            else
             {
-                settingsFile.Write("StartMinimized", "False", "Settings");
+                settingsFile.Write("StartMinimized", "false", "Settings");
             }
 
-            if (File.Exists("info.dat"))
+            if (settingsFile.KeyExists("PasswordProtect", "Settings") && settingsFile.Read("PasswordProtect", "Settings").ToLower().Equals("true") && (encryptedAccounts == null || encryptedAccounts.Count == 0))
             {
-                StreamReader datReader = new StreamReader("info.dat");
-                string temp = datReader.ReadLine();
-                datReader.Close();
-
-                // If the user is some how using an older info.dat, delete it.
-                if (!temp.Contains("xml"))
-                {
-                    MessageBox.Show("Your info.dat is out of date and must be deleted.\nSorry for the inconvenience!", "Invalid File", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                    try
-                    {
-                        File.Delete("info.dat");
-                    }
-                    catch (Exception m)
-                    {
-                        Console.WriteLine(m.Message);
-                    }
-                }
+                ShowPasswordProtectionDialog();
+            }
+            else if (!settingsFile.KeyExists("PasswordProtect", "Settings") || encryptedAccounts == null || encryptedAccounts.Count == 0)
+            {
+                settingsFile.Write("PasswordProtect", "false", "Settings");
             }
 
             settingsFile.Write("Version", AssemblyVer, "System");
@@ -285,7 +322,37 @@ namespace SAM
             if (File.Exists("info.dat"))
             {
                 // Deserialize file
-                encryptedAccounts = Utils.Deserialize("info.dat");
+
+                if (ePassword.Length > 0)
+                {
+                    MessageBoxResult messageBoxResult = MessageBoxResult.OK;
+
+                    while (messageBoxResult == MessageBoxResult.OK)
+                    {
+                        try
+                        {
+                            encryptedAccounts = Utils.PasswordDeserialize("info.dat", ePassword);
+                            messageBoxResult = MessageBoxResult.None;
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e.Message);
+                            messageBoxResult = MessageBox.Show("Invalid Password", "Invalid", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+
+                            if (messageBoxResult == MessageBoxResult.Cancel)
+                            {
+                                Close();
+                            }
+
+                            ShowPasswordProtectionDialog();
+                        }
+                    }
+                }
+                else
+                {
+                    encryptedAccounts = Utils.Deserialize("info.dat");
+                }
+
                 PostDeserializedRefresh(true);
             }
             else
@@ -558,8 +625,8 @@ namespace SAM
                 if (dialog.AutoLogAccountIndex == true)
                 {
                     settingsFile.Write("SelectedAcc", (encryptedAccounts.Count + 1).ToString(), "AutoLog");
-                    settingsFile.Write("Selected", "True", "AutoLog");
-                    settingsFile.Write("Recent", "False", "AutoLog");
+                    settingsFile.Write("Selected", "true", "AutoLog");
+                    settingsFile.Write("Recent", "false", "AutoLog");
                     selected = true;
                     recent = false;
                     selectedAcc = encryptedAccounts.Count + 1;
@@ -567,11 +634,7 @@ namespace SAM
 
                 try
                 {
-                    // Encrypt info before saving to file
-                    ePassword = StringCipher.Encrypt(password, eKey);
-                    eSharedSecret = StringCipher.Encrypt(sharedSecret, eKey);
-
-                    encryptedAccounts.Add(new Account() { Name = dialog.AccountText, Alias = dialog.AliasText, Password = ePassword, SharedSecret = eSharedSecret, ProfUrl = dialog.UrlText, AviUrl = aviUrl, SteamId = steamId, Description = dialog.DescriptionText });
+                    encryptedAccounts.Add(new Account() { Name = dialog.AccountText, Alias = dialog.AliasText, Password = StringCipher.Encrypt(password, eKey), SharedSecret = StringCipher.Encrypt(sharedSecret, eKey), ProfUrl = dialog.UrlText, AviUrl = aviUrl, SteamId = steamId, Description = dialog.DescriptionText });
 
                     Utils.Serialize(encryptedAccounts);
 
@@ -607,7 +670,7 @@ namespace SAM
             };
 
             // Reload slected boolean
-            selected = settingsFile.Read("Selected", "AutoLog") == "True" ? true : false;
+            selected = settingsFile.Read("Selected", "AutoLog") == "true" ? true : false;
 
             if (selected == true && selectedAcc == index)
                 dialog.autoLogCheckBox.IsChecked = true;
@@ -630,8 +693,8 @@ namespace SAM
                 if (dialog.AutoLogAccountIndex == true)
                 {
                     settingsFile.Write("SelectedAcc", button.Tag.ToString(), "AutoLog");
-                    settingsFile.Write("Selected", "True", "AutoLog");
-                    settingsFile.Write("Recent", "False", "AutoLog");
+                    settingsFile.Write("Selected", "true", "AutoLog");
+                    settingsFile.Write("Recent", "false", "AutoLog");
                     selected = true;
                     recent = false;
                     selectedAcc = index;
@@ -639,21 +702,17 @@ namespace SAM
                 else
                 {
                     settingsFile.Write("SelectedAcc", "-1", "AutoLog");
-                    settingsFile.Write("Selected", "False", "AutoLog");
+                    settingsFile.Write("Selected", "false", "AutoLog");
                     selected = false;
                     selectedAcc = -1;
                 }
 
                 try
                 {
-                    // Encrypt info before saving to file
-                    ePassword = StringCipher.Encrypt(dialog.PasswordText, eKey);
-                    eSharedSecret = StringCipher.Encrypt(dialog.SharedSecretText, eKey);
-
                     encryptedAccounts[index].Name = dialog.AccountText;
                     encryptedAccounts[index].Alias = dialog.AliasText;
-                    encryptedAccounts[index].Password = ePassword;
-                    encryptedAccounts[index].SharedSecret = eSharedSecret;
+                    encryptedAccounts[index].Password = StringCipher.Encrypt(dialog.PasswordText, eKey);
+                    encryptedAccounts[index].SharedSecret = StringCipher.Encrypt(dialog.SharedSecretText, eKey);
                     encryptedAccounts[index].ProfUrl = dialog.UrlText;
                     encryptedAccounts[index].AviUrl = aviUrl;
                     encryptedAccounts[index].SteamId = dialog.SteamId;
@@ -754,17 +813,17 @@ namespace SAM
 
             // Need both the Steam Login and Steam Guard windows.
             // Can't focus the Steam Guard window directly.
-            var steamLoginWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().Contains("Steam") && !wh.GetWindowText().Contains("-"));
-            var steamGuardWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - "));
+            var steamLoginWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().Contains("Steam") && !wh.GetWindowText().Contains("-") && !wh.GetWindowText().Contains("—"));
+            var steamGuardWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - ") || wh.GetWindowText().StartsWith("Steam Guard — "));
 
             while (!steamLoginWindow.IsValid || !steamGuardWindow.IsValid)
             {
                 Thread.Sleep(10);
-                steamLoginWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().Contains("Steam") && !wh.GetWindowText().Contains("-"));
-                steamGuardWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - "));
+                steamLoginWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().Contains("Steam") && !wh.GetWindowText().Contains("-") && !wh.GetWindowText().Contains("—"));
+                steamGuardWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - ") || wh.GetWindowText().StartsWith("Steam Guard — "));
 
-                // Check for steam warning window.
-                var steamWarningWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam - "));
+                // Check for Steam warning window.
+                var steamWarningWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam - ") || wh.GetWindowText().StartsWith("Steam — "));
                 if (steamWarningWindow.IsValid)
                 {
                     //Cancel the 2FA process since Steam connection is likely unavailable. 
@@ -839,7 +898,7 @@ namespace SAM
             Thread.Sleep(3000);
 
             // Check if we still have a 2FA popup, which means the previous one failed.
-            steamGuardWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - "));
+            steamGuardWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - ") || wh.GetWindowText().StartsWith("Steam Guard — "));
 
             if (tryCount < 2 && steamGuardWindow.IsValid)
             {
@@ -1056,10 +1115,31 @@ namespace SAM
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            var settingsDialog = new Window1();
+            var settingsDialog = new SettingsWindow();
             settingsDialog.ShowDialog();
 
             accPerRow = settingsDialog.ResponseText;
+
+            string previousPass = ePassword;
+
+            if (settingsDialog.Decrypt == true)
+            {
+                if (encryptedAccounts.Count > 0)
+                {
+                    Utils.Serialize(encryptedAccounts);
+                }
+
+                ePassword = "";
+            }
+            else if (settingsDialog.Password != null)
+            {
+                ePassword = settingsDialog.Password;
+
+                if (encryptedAccounts.Count > 0 && previousPass != ePassword)
+                {
+                    Utils.PasswordSerialize(encryptedAccounts, ePassword);
+                }
+            }
 
             LoadSettings();
             RefreshWindow();
@@ -1203,6 +1283,24 @@ namespace SAM
             if (exporting == true)
             {
                 e.Handled = true;
+            }
+        }
+
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            switch (this.WindowState)
+            {
+                case WindowState.Maximized:
+                    break;
+                case WindowState.Minimized:
+                    if (settingsFile.KeyExists("MinimizeToTray", "Settings") && settingsFile.Read("MinimizeToTray", "Settings").ToLower().Equals("true"))
+                    {
+                        ShowInTaskbar = false;
+                    }
+                    break;
+                case WindowState.Normal:
+                    ShowInTaskbar = true;
+                    break;
             }
         }
     }

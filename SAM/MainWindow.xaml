@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:tb="http://www.hardcodet.net/taskbar" 
         xmlns:local="clr-namespace:SAM"
-        mc:Ignorable="d" Height="190" Width="138" WindowStartupLocation="CenterScreen" Icon="steam_alt-10.ico" ResizeMode="CanMinimize" Title="SAM" Background="#FF333638">
+        mc:Ignorable="d" Height="190" Width="138" WindowStartupLocation="CenterScreen" Icon="steam_alt-10.ico" ResizeMode="CanMinimize" Title="SAM" Background="#FF333638" StateChanged="Window_StateChanged">
     <Window.Resources>
         <!-- This style is used for buttons, to remove the WPF default 'animated' mouse over effect -->
         <Style x:Key="SAMButtonStyle" TargetType="Button">
@@ -134,7 +134,7 @@
                         
                     </MenuItem>
                     <Separator />
-                    <MenuItem Header="Show" Click="ShowWindowButton_Click" />
+                    <MenuItem Header="Restore" Click="ShowWindowButton_Click" />
                     <MenuItem Header="Exit" Click="ExitMenuItem_Click" />
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>

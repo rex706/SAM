@@ -1,4 +1,4 @@
-﻿<Window x:Class="SAM.Window1"
+﻿<Window x:Class="SAM.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -12,10 +12,12 @@
         <TabControl HorizontalAlignment="Left" Height="142" VerticalAlignment="Top" Width="288" Margin="10,10,0,0" Background="{x:Null}">
             <TabItem Header="General">
                 <Grid>
-                    <Label x:Name="NumPerRowLabel" Content="Accounts/Row" HorizontalAlignment="Left" Margin="116,18,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
-                    <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="19" Margin="83,21,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="30" MaxLines="1" MaxLength="2" TextAlignment="Center" ToolTip="Adjust the number of accounts displayed per row" BorderBrush="#FF707070"/>
-                    <CheckBox x:Name="startupCheckBox" Content="Start with Windows" HorizontalAlignment="Left" Margin="83,48,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
-                    <CheckBox x:Name="startupMinCheckBox" Content="Start Minimized" HorizontalAlignment="Left" Margin="83,68,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <Label x:Name="NumPerRowLabel" Content="Accounts/Row" HorizontalAlignment="Left" Margin="116,4,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="19" Margin="83,7,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="30" MaxLines="1" MaxLength="2" TextAlignment="Center" ToolTip="Adjust the number of accounts displayed per row" BorderBrush="#FF707070"/>
+                    <CheckBox x:Name="startupCheckBox" Content="Start with Windows" HorizontalAlignment="Left" Margin="83,34,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <CheckBox x:Name="startupMinCheckBox" Content="Start Minimized" HorizontalAlignment="Left" Margin="83,54,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <CheckBox x:Name="minimizeToTrayCheckBox" Content="Minimize To Tray" HorizontalAlignment="Left" Margin="83,74,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <CheckBox x:Name="passwordProtectCheckBox" Content="Password Protect" HorizontalAlignment="Left" Margin="83,94,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" Checked="PasswordProtectCheckBox_Checked" Unchecked="PasswordProtectCheckBox_Unchecked"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Auto-Login">

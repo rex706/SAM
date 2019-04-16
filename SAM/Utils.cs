@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 using Gameloop.Vdf;
 using Gameloop.Vdf.Linq;
 using HtmlAgilityPack;
+using System.Text;
 
 namespace SAM
 {
@@ -18,17 +19,43 @@ namespace SAM
     {
         private static string apiKey = "API_KEY";
 
-        public static void Serialize(List<Account> input)
+        public static void Serialize(List<Account> accounts)
         {
-            var serializer = new XmlSerializer(input.GetType());
+            var serializer = new XmlSerializer(accounts.GetType());
             var sw = new StreamWriter("info.dat");
-            serializer.Serialize(sw, input);
+            serializer.Serialize(sw, accounts);
             sw.Close();
+        }
+
+        public static void PasswordSerialize(List<Account> accounts, string password)
+        {
+            var serializer = new XmlSerializer(accounts.GetType());
+            MemoryStream memStream = new MemoryStream();
+            serializer.Serialize(memStream, accounts);
+
+            string serializedAccounts = Encoding.UTF8.GetString(memStream.ToArray());
+            string encryptedAccounts = StringCipher.Encrypt(serializedAccounts, password);
+
+            File.WriteAllText("info.dat", encryptedAccounts);
+
+            memStream.Close();
         }
 
         public static List<Account> Deserialize(string file)
         {
             var stream = new StreamReader(file);
+            var ser = new XmlSerializer(typeof(List<Account>));
+            object obj = ser.Deserialize(stream);
+            stream.Close();
+            return (List<Account>)obj;
+        }
+
+        public static List<Account> PasswordDeserialize(string file, string password)
+        {
+            string contents = File.ReadAllText(file);
+            contents = StringCipher.Decrypt(contents, password);
+
+            var stream = new MemoryStream(Encoding.UTF8.GetBytes(contents));
             var ser = new XmlSerializer(typeof(List<Account>));
             object obj = ser.Deserialize(stream);
             stream.Close();

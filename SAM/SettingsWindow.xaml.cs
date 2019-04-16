@@ -5,14 +5,13 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace SAM
 {
     /// <summary>
     /// Interaction logic for settings window. 
     /// </summary>
-    public partial class Window1 : Window
+    public partial class SettingsWindow : Window
     {
         public int AutoAccIdx { get; set; }
 
@@ -29,20 +28,27 @@ namespace SAM
             set { textBox.Text = value; }
         }
 
+        public string Password { get; set; }
+
+        public bool Decrypt { get; set; }
+
         private IniFile settingsFile;
         
         private string start;
         private string minimized;
+        private string minimizeToTray;
+        private string passwordProtect;
         private string recent;
         private string recentAcc;
         private string selected;
         private string selectedAcc;
 
-        public Window1()
+        public SettingsWindow()
         {
             InitializeComponent();
 
             this.Loaded += new RoutedEventHandler(SettingsWindow_Loaded);
+            this.Decrypt = false;
         }
 
         private void SettingsWindow_Loaded(object sender, RoutedEventArgs e)
@@ -53,23 +59,39 @@ namespace SAM
                 textBox.Text = settingsFile.Read("AccountsPerRow", "Settings");
                 start = settingsFile.Read("StartWithWindows", "Settings");
                 minimized = settingsFile.Read("StartMinimized", "Settings");
+                minimizeToTray = settingsFile.Read("MinimizeToTray", "Settings");
+                passwordProtect = settingsFile.Read("PasswordProtect", "Settings");
                 recent = settingsFile.Read("Recent", "AutoLog");
                 recentAcc = settingsFile.Read("RecentAcc", "AutoLog");
                 selected = settingsFile.Read("Selected", "AutoLog");
                 selectedAcc = settingsFile.Read("SelectedAcc", "AutoLog");
 
-                if (start == "True")
+                if (start.ToLower().Equals("true"))
+                {
                     startupCheckBox.IsChecked = true;
+                }
 
-                if (minimized == "True")
+                if (minimized.ToLower().Equals("true"))
+                {
                     startupMinCheckBox.IsChecked = true;
+                }
 
-                if (recent == "True")
+                if (minimizeToTray.ToLower().Equals("true"))
+                {
+                    minimizeToTrayCheckBox.IsChecked = true;
+                }
+                
+                if (passwordProtect.ToLower().Equals("true"))
+                {
+                    passwordProtectCheckBox.IsChecked = true;
+                }
+
+                if (recent.ToLower().Equals("true"))
                 {
                     mostRecentCheckBox.IsChecked = true;
                     recentAccountLabel.Text = MainWindow.encryptedAccounts[Int32.Parse(recentAcc)].Name;
                 }
-                else if (selected == "True")
+                else if (selected.ToLower().Equals("true"))
                 {
                     selectedAccountCheckBox.IsChecked = true;
                     selectedAccountLabel.Text = MainWindow.encryptedAccounts[Int32.Parse(selectedAcc)].Name;
@@ -82,11 +104,75 @@ namespace SAM
         private void SaveSettings(string apr)
         {
             var settingsFile = new IniFile("SAMSettings.ini");
+
+            if (passwordProtectCheckBox.IsChecked == true && passwordProtect.ToLower().Equals("false"))
+            {
+                var passwordDialog = new PasswordWindow();
+
+                if (passwordDialog.ShowDialog() == true && passwordDialog.PasswordText != "")
+                {
+                    Password = passwordDialog.PasswordText;
+                    settingsFile.Write("PasswordProtect", "true", "Settings");
+                }
+                else
+                {
+                    Password = "";
+                }
+            }
+            else if (passwordProtectCheckBox.IsChecked == false && passwordProtect.ToLower().Equals("true"))
+            {
+                MessageBoxResult messageBoxResult = MessageBox.Show("Are you sure you want to decrypt your data file?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (messageBoxResult == MessageBoxResult.Yes)
+                {
+                    var passwordDialog = new PasswordWindow();
+
+                    if (passwordDialog.ShowDialog() == true)
+                    {
+                        messageBoxResult = MessageBoxResult.OK;
+
+                        while (messageBoxResult == MessageBoxResult.OK)
+                        {
+                            try
+                            {
+                                Utils.PasswordDeserialize("info.dat", passwordDialog.PasswordText);
+                                messageBoxResult = MessageBoxResult.None;
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e.Message);
+                                messageBoxResult = MessageBox.Show("Invalid Password", "Invalid", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+
+                                if (messageBoxResult == MessageBoxResult.Cancel)
+                                {
+                                    passwordProtectCheckBox.IsChecked = true;
+                                    return;
+                                }
+
+                                passwordDialog = new PasswordWindow();
+                                passwordDialog.ShowDialog();
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    passwordProtectCheckBox.IsChecked = true;
+                    return;
+                }
+
+                settingsFile.Write("PasswordProtect", "false", "Settings");
+                Password = "";
+                Decrypt = true;
+            }
+            else if (passwordProtectCheckBox.IsChecked == false)
+                settingsFile.Write("PasswordProtect", "false", "Settings");
+
             settingsFile.Write("AccountsPerRow", apr, "Settings");
 
             if (startupCheckBox.IsChecked == true)
             {
-                settingsFile.Write("StartWithWindows", "True", "Settings");
+                settingsFile.Write("StartWithWindows", "true", "Settings");
 
                 WshShell shell = new WshShell();
                 string shortcutAddress = Environment.GetFolderPath(Environment.SpecialFolder.Startup) + @"\SAM.lnk";
@@ -103,23 +189,28 @@ namespace SAM
                 if (System.IO.File.Exists(filePath))
                     System.IO.File.Delete(filePath);
 
-                settingsFile.Write("StartWithWindows", "False", "Settings");
+                settingsFile.Write("StartWithWindows", "false", "Settings");
             }
 
             if (startupMinCheckBox.IsChecked == true)
-                settingsFile.Write("StartMinimized", "True", "Settings");
+                settingsFile.Write("StartMinimized", "true", "Settings");
             else
-                settingsFile.Write("StartMinimized", "False", "Settings");
+                settingsFile.Write("StartMinimized", "false", "Settings");
+
+            if (minimizeToTrayCheckBox.IsChecked == true)
+                settingsFile.Write("MinimizeToTray", "true", "Settings");
+            else
+                settingsFile.Write("MinimizeToTray", "false", "Settings");
 
             if (mostRecentCheckBox.IsChecked == true)
-                settingsFile.Write("Recent", "True", "AutoLog");
+                settingsFile.Write("Recent", "true", "AutoLog");
             else
-                settingsFile.Write("Recent", "False", "AutoLog");
+                settingsFile.Write("Recent", "false", "AutoLog");
 
             if (selectedAccountCheckBox.IsChecked == true)
-                settingsFile.Write("Selected", "True", "AutoLog");
+                settingsFile.Write("Selected", "true", "AutoLog");
             else
-                settingsFile.Write("Selected", "False", "AutoLog");
+                settingsFile.Write("Selected", "false", "AutoLog");
 
             settingsFile.Write("Steam", SteamPathTextBox.Text, "Settings");
         }
@@ -246,6 +337,16 @@ namespace SAM
             {
                 MessageBox.Show(m.Message);
             }
+        }
+
+        private void PasswordProtectCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void PasswordProtectCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            
         }
     }
 }
