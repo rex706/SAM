@@ -17,12 +17,21 @@ Easily log in and switch between Steam accounts.
 * Import/Export accounts.
 * Start with windows.
 * Start minimized.
+* Minimize to tray.
+* Data password protection.
 
 ------------------------------------
 
 **CHANGELOG**
 
 **Latest version:** 
+1.2.5.0
+* Password protect application and data file.
+	- Encrypts entire data file.
+* Fix properly minimizing to system tray if setting enabled.
+* Fix Steam Guard window detection in different languages using the [em dash '—'](https://en.wikipedia.org/wiki/Dash) instead of standard hyphen.
+* Crash fixes.
+
 1.2.4.1
 * Steam Guard login fixes.
 	- Additional Language support.
