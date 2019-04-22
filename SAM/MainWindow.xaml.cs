@@ -165,7 +165,7 @@ namespace SAM
                 if (messageBoxResult == MessageBoxResult.Yes)
                 {
                     settingsFile.Write("PasswordProtect", ShowPasswordProtectionDialog(), "Settings");
-                }          
+                }
             }
             // Else load settings from preexisting file.
             else
@@ -201,7 +201,7 @@ namespace SAM
                 if (passwordDialog.ShowDialog() == true && passwordDialog.PasswordText != "")
                 {
                     ePassword = passwordDialog.PasswordText;
-                
+
                     return "true";
                 }
                 else if (passwordDialog.PasswordText == "")
@@ -426,7 +426,7 @@ namespace SAM
 
                         if (account.SharedSecret != null && account.SharedSecret.Length > 0)
                         {
-                             temp2fa = StringCipher.Decrypt(account.SharedSecret, eKey);
+                            temp2fa = StringCipher.Decrypt(account.SharedSecret, eKey);
                         }
                         if (account.SteamId != null && account.SteamId.Length > 0)
                         {
@@ -520,16 +520,19 @@ namespace SAM
                     MenuItem editItem = new MenuItem();
                     MenuItem exportItem = new MenuItem();
                     MenuItem reloadItem = new MenuItem();
+                    MenuItem copyPasswordItem = new MenuItem();
 
                     deleteItem.Header = "Delete";
                     editItem.Header = "Edit";
                     exportItem.Header = "Export";
                     reloadItem.Header = "Reload";
+                    copyPasswordItem.Header = "Copy Password";
 
                     accountContext.Items.Add(editItem);
                     accountContext.Items.Add(deleteItem);
                     accountContext.Items.Add(exportItem);
                     accountContext.Items.Add(reloadItem);
+                    accountContext.Items.Add(copyPasswordItem);
 
                     accountButton.ContextMenu = accountContext;
                     accountButton.ContextMenuOpening += new ContextMenuEventHandler(ContextMenu_ContextMenuOpening);
@@ -538,6 +541,7 @@ namespace SAM
                     editItem.Click += delegate { EditEntry(accountButton); };
                     exportItem.Click += delegate { ExportAccount(Int32.Parse(accountButton.Tag.ToString())); };
                     reloadItem.Click += async delegate { await ReloadAccount_ClickAsync(Int32.Parse(accountButton.Tag.ToString())); };
+                    copyPasswordItem.Click += delegate { copyPasswordToClipboard(Int32.Parse(accountButton.Tag.ToString())); };
 
                     // TaskbarIcon Context Menu Item
                     MenuItem taskBarIconLoginItem = new MenuItem();
@@ -1249,6 +1253,11 @@ namespace SAM
         {
             WindowState = WindowState.Normal;
             Focus();
+        }
+
+        private void copyPasswordToClipboard(int index)
+        {
+            Clipboard.SetText(decryptedAccounts[index].Password);
         }
 
         #endregion
