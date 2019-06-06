@@ -62,6 +62,20 @@ namespace SAM
             return (List<Account>)obj;
         }
 
+        public static void ImportAccountsFromList(List<Account> accounts)
+        {
+            try
+            {
+                MainWindow.encryptedAccounts = MainWindow.encryptedAccounts.Concat(accounts).ToList();
+                Serialize(MainWindow.encryptedAccounts);
+                MessageBox.Show("Account(s) imported!");
+            }
+            catch (Exception m)
+            {
+                MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         public static void ImportAccountFile()
         {
             OpenFileDialog dialog = new OpenFileDialog

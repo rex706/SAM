@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using Win32Interop.WinHandles;
 using System.Windows.Threading;
+using System.Net;
+using Newtonsoft.Json.Linq;
 
 namespace SAM
 {
@@ -1182,7 +1184,7 @@ namespace SAM
             SortAccounts(1);
         }
 
-        private void ImportMenuItem_Click(object sender, RoutedEventArgs e)
+        private void ImportFromFileMenuItem_Click(object sender, RoutedEventArgs e)
         {
             Utils.ImportAccountFile();
             RefreshWindow();
@@ -1311,6 +1313,14 @@ namespace SAM
                     ShowInTaskbar = true;
                     break;
             }
+        }
+
+        private void ImportDelimitedTextMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var importDelimitedWindow = new ImportDelimited(eKey);
+            importDelimitedWindow.ShowDialog();
+
+            RefreshWindow();
         }
     }
 }

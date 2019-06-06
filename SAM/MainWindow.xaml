@@ -100,7 +100,10 @@
                 <Menu x:Name="FileMenu"  Margin="0,1,0,0">
                     <MenuItem x:Name="FileMenuItem" Header="File">
                         <MenuItem Header="New" Click="NewButton_Click" />
-                        <MenuItem Header="Import" Click="ImportMenuItem_Click" />
+                        <MenuItem Header="Import">
+                            <MenuItem Header="From DAT File" Click="ImportFromFileMenuItem_Click" />
+                            <MenuItem Header="Delimiter Separated" Click="ImportDelimitedTextMenuItem_Click" />
+                        </MenuItem>
                         <MenuItem Header="Export">
                             <MenuItem Header="All" Click="ExportAllMenuItem_Click"/>
                             <MenuItem Header="Select" Click="ExportSelectedMenuItem_Click" />
