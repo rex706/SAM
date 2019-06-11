@@ -15,8 +15,6 @@ using System.Threading.Tasks;
 using System.Threading;
 using Win32Interop.WinHandles;
 using System.Windows.Threading;
-using System.Net;
-using Newtonsoft.Json.Linq;
 
 namespace SAM
 {
@@ -166,7 +164,7 @@ namespace SAM
 
                 if (messageBoxResult == MessageBoxResult.Yes)
                 {
-                    settingsFile.Write("PasswordProtect", ShowPasswordProtectionDialog(), "Settings");
+                    settingsFile.Write("PasswordProtect", VerifyAndSetPassword(), "Settings");
                 }
             }
             // Else load settings from preexisting file.
@@ -192,7 +190,7 @@ namespace SAM
             }
         }
 
-        private string ShowPasswordProtectionDialog()
+        private string VerifyAndSetPassword()
         {
             MessageBoxResult messageBoxResult = MessageBoxResult.No;
 
@@ -213,6 +211,47 @@ namespace SAM
             }
 
             return "false";
+        }
+
+        private bool VerifyPassword()
+        {
+            MessageBoxResult messageBoxResult = MessageBoxResult.No;
+
+            while (messageBoxResult == MessageBoxResult.No)
+            {
+                var passwordDialog = new PasswordWindow();
+
+                if (passwordDialog.ShowDialog() == true && passwordDialog.PasswordText != "")
+                {
+                    try
+                    {
+                        encryptedAccounts = Utils.PasswordDeserialize("info.dat", passwordDialog.PasswordText);
+                        messageBoxResult = MessageBoxResult.None;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                        messageBoxResult = MessageBox.Show("Invalid Password", "Invalid", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+
+                        if (messageBoxResult == MessageBoxResult.Cancel)
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            VerifyPassword();
+                        }
+                    }
+
+                    return true;
+                }
+                else if (passwordDialog.PasswordText == "")
+                {
+                    messageBoxResult = MessageBox.Show("No password detected, are you sure?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                }
+            }
+
+            return false;
         }
 
         private void LoadSettings()
@@ -303,7 +342,7 @@ namespace SAM
 
             if (settingsFile.KeyExists("PasswordProtect", "Settings") && settingsFile.Read("PasswordProtect", "Settings").ToLower().Equals("true") && (encryptedAccounts == null || encryptedAccounts.Count == 0))
             {
-                ShowPasswordProtectionDialog();
+                VerifyAndSetPassword();
             }
             else if (!settingsFile.KeyExists("PasswordProtect", "Settings") || encryptedAccounts == null || encryptedAccounts.Count == 0)
             {
@@ -345,8 +384,10 @@ namespace SAM
                             {
                                 Close();
                             }
-
-                            ShowPasswordProtectionDialog();
+                            else
+                            {
+                                VerifyAndSetPassword();
+                            }
                         }
                     }
                 }
@@ -1321,6 +1362,27 @@ namespace SAM
             importDelimitedWindow.ShowDialog();
 
             RefreshWindow();
+        }
+
+        private void ExposeCredentialsMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            // TODO: Check if password protected and prompt for password. Show exposed info window if successful.
+            // If no password protection is used, prompt to confirm user wants to expose credentials.
+
+            MessageBoxResult messageBoxResult = MessageBox.Show("Are you sure you want to expose all account credentials in plain text?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (messageBoxResult == MessageBoxResult.No)
+            {
+                return;
+            }
+
+            if (settingsFile.KeyExists("PasswordProtect", "Settings") && settingsFile.Read("PasswordProtect", "Settings").ToLower().Equals("true") && !VerifyPassword())
+            {
+                return;
+            }
+
+            var exposedCredentialsWindow = new ExposedInfoWindow(decryptedAccounts);
+            exposedCredentialsWindow.ShowDialog();
         }
     }
 }

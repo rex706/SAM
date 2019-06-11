@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:SAM"
         mc:Ignorable="d"
         Title="Login Info" Height="540" Width="300" Background="#FF333638" ResizeMode="NoResize" Icon="steam_alt-10.ico" WindowStartupLocation="CenterScreen" Topmost="True">

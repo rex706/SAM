@@ -108,6 +108,7 @@
                             <MenuItem Header="All" Click="ExportAllMenuItem_Click"/>
                             <MenuItem Header="Select" Click="ExportSelectedMenuItem_Click" />
                         </MenuItem>
+                        <MenuItem Header="Expose Credentials" Click="ExposeCredentialsMenuItem_Click"/>
                         <Separator />
                         <MenuItem Header="Exit" Click="ExitMenuItem_Click" />
                     </MenuItem>

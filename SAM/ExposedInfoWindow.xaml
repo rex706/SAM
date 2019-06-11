@@ -1,14 +1,13 @@
-﻿<Window x:Name="ImportDelimitedWindow" x:Class="SAM.ImportDelimited"
+﻿<Window x:Class="SAM.ExposedInfoWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SAM"
         mc:Ignorable="d"
-        Title="Import" Height="400" Width="300" Background="#FF333638" Icon="steam_alt-10.ico" Topmost="True" WindowStartupLocation="CenterScreen" MinWidth="250" MinHeight="200">
+        Title="Account Credentials" Height="400" Width="300" Background="#FF333638" MinWidth="250" MinHeight="200" Topmost="True" WindowStartupLocation="CenterScreen">
     <Grid>
-        <Button x:Name="ImportButton" Content="Import" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom" Width="75" Height="30" Click="ImportButton_Click"/>
-        <TextBox x:Name="DelimitedAccountsTextBox" Margin="10,40,10,50" TextWrapping="NoWrap" Text="" Background="#FF0F0F0F" Foreground="White" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
+        <TextBox x:Name="DelimitedAccountsTextBox" Margin="10,40,10,10" TextWrapping="NoWrap" Text="" Background="#FF0F0F0F" Foreground="White" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" IsReadOnly="True"/>
         <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Delimiter:" VerticalAlignment="Top" Foreground="White"/>
         <TextBox x:Name="DelimiterCharacterTextBox" HorizontalAlignment="Left" Height="23" Margin="66,7,0,0" TextWrapping="Wrap" Text=":" VerticalAlignment="Top" Width="25" TextAlignment="Center" MaxLength="1" Background="#FF0F0F0F" Foreground="White" TextChanged="DelimiterCharacterTextBox_TextChanged"/>
         <TextBlock x:Name="PreviewTextBlock" HorizontalAlignment="Right" Margin="0,10,10,0" TextWrapping="Wrap" Text="account:password" VerticalAlignment="Top" Foreground="White"/>
