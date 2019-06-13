@@ -148,6 +148,7 @@ namespace SAM
         {
             string registryValue = string.Empty;
             RegistryKey localKey = null;
+
             if (Environment.Is64BitOperatingSystem)
             {
                 localKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64);
@@ -166,6 +167,7 @@ namespace SAM
             {
 
             }
+
             return registryValue;
         }
 
@@ -328,6 +330,29 @@ namespace SAM
             }
 
             return "";
+        }
+
+        public static string FormatTimespanString(TimeSpan time)
+        {
+            int years = time.Days / 365;
+            int days = time.Days;
+
+            if (years > 0)
+            {
+                days = (time.Days / (years * 365));
+            }
+
+            return years.ToString("D2") + ":" + days.ToString("D2") + ":" + time.ToString(@"hh\:mm\:ss");
+        }
+
+        public static bool AccountHasActiveTimeout(Account account)
+        {
+            if (account.Timeout == null || account.Timeout == new DateTime() || account.Timeout.CompareTo(DateTime.Now) <= 0)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SAM"
         mc:Ignorable="d"
-        Title="Account Credentials" Height="400" Width="300" Background="#FF333638" MinWidth="250" MinHeight="200" Topmost="True" WindowStartupLocation="CenterScreen">
+        Title="Account Credentials" Height="400" Width="300" Background="#FF333638" MinWidth="250" MinHeight="200" Topmost="True" WindowStartupLocation="CenterScreen" Icon="steam_alt-10.ico">
     <Grid>
         <TextBox x:Name="DelimitedAccountsTextBox" Margin="10,40,10,10" TextWrapping="NoWrap" Text="" Background="#FF0F0F0F" Foreground="White" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" IsReadOnly="True"/>
         <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Delimiter:" VerticalAlignment="Top" Foreground="White"/>

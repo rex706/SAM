@@ -114,6 +114,9 @@
       <DependentUpon>ExposedInfoWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="IniFile.cs" />
+    <Compile Include="SetTimeoutWindow.xaml.cs">
+      <DependentUpon>SetTimeoutWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="StringCipher.cs" />
     <Compile Include="TextDialog.xaml.cs">
       <DependentUpon>TextDialog.xaml</DependentUpon>
@@ -145,6 +148,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="SetTimeoutWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="TextDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Win32Interop.WinHandles;
 using System.Windows.Threading;
+using System.Windows.Media.Effects;
 
 namespace SAM
 {
@@ -37,6 +38,8 @@ namespace SAM
         public string AviUrl { get; set; }
 
         public string SteamId { get; set; }
+
+        public DateTime Timeout { get; set; }
 
         public string Description { get; set; }
     }
@@ -77,6 +80,7 @@ namespace SAM
         private static Dictionary<int, Account> exportAccounts;
 
         private static List<Thread> loginThreads;
+        private static List<System.Timers.Timer> timeoutTimers;
 
         private static string updateCheckUrl = "https://raw.githubusercontent.com/rex706/SAM/master/latest.txt";
 
@@ -445,6 +449,17 @@ namespace SAM
 
         private void PostDeserializedRefresh(bool seedAcc)
         {
+            // Dispose and reinitialize timers each time grid is refreshed as to not clog up more resources than necessary. 
+            if (timeoutTimers != null)
+            {
+                foreach (System.Timers.Timer timer in timeoutTimers)
+                {
+                    timer.Dispose();
+                }
+            }
+
+            timeoutTimers = new List<System.Timers.Timer>();
+
             if (encryptedAccounts != null)
             {
                 int bCounter = 0;
@@ -476,11 +491,12 @@ namespace SAM
                             steamId = account.SteamId;
                         }
 
-                        decryptedAccounts.Add(new Account() { Name = account.Name, Alias = account.Alias, Password = tempPass, SharedSecret = temp2fa, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, SteamId = steamId, Description = account.Description });
+                        decryptedAccounts.Add(new Account() { Name = account.Name, Alias = account.Alias, Password = tempPass, SharedSecret = temp2fa, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, SteamId = steamId, Timeout = account.Timeout, Description = account.Description });
                     }
 
                     Button accountButton = new Button();
                     TextBlock accountText = new TextBlock();
+                    TextBlock timeoutTextBlock = new TextBlock();
 
                     accountButton.Style = (Style)Resources["SAMButtonStyle"];
 
@@ -504,19 +520,35 @@ namespace SAM
 
                     accountButton.Height = height;
                     accountButton.Width = width;
-                    accountText.Height = 30;
+                    accountText.Height = 15;
                     accountText.Width = 100;
+                    timeoutTextBlock.Height = 15;
+                    timeoutTextBlock.Width = 100;
 
                     accountButton.HorizontalAlignment = HorizontalAlignment.Left;
                     accountButton.VerticalAlignment = VerticalAlignment.Top;
                     accountText.HorizontalAlignment = HorizontalAlignment.Left;
                     accountText.VerticalAlignment = VerticalAlignment.Top;
+                    timeoutTextBlock.HorizontalAlignment = HorizontalAlignment.Left;
+                    timeoutTextBlock.VerticalAlignment = VerticalAlignment.Top;
 
                     accountButton.Margin = new Thickness(15 + (xCounter * widthOffset), (yCounter * heightOffset) + 14, 0, 0);
                     accountText.Margin = new Thickness(15 + (xCounter * widthOffset), (yCounter * heightOffset) + 113, 0, 0);
+                    timeoutTextBlock.Margin = new Thickness(15 + (xCounter * widthOffset), (yCounter * heightOffset) + 95, 0, 0);
+                    timeoutTextBlock.Padding = new Thickness(13, 0, 0, 0);
 
                     accountButton.BorderBrush = null;
                     accountText.Foreground = new SolidColorBrush(Colors.White);
+
+                    timeoutTextBlock.Foreground = new SolidColorBrush(Colors.White);
+                    timeoutTextBlock.Background = new SolidColorBrush(new Color { A = 100, R = 0, G = 0, B = 0 });
+                    timeoutTextBlock.Effect = new DropShadowEffect
+                    {
+                        Color = new Color { A = 255, R = 0, G = 0, B = 0 },
+                        Direction = 320,
+                        ShadowDepth = 0,
+                        Opacity = 1
+                    };
 
                     if (account.ProfUrl == "" || account.AviUrl == null || account.AviUrl == "" || account.AviUrl == " ")
                     {
@@ -563,18 +595,51 @@ namespace SAM
                     MenuItem editItem = new MenuItem();
                     MenuItem exportItem = new MenuItem();
                     MenuItem reloadItem = new MenuItem();
+                    MenuItem setTimeoutItem = new MenuItem();
+                    MenuItem clearTimeoutItem = new MenuItem();
                     MenuItem copyPasswordItem = new MenuItem();
 
                     deleteItem.Header = "Delete";
                     editItem.Header = "Edit";
                     exportItem.Header = "Export";
                     reloadItem.Header = "Reload";
+                    setTimeoutItem.Header = "Set Timeout";
+                    clearTimeoutItem.Header = "Clear Timeout";
                     copyPasswordItem.Header = "Copy Password";
+
+                    if (account.Timeout == null || account.Timeout == new DateTime())
+                    {
+                        clearTimeoutItem.IsEnabled = false;
+                    }
+                    else
+                    {
+                        // Set up timer event to update timeout label
+                        var timeLeft = account.Timeout - DateTime.Now;
+
+                        System.Timers.Timer timeoutTimer = new System.Timers.Timer();
+                        timeoutTimers.Add(timeoutTimer);
+
+                        timeoutTimer.Elapsed += delegate
+                        {
+                            this.Dispatcher.Invoke(() =>
+                            {
+                                TimeoutTimer_Tick(Int32.Parse(accountButton.Tag.ToString()), timeoutTextBlock, timeoutTimer);
+                            });
+                        };
+                        timeoutTimer.Interval = 1000;
+                        timeoutTimer.Enabled = true;
+                        timeoutTextBlock.Text = Utils.FormatTimespanString(timeLeft);
+                        timeoutTextBlock.Visibility = Visibility.Visible;
+
+                        buttonGrid.Children.Add(timeoutTextBlock);
+                    }
 
                     accountContext.Items.Add(editItem);
                     accountContext.Items.Add(deleteItem);
                     accountContext.Items.Add(exportItem);
                     accountContext.Items.Add(reloadItem);
+                    accountContext.Items.Add(setTimeoutItem);
+                    accountContext.Items.Add(clearTimeoutItem);
                     accountContext.Items.Add(copyPasswordItem);
 
                     accountButton.ContextMenu = accountContext;
@@ -584,6 +649,8 @@ namespace SAM
                     editItem.Click += delegate { EditEntry(accountButton); };
                     exportItem.Click += delegate { ExportAccount(Int32.Parse(accountButton.Tag.ToString())); };
                     reloadItem.Click += async delegate { await ReloadAccount_ClickAsync(Int32.Parse(accountButton.Tag.ToString())); };
+                    setTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(Int32.Parse(accountButton.Tag.ToString())); };
+                    clearTimeoutItem.Click += delegate { AccountButtonClearTimeout_Click(Int32.Parse(accountButton.Tag.ToString())); };
                     copyPasswordItem.Click += delegate { copyPasswordToClipboard(Int32.Parse(accountButton.Tag.ToString())); };
 
                     // TaskbarIcon Context Menu Item
@@ -1116,7 +1183,22 @@ namespace SAM
             if (sender is Button btn)
             {
                 // Login with clicked button's index, which stored in Tag.
-                Login(Int32.Parse(btn.Tag.ToString()));
+
+                int index = Int32.Parse(btn.Tag.ToString());
+
+                if (!Utils.AccountHasActiveTimeout(encryptedAccounts[index]))
+                {
+                    Login(index);
+                }
+                else
+                {
+                    MessageBoxResult result = MessageBox.Show("Account timeout is active!\nLogin anyway?", "Timeout", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        Login(index);
+                    }
+                }
             }
         }
 
@@ -1126,6 +1208,52 @@ namespace SAM
             {
                 Login(Int32.Parse(item.Tag.ToString()));
             }
+        }
+
+        private void AccountButtonSetTimeout_Click(int index)
+        {
+            // TODO: if account already has timeout enabled, disable it and return.
+            // Otherwise display timeout window and calculate date/time of selection and save.
+
+            var setTimeoutWindow = new SetTimeoutWindow(encryptedAccounts[index].Timeout);
+            setTimeoutWindow.ShowDialog();
+
+            if (setTimeoutWindow.timeout != null && setTimeoutWindow.timeout != new DateTime())
+            {
+                encryptedAccounts[index].Timeout = setTimeoutWindow.timeout;
+
+            }
+            else
+            {
+
+            }
+
+            if (IsPasswordProtected())
+            {
+                Utils.PasswordSerialize(encryptedAccounts, ePassword);
+            }
+            else
+            {
+                Utils.Serialize(encryptedAccounts);
+            }
+
+            RefreshWindow();
+        }
+
+        private void AccountButtonClearTimeout_Click(int index)
+        {
+            encryptedAccounts[index].Timeout = new DateTime();
+
+            if (IsPasswordProtected())
+            {
+                Utils.PasswordSerialize(encryptedAccounts, ePassword);
+            }
+            else
+            {
+                Utils.Serialize(encryptedAccounts);
+            }
+
+            RefreshWindow();
         }
 
         private void AccountButtonExport_Click(object sender, RoutedEventArgs e)
@@ -1366,23 +1494,39 @@ namespace SAM
 
         private void ExposeCredentialsMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Check if password protected and prompt for password. Show exposed info window if successful.
-            // If no password protection is used, prompt to confirm user wants to expose credentials.
-
             MessageBoxResult messageBoxResult = MessageBox.Show("Are you sure you want to expose all account credentials in plain text?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
-            if (messageBoxResult == MessageBoxResult.No)
-            {
-                return;
-            }
-
-            if (settingsFile.KeyExists("PasswordProtect", "Settings") && settingsFile.Read("PasswordProtect", "Settings").ToLower().Equals("true") && !VerifyPassword())
+            if (messageBoxResult == MessageBoxResult.No || (IsPasswordProtected() && !VerifyPassword()))
             {
                 return;
             }
 
             var exposedCredentialsWindow = new ExposedInfoWindow(decryptedAccounts);
             exposedCredentialsWindow.ShowDialog();
+        }
+
+        private bool IsPasswordProtected()
+        {
+            return settingsFile.KeyExists("PasswordProtect", "Settings") && settingsFile.Read("PasswordProtect", "Settings").ToLower().Equals("true");
+        }
+
+        void TimeoutTimer_Tick(int index, TextBlock timeoutLabel, System.Timers.Timer timeoutTimer)
+        {
+            var timeLeft = encryptedAccounts[index].Timeout - DateTime.Now;
+
+            if (timeLeft.CompareTo(TimeSpan.Zero) <= 0)
+            {
+                timeoutTimer.Stop();
+                timeoutTimer.Dispose();
+
+                timeoutLabel.Visibility = Visibility.Hidden;
+                AccountButtonClearTimeout_Click(index);
+            }
+            else
+            {
+                timeoutLabel.Text = Utils.FormatTimespanString(timeLeft);
+                timeoutLabel.Visibility = Visibility.Visible;
+            }
         }
     }
 }
