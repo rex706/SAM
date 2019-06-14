@@ -454,6 +454,7 @@ namespace SAM
             {
                 foreach (System.Timers.Timer timer in timeoutTimers)
                 {
+                    timer.Stop();
                     timer.Dispose();
                 }
             }
@@ -541,7 +542,7 @@ namespace SAM
                     accountText.Foreground = new SolidColorBrush(Colors.White);
 
                     timeoutTextBlock.Foreground = new SolidColorBrush(Colors.White);
-                    timeoutTextBlock.Background = new SolidColorBrush(new Color { A = 100, R = 0, G = 0, B = 0 });
+                    timeoutTextBlock.Background = new SolidColorBrush(new Color { A = 128, R = 255, G = 0, B = 0 });
                     timeoutTextBlock.Effect = new DropShadowEffect
                     {
                         Color = new Color { A = 255, R = 0, G = 0, B = 0 },
@@ -607,7 +608,7 @@ namespace SAM
                     clearTimeoutItem.Header = "Clear Timeout";
                     copyPasswordItem.Header = "Copy Password";
 
-                    if (account.Timeout == null || account.Timeout == new DateTime())
+                    if (!Utils.AccountHasActiveTimeout(account))
                     {
                         clearTimeoutItem.IsEnabled = false;
                     }
@@ -858,6 +859,16 @@ namespace SAM
 
         private void Login(int index)
         {
+            if (Utils.AccountHasActiveTimeout(encryptedAccounts[index]))
+            { 
+                MessageBoxResult result = MessageBox.Show("Account timeout is active!\nLogin anyway?", "Timeout", MessageBoxButton.YesNo, MessageBoxImage.Warning, 0, MessageBoxOptions.DefaultDesktopOnly);
+
+                if (result == MessageBoxResult.No)
+                {
+                    return;
+                }
+            }
+
             foreach (Thread loginThread in loginThreads)
             {
                 loginThread.Abort();
@@ -1185,20 +1196,7 @@ namespace SAM
                 // Login with clicked button's index, which stored in Tag.
 
                 int index = Int32.Parse(btn.Tag.ToString());
-
-                if (!Utils.AccountHasActiveTimeout(encryptedAccounts[index]))
-                {
-                    Login(index);
-                }
-                else
-                {
-                    MessageBoxResult result = MessageBox.Show("Account timeout is active!\nLogin anyway?", "Timeout", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        Login(index);
-                    }
-                }
+                Login(index);
             }
         }
 
@@ -1212,16 +1210,12 @@ namespace SAM
 
         private void AccountButtonSetTimeout_Click(int index)
         {
-            // TODO: if account already has timeout enabled, disable it and return.
-            // Otherwise display timeout window and calculate date/time of selection and save.
-
             var setTimeoutWindow = new SetTimeoutWindow(encryptedAccounts[index].Timeout);
             setTimeoutWindow.ShowDialog();
 
             if (setTimeoutWindow.timeout != null && setTimeoutWindow.timeout != new DateTime())
             {
                 encryptedAccounts[index].Timeout = setTimeoutWindow.timeout;
-
             }
             else
             {
