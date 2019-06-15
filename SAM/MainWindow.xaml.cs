@@ -182,7 +182,7 @@ namespace SAM
             // Load window with account buttons.
             RefreshWindow();
 
-            // Login to auto log account if enabled and steam is not already open.
+            // Login to auto log account if enabled and Steam is not already open.
             Process[] SteamProc = Process.GetProcessesByName("Steam");
 
             if (SteamProc.Length == 0)
@@ -243,7 +243,7 @@ namespace SAM
                         }
                         else
                         {
-                            VerifyPassword();
+                            return VerifyPassword();
                         }
                     }
 

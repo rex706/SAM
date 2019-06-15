@@ -1,9 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Net;
-using System.Threading.Tasks;
-using System.Windows;
-using Newtonsoft.Json.Linq;
+﻿using System.Windows;
 
 namespace SAM
 {
