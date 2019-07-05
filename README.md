@@ -31,7 +31,7 @@ Easily log in and switch between Steam accounts.
 1.2.6.0
 * Set account timeouts through account context menu.
 * Support for importing character delimited accounts in bulk.
-        - Shared secret optional.
+    - Shared secret optional.
 * Copy password from account context menu.
 * Expose all account credentials in delimited format through file drop down menu.
 	- Password required if protected.
