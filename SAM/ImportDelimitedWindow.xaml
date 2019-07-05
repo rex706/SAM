@@ -5,12 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SAM"
         mc:Ignorable="d"
-        Title="Import" Height="400" Width="300" Background="#FF333638" Icon="steam_alt-10.ico" Topmost="True" WindowStartupLocation="CenterScreen" MinWidth="250" MinHeight="200">
+        Title="Import" Height="400" Width="400" Background="#FF333638" Icon="steam_alt-10.ico" Topmost="True" WindowStartupLocation="CenterScreen" MinWidth="250" MinHeight="200">
     <Grid>
         <Button x:Name="ImportButton" Content="Import" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom" Width="75" Height="30" Click="ImportButton_Click"/>
         <TextBox x:Name="DelimitedAccountsTextBox" Margin="10,40,10,50" TextWrapping="NoWrap" Text="" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
         <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Delimiter:" VerticalAlignment="Top" Foreground="White"/>
         <TextBox x:Name="DelimiterCharacterTextBox" HorizontalAlignment="Left" Height="23" Margin="66,7,0,0" TextWrapping="Wrap" Text=":" VerticalAlignment="Top" Width="25" TextAlignment="Center" MaxLength="1" TextChanged="DelimiterCharacterTextBox_TextChanged"/>
-        <TextBlock x:Name="PreviewTextBlock" HorizontalAlignment="Right" Margin="0,10,10,0" TextWrapping="Wrap" Text="account:password" VerticalAlignment="Top" Foreground="White"/>
+        <TextBlock x:Name="PreviewTextBlock" HorizontalAlignment="Right" Margin="0,10,10,0" TextWrapping="Wrap" Text="account:password:sharedSecret" VerticalAlignment="Top" Foreground="White"/>
     </Grid>
 </Window>

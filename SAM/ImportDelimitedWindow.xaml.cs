@@ -40,7 +40,6 @@ namespace SAM
 
             foreach (string line in lines)
             {
-                // TODO: collect account info for import.
                 string[] info = line.Split(delimiter);
 
                 if (info.Length < 2)
@@ -49,7 +48,15 @@ namespace SAM
                     return;
                 }
 
-                accounts.Add(new Account { Name = info[0], Password = StringCipher.Encrypt(info[1], eKey)});
+                // Shared secret.
+                if (info[2] != null)
+                {
+                    accounts.Add(new Account { Name = info[0], Password = StringCipher.Encrypt(info[1], eKey), SharedSecret = StringCipher.Encrypt(info[2], eKey) });
+                }
+                else
+                {
+                    accounts.Add(new Account { Name = info[0], Password = StringCipher.Encrypt(info[1], eKey) });
+                }
             }
 
             Utils.ImportAccountsFromList(accounts);
@@ -61,7 +68,7 @@ namespace SAM
         {
             if (PreviewTextBlock != null && DelimiterCharacterTextBox.Text.Length > 0)
             {
-                PreviewTextBlock.Text = "account" + DelimiterCharacterTextBox.Text + "password";
+                PreviewTextBlock.Text = "account" + DelimiterCharacterTextBox.Text + "password" + DelimiterCharacterTextBox.Text + "sharedSecret";
             }
         }
     }

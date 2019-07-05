@@ -25,7 +25,14 @@ namespace SAM
 
             foreach (Account account in decryptedAccounts)
             {
-                accountListBuilder.AppendLine(account.Name + DelimiterCharacterTextBox.Text + account.Password);
+                if (account.SharedSecret != null)
+                {
+                    accountListBuilder.AppendLine(account.Name + DelimiterCharacterTextBox.Text + account.Password + DelimiterCharacterTextBox.Text + account.SharedSecret);
+                }
+                else
+                {
+                    accountListBuilder.AppendLine(account.Name + DelimiterCharacterTextBox.Text + account.Password);
+                }
             }
 
             DelimitedAccountsTextBox.Text = accountListBuilder.ToString();
@@ -35,7 +42,7 @@ namespace SAM
         {
             if (PreviewTextBlock != null && DelimiterCharacterTextBox.Text.Length > 0)
             {
-                PreviewTextBlock.Text = "account" + DelimiterCharacterTextBox.Text + "password";
+                PreviewTextBlock.Text = "account" + DelimiterCharacterTextBox.Text + "password" + DelimiterCharacterTextBox.Text + "sharedSecret";
                 RefreshAccountsList();
             }
         }

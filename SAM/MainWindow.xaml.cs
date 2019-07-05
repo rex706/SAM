@@ -989,7 +989,7 @@ namespace SAM
             // Wait a bit for the window to fully initialize just in case.
             Thread.Sleep(2000);
 
-            // Generate 2FA code, then send it to the client
+            // Generate 2FA code, then send it to the client.
             Console.WriteLine("It is idle now, typing code...");
 
             SetForegroundWindow(steamLoginWindow.RawPtr);
@@ -1019,7 +1019,7 @@ namespace SAM
             //SendMessage(steamGuardWindow.RawPtr, WM_KEYDOWN, VK_RETURN, IntPtr.Zero);
             //PostMessage(steamGuardWindow.RawPtr, WM_KEYDOWN, (IntPtr)VK_RETURN, IntPtr.Zero);
 
-            // Need a little pause here to more reliably check for popup later
+            // Need a little pause here to more reliably check for popup later.
             Thread.Sleep(3000);
 
             // Check if we still have a 2FA popup, which means the previous one failed.
