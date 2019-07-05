@@ -25,6 +25,9 @@ Easily log in and switch between Steam accounts.
 **CHANGELOG**
 
 **Latest version:** 
+1.2.6.1
+* If shared secret is an empty string, do not display the delimiter character when credentials are exposed. 
+
 1.2.6.0
 * Set account timeouts through account context menu.
 * Support for importing character delimited accounts in bulk.

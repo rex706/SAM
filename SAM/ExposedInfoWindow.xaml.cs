@@ -25,7 +25,7 @@ namespace SAM
 
             foreach (Account account in decryptedAccounts)
             {
-                if (account.SharedSecret != null)
+                if (account.SharedSecret != null && account.SharedSecret != string.Empty )
                 {
                     accountListBuilder.AppendLine(account.Name + DelimiterCharacterTextBox.Text + account.Password + DelimiterCharacterTextBox.Text + account.SharedSecret);
                 }
