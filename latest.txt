@@ -1,4 +1,4 @@
 1.2.6.0
 SAM.exe
-https://github.com/rex706/SAM/releases/download/v1.2.6.0/SAM.exe
+https://drive.google.com/uc?export=download&id=0B2byNRcR0k4vblQxNWNEakNISFU
 SAM.exe
