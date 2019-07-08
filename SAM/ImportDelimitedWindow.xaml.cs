@@ -49,7 +49,7 @@ namespace SAM
                 }
 
                 // Shared secret.
-                if (info[2] != null)
+                if (info.Length > 2 && info[2] != null && info[2] != string.Empty)
                 {
                     accounts.Add(new Account { Name = info[0], Password = StringCipher.Encrypt(info[1], eKey), SharedSecret = StringCipher.Encrypt(info[2], eKey) });
                 }
