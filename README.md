@@ -19,12 +19,15 @@ Easily log in and switch between Steam accounts.
 * Start minimized.
 * Minimize to tray.
 * Data password protection.
+* Set\clear account timeouts.
 
 ------------------------------------
 
 **CHANGELOG**
 
-**Latest version:** 
+**Latest version:** 1.2.6.2
+* Fix importing delimited accounts without a shared secret.
+
 1.2.6.1
 * If shared secret is an empty string, do not display the delimiter character when credentials are exposed. 
 
