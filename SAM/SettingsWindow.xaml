@@ -15,7 +15,7 @@
                 <Grid>
                     <Label x:Name="NumPerRowLabel" Content="Accounts Per Row" HorizontalAlignment="Left" Margin="55,7,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
                     <xctk:IntegerUpDown x:Name="accountsPerRowSpinBox" Minimum="1" Maximum="999" HorizontalAlignment="Left" Height="23" Margin="10,10,0,0" VerticalAlignment="Top" Width="45" TextAlignment="Center" ToolTip="Adjust the number of accounts displayed per row" BorderBrush="#FF707070"/>
-                    <xctk:IntegerUpDown x:Name="buttonSizeSpinBox" Minimum="50" Maximum="200" HorizontalAlignment="Left" Height="23" Margin="10,38,0,0" VerticalAlignment="Top" Width="45" TextAlignment="Center" ToolTip="Adjust the number of accounts displayed per row" BorderBrush="#FF707070"/>
+                    <xctk:IntegerUpDown x:Name="buttonSizeSpinBox" Minimum="50" Maximum="200" HorizontalAlignment="Left" Height="23" Margin="10,38,0,0" VerticalAlignment="Top" Width="45" TextAlignment="Center" ToolTip="Adjust the size of the account buttons in pixels" BorderBrush="#FF707070"/>
                     <CheckBox x:Name="startupCheckBox" Content="Start with Windows" HorizontalAlignment="Left" Margin="178,11,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
                     <CheckBox x:Name="startupMinCheckBox" Content="Start Minimized" HorizontalAlignment="Left" Margin="178,31,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
                     <CheckBox x:Name="minimizeToTrayCheckBox" Content="Minimize To Tray" HorizontalAlignment="Left" Margin="178,51,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
