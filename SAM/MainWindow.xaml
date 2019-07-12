@@ -41,7 +41,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Name="border" 
-                            BorderThickness="1"
+                            BorderThickness="2"
                             Padding="4,2" 
                             BorderBrush="DarkGray" 
                             CornerRadius="3" 
@@ -63,7 +63,7 @@
     </Window.Resources>
     <Grid x:Name="MainGrid">
         <Border x:Name="BackgroundBorder" Background="Transparent" Margin="0,20,0,0" Padding="0,20,0,0"/>
-        <Grid x:Name="NewButtonGrid" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="14,26,0,0">
+        <Grid x:Name="NewButtonGrid" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="25,57,0,0">
             <Button x:Name="NewButton" Margin="0" Width="64" Click="NewButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="63" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{x:Null}" RenderTransformOrigin="0.5,0.5">
                 <Button.Style>
                     <Style TargetType="{x:Type Button}">
@@ -90,8 +90,8 @@
                     </Style>
                 </Button.Style>
             </Button>
-            <Button x:Name="ExportButton" Content="Export" HorizontalAlignment="Left" Margin="27,64,0,0" VerticalAlignment="Top" Height="30" Width="75" Click="ExportButton_Click" Visibility="Hidden"/>
-            <Button x:Name="CancelExportButton" Content="Cancel" HorizontalAlignment="Left" Margin="27,95,0,0" VerticalAlignment="Top" Height="30" Width="75" Click="CancelExportButton_Click" Visibility="Hidden"/>
+            <Button x:Name="ExportButton" Content="Export" HorizontalAlignment="Center" Margin="0,0,0,25" VerticalAlignment="Center" Height="23" Width="50" Click="ExportButton_Click" Visibility="Hidden"/>
+            <Button x:Name="CancelExportButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,25,0,0" VerticalAlignment="Center" Height="23" Width="50" Click="CancelExportButton_Click" Visibility="Hidden"/>
         </Grid>
         <DockPanel>
             <Border DockPanel.Dock="Top" Height="20" VerticalAlignment="Top" Background="#FFF0F0F0">

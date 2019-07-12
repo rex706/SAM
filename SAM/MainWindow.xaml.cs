@@ -15,7 +15,6 @@ using System.Threading.Tasks;
 using System.Threading;
 using Win32Interop.WinHandles;
 using System.Windows.Threading;
-using System.Windows.Media.Effects;
 
 namespace SAM
 {
@@ -562,7 +561,7 @@ namespace SAM
                     timeoutTextBlock.FontSize = buttonSize / 8;
                     timeoutTextBlock.HorizontalAlignment = HorizontalAlignment.Center;
                     timeoutTextBlock.VerticalAlignment = VerticalAlignment.Center;
-                    timeoutTextBlock.Padding = new Thickness(0, 0, 0, 2);
+                    timeoutTextBlock.Padding = new Thickness(0, 0, 0, 1);
                     timeoutTextBlock.TextAlignment = TextAlignment.Center;
                     timeoutTextBlock.Foreground = new SolidColorBrush(Colors.White);
                     timeoutTextBlock.Background = new SolidColorBrush(new Color { A = 128, R = 255, G = 0, B = 0 });
@@ -615,7 +614,7 @@ namespace SAM
                     accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
                     accountButton.PreviewMouseLeftButtonUp += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
                     //accountButton.PreviewMouseMove += new System.Windows.Input.MouseEventHandler(AccountButton_MouseMove);
-                    //accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+                    accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
                     accountButton.MouseEnter += delegate { AccountButton_MouseEnter(accountButton, accountText); };
                     accountButton.MouseLeave += delegate { AccountButton_MouseLeave(accountButton, accountText); };
 
@@ -730,8 +729,7 @@ namespace SAM
                 Resize(newHeight, newWidth);
 
                 // Adjust new account and export buttons
-                Thickness newThickness = new Thickness((xCounter * buttonOffset) + 5, (yCounter * buttonOffset) + 25, 0, 0);
-                NewButtonGrid.Margin = newThickness;
+                NewButtonGrid.Margin = new Thickness((xCounter * buttonOffset) + 5, (yCounter * buttonOffset) + 25, 0, 0);
             }
         }
 
@@ -1415,10 +1413,12 @@ namespace SAM
             FileMenuItem.IsEnabled = false;
             EditMenuItem.IsEnabled = false;
 
-            IEnumerable<Button> buttonCollection = buttonGrid.Children.OfType<Button>();
+            IEnumerable<Grid> buttonGridCollection = buttonGrid.Children.OfType<Grid>();
 
-            foreach (Button accountButton in buttonCollection)
+            foreach (Grid accountButtonGrid in buttonGridCollection)
             {
+                Button accountButton = accountButtonGrid.Children.OfType<Button>().FirstOrDefault();
+
                 accountButton.Style = (Style)Resources["ExportButtonStyle"];
                 accountButton.Click -= new RoutedEventHandler(AccountButton_Click);
                 accountButton.Click += new RoutedEventHandler(AccountButtonExport_Click);
@@ -1467,10 +1467,12 @@ namespace SAM
             FileMenuItem.IsEnabled = true;
             EditMenuItem.IsEnabled = true;
 
-            IEnumerable<Button> buttonCollection = buttonGrid.Children.OfType<Button>();
+            IEnumerable<Grid> buttonGridCollection = buttonGrid.Children.OfType<Grid>();
 
-            foreach (Button accountButton in buttonCollection)
+            foreach (Grid accountButtonGrid in buttonGridCollection)
             {
+                Button accountButton = accountButtonGrid.Children.OfType<Button>().FirstOrDefault();
+
                 accountButton.Style = (Style)Resources["SAMButtonStyle"];
                 accountButton.Click -= new RoutedEventHandler(AccountButtonExport_Click);
                 accountButton.Click += new RoutedEventHandler(AccountButton_Click);
