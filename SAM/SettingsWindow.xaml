@@ -8,9 +8,9 @@
         mc:Ignorable="d"
         Title="Settings" Height="251" Width="350" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" Icon="steam_alt-10.ico" Background="#FF333638">
     <Grid>
-        <Button Name="OKButton" Content="OK" Margin="20,0,0,10" Click="OKButton_Click" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="38" Width="141" />
-        <Button Name="CancelButton" Content="Cancel"  Click="CancelButton_Click" Margin="0,0,20,10" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="38" Width="142" />
-        <TabControl Height="142" VerticalAlignment="Top" Background="{x:Null}" Margin="10,10,10,0">
+        <Button Name="OKButton" Content="OK" Margin="80,0,0,10" Click="OKButton_Click" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="23" Width="85" />
+        <Button Name="CancelButton" Content="Cancel"  Click="CancelButton_Click" Margin="0,0,80,10" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="23" Width="85" />
+        <TabControl Background="{x:Null}" Margin="10,10,10,0" VerticalAlignment="Top" Height="156">
             <TabItem Header="General">
                 <Grid>
                     <Label x:Name="NumPerRowLabel" Content="Accounts Per Row" HorizontalAlignment="Left" Margin="55,7,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
@@ -34,9 +34,9 @@
             </TabItem>
             <TabItem Header="Steam">
                 <Grid>
-                    <TextBox x:Name="SteamPathTextBox" Height="23" Text="" Margin="10,34,31,57" IsReadOnly="True"/>
+                    <TextBox x:Name="SteamPathTextBox" Height="23" Text="" Margin="10,34,36,57" IsReadOnly="True"/>
                     <Button x:Name="ChangePathButton" Content="..." Margin="0,34,6,57" Click="ChangePathButton_Click" HorizontalAlignment="Right" Width="25" Height="23"/>
-                    <Button x:Name="AutoPathButton" Content="Auto" Width="75" Margin="103,69,104,17" Click="AutoPathButton_Click"/>
+                    <Button x:Name="AutoPathButton" Content="Auto" Width="75" Margin="103,69,104,17" Click="AutoPathButton_Click" Height="23"/>
                     <TextBlock Text="Steam File Path" HorizontalAlignment="Center" Margin="0,13,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
                 </Grid>
             </TabItem>

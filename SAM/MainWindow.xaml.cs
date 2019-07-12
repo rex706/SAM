@@ -548,33 +548,24 @@ namespace SAM
                     accountButton.VerticalAlignment = VerticalAlignment.Center;
 
                     accountText.Width = buttonSize;
+                    accountText.FontSize = buttonSize / 8;
                     accountText.HorizontalAlignment = HorizontalAlignment.Center;
                     accountText.VerticalAlignment = VerticalAlignment.Bottom;
                     accountText.Margin = new Thickness(0, 0, 0, 7);
+                    accountText.Padding = new Thickness(0, 0, 0, 1);
                     accountText.TextAlignment = TextAlignment.Center;
                     accountText.Foreground = new SolidColorBrush(Colors.White);
                     accountText.Background = new SolidColorBrush(new Color { A = 128, R = 0, G = 0, B = 0 });
-                    accountText.Effect = new DropShadowEffect
-                    {
-                        Color = new Color { A = 255, R = 0, G = 0, B = 0 },
-                        Direction = 320,
-                        ShadowDepth = 0,
-                        Opacity = 1
-                    };
+                    accountText.Visibility = Visibility.Collapsed;
 
                     timeoutTextBlock.Width = buttonSize;
+                    timeoutTextBlock.FontSize = buttonSize / 8;
                     timeoutTextBlock.HorizontalAlignment = HorizontalAlignment.Center;
                     timeoutTextBlock.VerticalAlignment = VerticalAlignment.Center;
+                    timeoutTextBlock.Padding = new Thickness(0, 0, 0, 2);
                     timeoutTextBlock.TextAlignment = TextAlignment.Center;
                     timeoutTextBlock.Foreground = new SolidColorBrush(Colors.White);
                     timeoutTextBlock.Background = new SolidColorBrush(new Color { A = 128, R = 255, G = 0, B = 0 });
-                    timeoutTextBlock.Effect = new DropShadowEffect
-                    {
-                        Color = new Color { A = 255, R = 0, G = 0, B = 0 },
-                        Direction = 320,
-                        ShadowDepth = 0,
-                        Opacity = 1
-                    };
 
                     accountButton.Background = Brushes.Transparent;
 
@@ -624,7 +615,9 @@ namespace SAM
                     accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
                     accountButton.PreviewMouseLeftButtonUp += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
                     //accountButton.PreviewMouseMove += new System.Windows.Input.MouseEventHandler(AccountButton_MouseMove);
-                    accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+                    //accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+                    accountButton.MouseEnter += delegate { AccountButton_MouseEnter(accountButton, accountText); };
+                    accountButton.MouseLeave += delegate { AccountButton_MouseLeave(accountButton, accountText); };
 
                     ContextMenu accountContext = new ContextMenu();
 
@@ -1191,6 +1184,16 @@ namespace SAM
                 btn.Opacity = 1;
                 dragging = false;
             }
+        }
+
+        private void AccountButton_MouseLeave(Button accountButton, TextBlock accountText)
+        {
+            accountText.Visibility = Visibility.Collapsed;
+        }
+
+        private void AccountButton_MouseEnter(Button accountButton, TextBlock accountText)
+        {
+            accountText.Visibility = Visibility.Visible;
         }
 
         private void AccountButton_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
