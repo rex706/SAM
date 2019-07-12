@@ -15,11 +15,11 @@ Easily log in and switch between Steam accounts.
 * Encrypts saved user password.
 * Adjust number of accounts per row.
 * Import/Export accounts.
-* Start with windows.
+* Start with Windows.
 * Start minimized.
 * Minimize to tray.
 * Data password protection.
-* Set\clear account timeouts.
+* Set/clear account timeouts.
 
 ------------------------------------
 
