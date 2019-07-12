@@ -15,7 +15,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Name="border" 
-                            BorderThickness="1"
+                            BorderThickness="2"
                             Padding="4,2" 
                             BorderBrush="DarkGray" 
                             CornerRadius="3" 
@@ -61,40 +61,38 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Grid x:Name="MainGrid" RenderTransformOrigin="0.484,0.505">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition Width="0*"/>
-        </Grid.ColumnDefinitions>
-        <Border x:Name="BackgroundBorder" Background="Transparent" Margin="0,25,0,0" Padding="0,25,0,0"/>
-        <Button x:Name="NewButton" Margin="30,57,0,0" Width="64" Click="NewButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="63" HorizontalAlignment="Left" VerticalAlignment="Top" Background="{x:Null}" RenderTransformOrigin="0.5,0.5">
-            <Button.Style>
-                <Style TargetType="{x:Type Button}">
-                    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="Button">
-                                <Grid Background="{TemplateBinding Background}">
-                                    <Rectangle Fill="Transparent"/>
-                                    <Image x:Name="img" Width="64" Height="64" Source="4ncBpopTA.png"/>
-                                </Grid>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="img" Property="Source" Value="4ncBpopTA_glow.png"/>
-                                    </Trigger>
-                                    <Trigger Property="IsPressed" Value="True">
-                                        <Setter TargetName="img" Property="Opacity" Value="0.5" />
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </Button.Style>
-        </Button>
-        <Button x:Name="ExportButton" Content="Export" HorizontalAlignment="Left" Margin="27,64,0,0" VerticalAlignment="Top" Height="30" Width="75" Click="ExportButton_Click" Visibility="Hidden"/>
-        <Button x:Name="CancelExportButton" Content="Cancel" HorizontalAlignment="Left" Margin="27,95,0,0" VerticalAlignment="Top" Height="30" Width="75" Click="CancelExportButton_Click" Visibility="Hidden"/>
+    <Grid x:Name="MainGrid">
+        <Border x:Name="BackgroundBorder" Background="Transparent" Margin="0,20,0,0" Padding="0,20,0,0"/>
+        <Grid x:Name="NewButtonGrid" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="14,26,0,0">
+            <Button x:Name="NewButton" Margin="0" Width="64" Click="NewButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="63" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{x:Null}" RenderTransformOrigin="0.5,0.5">
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}">
+                        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Grid Background="{TemplateBinding Background}">
+                                        <Rectangle Fill="Transparent"/>
+                                        <Image x:Name="img" Width="64" Height="64" Source="4ncBpopTA.png"/>
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="img" Property="Source" Value="4ncBpopTA_glow.png"/>
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter TargetName="img" Property="Opacity" Value="0.5" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Button x:Name="ExportButton" Content="Export" HorizontalAlignment="Left" Margin="27,64,0,0" VerticalAlignment="Top" Height="30" Width="75" Click="ExportButton_Click" Visibility="Hidden"/>
+            <Button x:Name="CancelExportButton" Content="Cancel" HorizontalAlignment="Left" Margin="27,95,0,0" VerticalAlignment="Top" Height="30" Width="75" Click="CancelExportButton_Click" Visibility="Hidden"/>
+        </Grid>
         <DockPanel>
             <Border DockPanel.Dock="Top" Height="20" VerticalAlignment="Top" Background="#FFF0F0F0">
                 <Menu x:Name="FileMenu"  Margin="0,1,0,0">
@@ -128,7 +126,7 @@
                     </MenuItem>
                 </Menu>
             </Border>
-            <Grid x:Name="buttonGrid" Height="141" VerticalAlignment="Top" Width="131" RenderTransformOrigin="0.457,0.511"/>
+            <Grid x:Name="buttonGrid"/>
         </DockPanel>
         <tb:TaskbarIcon IconSource="steam_alt-10.ico" ToolTipText="SAM">
             <tb:TaskbarIcon.ContextMenu>

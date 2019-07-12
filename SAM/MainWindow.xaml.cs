@@ -93,6 +93,8 @@ namespace SAM
         private static string accPerRow = "0";
         private static string steamPath;
 
+        private static int buttonSize = 100;
+
         private static bool selected = false;
         private static int selectedAcc = -1;
         private static bool recent = false;
@@ -155,6 +157,7 @@ namespace SAM
                 settingsFile = new IniFile("SAMSettings.ini");
                 settingsFile.Write("Version", AssemblyVer, "System");
                 settingsFile.Write("AccountsPerRow", "5", "Settings");
+                settingsFile.Write("ButtonSize", "100", "Settings");
                 settingsFile.Write("StartWithWindows", "false", "Settings");
                 settingsFile.Write("StartMinimized", "false", "Settings");
                 settingsFile.Write("MinimizeToTray", "false", "Settings");
@@ -278,6 +281,21 @@ namespace SAM
                 }
             }
 
+            if (!settingsFile.KeyExists("ButtonSize", "Settings"))
+            {
+                settingsFile.Write("ButtonSize", "100", "Settings");
+            }
+            else
+            {
+                string buttonSizeString = settingsFile.Read("ButtonSize", "Settings");
+
+                if (!Regex.IsMatch(buttonSizeString, @"^\d+$") || !Int32.TryParse(buttonSizeString, out buttonSize) || buttonSize < 50 || buttonSize > 200)
+                {
+                    settingsFile.Write("ButtonSize", "100", "Settings");
+                    buttonSize = 100;
+                }
+            }
+
             Utils.CheckSteamPath();
 
             // If the recent autolog entry exists and is set to true.
@@ -362,6 +380,9 @@ namespace SAM
             buttonGrid.Children.Clear();
             TaskBarIconLoginContextMenu.Items.Clear();
             TaskBarIconLoginContextMenu.IsEnabled = false;
+
+            NewButtonGrid.Height = buttonSize;
+            NewButtonGrid.Width = buttonSize;
 
             // Check if info.dat exists
             if (File.Exists("info.dat"))
@@ -467,11 +488,7 @@ namespace SAM
                 int xCounter = 0;
                 int yCounter = 0;
 
-                int height = 100;
-                int width = 100;
-
-                double heightOffset = height + (height * 0.2);
-                double widthOffset = width + (width * 0.2);
+                int buttonOffset = buttonSize + 5;
 
                 // Create new button and textblock for each account
                 foreach (var account in encryptedAccounts)
@@ -495,16 +512,15 @@ namespace SAM
                         decryptedAccounts.Add(new Account() { Name = account.Name, Alias = account.Alias, Password = tempPass, SharedSecret = temp2fa, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, SteamId = steamId, Timeout = account.Timeout, Description = account.Description });
                     }
 
+                    Grid accountButtonGrid = new Grid();
+
                     Button accountButton = new Button();
                     TextBlock accountText = new TextBlock();
                     TextBlock timeoutTextBlock = new TextBlock();
+                    Border accountImage = new Border();
 
                     accountButton.Style = (Style)Resources["SAMButtonStyle"];
-
                     accountButton.Tag = bCounter.ToString();
-
-                    //accountButton.Name = account.Name;
-                    //accountText.Name = account.Name + "Label";
 
                     if (account.Alias != null && account.Alias.Length > 0)
                     {
@@ -517,30 +533,39 @@ namespace SAM
 
                     // If there is a description, set up tooltip.
                     if (account.Description != null && account.Description.Length > 0)
+                    {
                         accountButton.ToolTip = account.Description;
+                    }
+                        
+                    accountButtonGrid.HorizontalAlignment = HorizontalAlignment.Left;
+                    accountButtonGrid.VerticalAlignment = VerticalAlignment.Top;
+                    accountButtonGrid.Margin = new Thickness((xCounter * buttonOffset), (yCounter * buttonOffset), 0, 0);
 
-                    accountButton.Height = height;
-                    accountButton.Width = width;
-                    accountText.Height = 15;
-                    accountText.Width = 100;
-                    timeoutTextBlock.Height = 15;
-                    timeoutTextBlock.Width = 100;
-
-                    accountButton.HorizontalAlignment = HorizontalAlignment.Left;
-                    accountButton.VerticalAlignment = VerticalAlignment.Top;
-                    accountText.HorizontalAlignment = HorizontalAlignment.Left;
-                    accountText.VerticalAlignment = VerticalAlignment.Top;
-                    timeoutTextBlock.HorizontalAlignment = HorizontalAlignment.Left;
-                    timeoutTextBlock.VerticalAlignment = VerticalAlignment.Top;
-
-                    accountButton.Margin = new Thickness(15 + (xCounter * widthOffset), (yCounter * heightOffset) + 14, 0, 0);
-                    accountText.Margin = new Thickness(15 + (xCounter * widthOffset), (yCounter * heightOffset) + 113, 0, 0);
-                    timeoutTextBlock.Margin = new Thickness(15 + (xCounter * widthOffset), (yCounter * heightOffset) + 95, 0, 0);
-                    timeoutTextBlock.Padding = new Thickness(13, 0, 0, 0);
-
+                    accountButton.Height = buttonSize;
+                    accountButton.Width = buttonSize;
                     accountButton.BorderBrush = null;
-                    accountText.Foreground = new SolidColorBrush(Colors.White);
+                    accountButton.HorizontalAlignment = HorizontalAlignment.Center;
+                    accountButton.VerticalAlignment = VerticalAlignment.Center;
 
+                    accountText.Width = buttonSize;
+                    accountText.HorizontalAlignment = HorizontalAlignment.Center;
+                    accountText.VerticalAlignment = VerticalAlignment.Bottom;
+                    accountText.Margin = new Thickness(0, 0, 0, 7);
+                    accountText.TextAlignment = TextAlignment.Center;
+                    accountText.Foreground = new SolidColorBrush(Colors.White);
+                    accountText.Background = new SolidColorBrush(new Color { A = 128, R = 0, G = 0, B = 0 });
+                    accountText.Effect = new DropShadowEffect
+                    {
+                        Color = new Color { A = 255, R = 0, G = 0, B = 0 },
+                        Direction = 320,
+                        ShadowDepth = 0,
+                        Opacity = 1
+                    };
+
+                    timeoutTextBlock.Width = buttonSize;
+                    timeoutTextBlock.HorizontalAlignment = HorizontalAlignment.Center;
+                    timeoutTextBlock.VerticalAlignment = VerticalAlignment.Center;
+                    timeoutTextBlock.TextAlignment = TextAlignment.Center;
                     timeoutTextBlock.Foreground = new SolidColorBrush(Colors.White);
                     timeoutTextBlock.Background = new SolidColorBrush(new Color { A = 128, R = 255, G = 0, B = 0 });
                     timeoutTextBlock.Effect = new DropShadowEffect
@@ -551,20 +576,33 @@ namespace SAM
                         Opacity = 1
                     };
 
+                    accountButton.Background = Brushes.Transparent;
+
+                    accountImage.Height = buttonSize;
+                    accountImage.Width = buttonSize;
+                    accountImage.HorizontalAlignment = HorizontalAlignment.Center;
+                    accountImage.VerticalAlignment = VerticalAlignment.Center;
+                    accountImage.CornerRadius = new CornerRadius(3);
+
                     if (account.ProfUrl == "" || account.AviUrl == null || account.AviUrl == "" || account.AviUrl == " ")
                     {
-                        accountButton.Content = account.Name;
-                        accountButton.Background = Brushes.LightGray;
+                        if (account.Alias != null && account.Alias.Length > 0)
+                        {
+                            accountButton.Content = account.Alias;
+                        }
+                        else
+                        {
+                            accountButton.Content = account.Name;
+                        }
                     }
                     else
                     {
                         try
                         {
-                            ImageBrush brush1 = new ImageBrush();
+                            ImageBrush imageBrush = new ImageBrush();
                             BitmapImage image1 = new BitmapImage(new Uri(account.AviUrl));
-                            brush1.ImageSource = image1;
-                            accountButton.Background = brush1;
-                            buttonGrid.Children.Add(accountText);
+                            imageBrush.ImageSource = image1;
+                            accountImage.Background = imageBrush;
                         }
                         catch (Exception m)
                         {
@@ -581,8 +619,6 @@ namespace SAM
                             }
                         }
                     }
-
-                    buttonGrid.Children.Add(accountButton);
 
                     accountButton.Click += new RoutedEventHandler(AccountButton_Click);
                     accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
@@ -608,6 +644,8 @@ namespace SAM
                     clearTimeoutItem.Header = "Clear Timeout";
                     copyPasswordItem.Header = "Copy Password";
 
+                    accountButtonGrid.Children.Add(accountImage);
+
                     if (!Utils.AccountHasActiveTimeout(account))
                     {
                         clearTimeoutItem.IsEnabled = false;
@@ -632,9 +670,12 @@ namespace SAM
                         timeoutTextBlock.Text = Utils.FormatTimespanString(timeLeft);
                         timeoutTextBlock.Visibility = Visibility.Visible;
 
-                        buttonGrid.Children.Add(timeoutTextBlock);
+                        accountButtonGrid.Children.Add(timeoutTextBlock);
                     }
 
+                    accountButtonGrid.Children.Add(accountText);
+                    accountButtonGrid.Children.Add(accountButton);
+                    
                     accountContext.Items.Add(editItem);
                     accountContext.Items.Add(deleteItem);
                     accountContext.Items.Add(exportItem);
@@ -653,6 +694,8 @@ namespace SAM
                     setTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(Int32.Parse(accountButton.Tag.ToString())); };
                     clearTimeoutItem.Click += delegate { AccountButtonClearTimeout_Click(Int32.Parse(accountButton.Tag.ToString())); };
                     copyPasswordItem.Click += delegate { copyPasswordToClipboard(Int32.Parse(accountButton.Tag.ToString())); };
+
+                    buttonGrid.Children.Add(accountButtonGrid);
 
                     // TaskbarIcon Context Menu Item
                     MenuItem taskBarIconLoginItem = new MenuItem();
@@ -681,35 +724,21 @@ namespace SAM
                     }
                 }
 
-                int xVal = 0;
-                int newHeight;
-
                 // Adjust window size and info positions
+                int xVal = Int32.Parse(accPerRow);
+
                 if (yCounter == 0)
                 {
                     xVal = xCounter + 1;
-                    newHeight = 190;
-                    buttonGrid.Height = 141;
-                }
-                else
-                {
-                    xVal = Int32.Parse(accPerRow);
-                    newHeight = 185 + (120 * yCounter);
-                    buttonGrid.Height = 141 * (120 + yCounter);
                 }
 
-                int newWidth = (xVal * 120) + 25;
-
+                int newHeight = (buttonOffset * (yCounter + 1)) + 65;
+                int newWidth = (buttonOffset * xVal) + 21;
                 Resize(newHeight, newWidth);
-                buttonGrid.Width = newWidth;
 
                 // Adjust new account and export buttons
-                Thickness newThickness = new Thickness(33 + (xCounter * widthOffset), (yCounter * heightOffset) + 52, 0, 0);
-                Thickness offsetThickness = new Thickness(33 + (xCounter * widthOffset), (yCounter * heightOffset) + 92, 0, 0);
-
-                NewButton.Margin = newThickness;
-                ExportButton.Margin = newThickness;
-                CancelExportButton.Margin = offsetThickness;
+                Thickness newThickness = new Thickness((xCounter * buttonOffset) + 5, (yCounter * buttonOffset) + 25, 0, 0);
+                NewButtonGrid.Margin = newThickness;
             }
         }
 

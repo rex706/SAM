@@ -19,14 +19,16 @@ namespace SAM
         {
             get
             {
-                if (!Regex.IsMatch(textBox.Text, @"^\d+$") || Int32.Parse(textBox.Text) < 1)
+                if (!Regex.IsMatch(accountsPerRowSpinBox.Text, @"^\d+$") || Int32.Parse(accountsPerRowSpinBox.Text) < 1)
                     return "1";
                 else
-                    return textBox.Text;
+                    return accountsPerRowSpinBox.Text;
 
             }
-            set { textBox.Text = value; }
+            set { accountsPerRowSpinBox.Text = value; }
         }
+
+        public int buttonSize { get; set; }
 
         public string Password { get; set; }
 
@@ -56,7 +58,8 @@ namespace SAM
             if (System.IO.File.Exists("SAMSettings.ini"))
             {
                 settingsFile = new IniFile("SAMSettings.ini");
-                textBox.Text = settingsFile.Read("AccountsPerRow", "Settings");
+                accountsPerRowSpinBox.Text = settingsFile.Read("AccountsPerRow", "Settings");
+                buttonSizeSpinBox.Text = settingsFile.Read("ButtonSize", "Settings");
                 start = settingsFile.Read("StartWithWindows", "Settings");
                 minimized = settingsFile.Read("StartMinimized", "Settings");
                 minimizeToTray = settingsFile.Read("MinimizeToTray", "Settings");
@@ -169,6 +172,7 @@ namespace SAM
                 settingsFile.Write("PasswordProtect", "false", "Settings");
 
             settingsFile.Write("AccountsPerRow", apr, "Settings");
+            settingsFile.Write("ButtonSize", buttonSizeSpinBox.Text, "Settings");
 
             if (startupCheckBox.IsChecked == true)
             {
@@ -217,10 +221,10 @@ namespace SAM
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!Regex.IsMatch(textBox.Text, @"^\d+$") || Int32.Parse(textBox.Text) < 1)
+            if (!Regex.IsMatch(accountsPerRowSpinBox.Text, @"^\d+$") || Int32.Parse(accountsPerRowSpinBox.Text) < 1)
                 SaveSettings("1");
             else
-                SaveSettings(textBox.Text);
+                SaveSettings(accountsPerRowSpinBox.Text);
 
             Close();
         }
