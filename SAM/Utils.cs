@@ -12,11 +12,27 @@ using Gameloop.Vdf;
 using Gameloop.Vdf.Linq;
 using HtmlAgilityPack;
 using System.Text;
+using Win32Interop.WinHandles;
+using System.Diagnostics;
+using System.Threading;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
 
 namespace SAM
 {
     class Utils
     {
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern int GetWindowThreadProcessId(IntPtr handle, out int processId);
+
+        [DllImport("user32.dll")]
+        static extern IntPtr AttachThreadInput(IntPtr idAttach, IntPtr idAttachTo, bool fAttach);
+
+        [DllImport("user32.dll")]
+        static extern IntPtr GetFocus();
+
+        readonly static char[] specialChars = { '{', '}', '(', ')', '[', ']', '+', '^', '%', '~' };
+
         private static string apiKey = "API_KEY";
 
         public static void Serialize(List<Account> accounts)
@@ -165,10 +181,36 @@ namespace SAM
             }
             catch (NullReferenceException nre)
             {
-
+                Console.WriteLine(nre.Message);
             }
 
             return registryValue;
+        }
+
+        public static void ClearAutoLoginUserKeyValues()
+        {
+            string registryValue = string.Empty;
+            RegistryKey localKey = null;
+
+            if (Environment.Is64BitOperatingSystem)
+            {
+                localKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64);
+            }
+            else
+            {
+                localKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32);
+            }
+
+            try
+            {
+                localKey = localKey.OpenSubKey(@"Software\\Valve\\Steam", true);
+                localKey.SetValue("AutoLoginUser", "", RegistryValueKind.String);
+                localKey.SetValue("RememberPassword", 0, RegistryValueKind.DWord);
+            }
+            catch (NullReferenceException nre)
+            {
+                Console.WriteLine(nre.Message);
+            }
         }
 
         public static string CheckSteamPath()
@@ -353,6 +395,65 @@ namespace SAM
             }
 
             return true;
+        }
+
+        public static WindowHandle GetSteamLoginWindow()
+        {
+            return TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().Contains("Steam Login") && !wh.GetWindowText().Contains("-") && !wh.GetWindowText().Contains("—"));
+        }
+
+        public static WindowHandle GetSteamGuardWindow()
+        {
+            return TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - ") || wh.GetWindowText().StartsWith("Steam Guard — "));
+        }
+
+        public static WindowHandle GetSteamWarningWindow()
+        {
+            return TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam - ") || wh.GetWindowText().StartsWith("Steam — "));
+        }
+
+        public static Process WaitForSteamProcess(WindowHandle windowHandle)
+        {
+            Process process = null;
+
+            // Wait for valid process to wait for input idle.
+            Console.WriteLine("Waiting for it to be idle.");
+            while (process == null)
+            {
+                int procId = 0;
+                GetWindowThreadProcessId(windowHandle.RawPtr, out procId);
+
+                // Wait for valid process id from handle.
+                while (procId == 0)
+                {
+                    Thread.Sleep(10);
+                    GetWindowThreadProcessId(windowHandle.RawPtr, out procId);
+                }
+
+                try
+                {
+                    process = Process.GetProcessById(procId);
+                }
+                catch
+                {
+                    process = null;
+                }
+            }
+
+            return process;
+        }
+
+        public static bool IsSpecialCharacter(char c)
+        {
+            foreach (char special in specialChars)
+            {
+                if (c.Equals(special))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

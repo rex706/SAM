@@ -40,6 +40,7 @@ namespace SAM
         private string minimized;
         private string minimizeToTray;
         private string passwordProtect;
+        private string rememberPassword;
         private string recent;
         private string recentAcc;
         private string selected;
@@ -64,6 +65,7 @@ namespace SAM
                 minimized = settingsFile.Read("StartMinimized", "Settings");
                 minimizeToTray = settingsFile.Read("MinimizeToTray", "Settings");
                 passwordProtect = settingsFile.Read("PasswordProtect", "Settings");
+                rememberPassword = settingsFile.Read("RememberPassword", "Settings");
                 recent = settingsFile.Read("Recent", "AutoLog");
                 recentAcc = settingsFile.Read("RecentAcc", "AutoLog");
                 selected = settingsFile.Read("Selected", "AutoLog");
@@ -87,6 +89,11 @@ namespace SAM
                 if (passwordProtect.ToLower().Equals("true"))
                 {
                     passwordProtectCheckBox.IsChecked = true;
+                }
+
+                if (rememberPassword.ToLower().Equals("true"))
+                {
+                    rememberLoginPasswordCheckBox.IsChecked = true;
                 }
 
                 if (recent.ToLower().Equals("true"))
@@ -169,8 +176,19 @@ namespace SAM
                 Decrypt = true;
             }
             else if (passwordProtectCheckBox.IsChecked == false)
+            {
                 settingsFile.Write("PasswordProtect", "false", "Settings");
+            }
 
+            if (rememberLoginPasswordCheckBox.IsChecked == true)
+            {
+                settingsFile.Write("RememberPassword", "true", "Settings");
+            }
+            else
+            {
+                settingsFile.Write("RememberPassword", "false", "Settings");
+            }
+            
             settingsFile.Write("AccountsPerRow", apr, "Settings");
             settingsFile.Write("ButtonSize", buttonSizeSpinBox.Text, "Settings");
 
@@ -341,16 +359,6 @@ namespace SAM
             {
                 MessageBox.Show(m.Message);
             }
-        }
-
-        private void PasswordProtectCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            
-        }
-
-        private void PasswordProtectCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            
         }
     }
 }

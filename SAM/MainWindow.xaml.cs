@@ -3,18 +3,19 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Imaging;
-using System.Linq;
+using System.Windows.Interop;
 using System.Windows.Media;
-using System.Text.RegularExpressions;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using System.Threading;
-using Win32Interop.WinHandles;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Win32Interop.WinHandles;
 
 namespace SAM
 {
@@ -58,9 +59,6 @@ namespace SAM
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern IntPtr SetActiveWindow(IntPtr hWnd);
-
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, IntPtr lParam);
 
@@ -71,9 +69,8 @@ namespace SAM
         public const int WM_SETTEXT = 0x000C;
         public const int WM_KEYDOWN = 0x0100;
         public const int WM_CHAR = 0x0102;
-
         public const int VK_RETURN = 0x0D;
-
+        
         public static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
         private static Dictionary<int, Account> exportAccounts;
@@ -91,6 +88,7 @@ namespace SAM
 
         private static string accPerRow = "0";
         private static string steamPath;
+        private static bool rememberPassword = false;
 
         private static int buttonSize = 100;
 
@@ -370,6 +368,15 @@ namespace SAM
                 settingsFile.Write("PasswordProtect", "false", "Settings");
             }
 
+            if (settingsFile.KeyExists("RememberPassword", "Settings") && settingsFile.Read("RememberPassword", "Settings").ToLower().Equals("true"))
+            {
+                rememberPassword = true;
+            }
+            else if (!settingsFile.KeyExists("RememberPassword", "Settings"))
+            {
+                settingsFile.Write("RememberPassword", "false", "Settings");
+            }
+
             settingsFile.Write("Version", AssemblyVer, "System");
         }
 
@@ -558,7 +565,7 @@ namespace SAM
                     accountText.Visibility = Visibility.Collapsed;
 
                     timeoutTextBlock.Width = buttonSize;
-                    timeoutTextBlock.FontSize = buttonSize / 8;
+                    timeoutTextBlock.FontSize = buttonSize / 7;
                     timeoutTextBlock.HorizontalAlignment = HorizontalAlignment.Center;
                     timeoutTextBlock.VerticalAlignment = VerticalAlignment.Center;
                     timeoutTextBlock.Padding = new Thickness(0, 0, 0, 1);
@@ -924,6 +931,9 @@ namespace SAM
                 Console.WriteLine("No steam process found or steam failed to shutdown.");
             }
 
+            // Make sure Username field is empty and Remember Password checkbox is unchecked.
+            Utils.ClearAutoLoginUserKeyValues();
+
             // Start Steam process with the selected path.
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
@@ -932,8 +942,7 @@ namespace SAM
                 FileName = steamPath + "steam.exe",
                 WorkingDirectory = steamPath,
                 WindowStyle = ProcessWindowStyle.Hidden,
-                Arguments = "-login " + decryptedAccounts[index].Name + " " + decryptedAccounts[index].Password
-            };
+            }; 
 
             try
             {
@@ -945,30 +954,87 @@ namespace SAM
                 return;
             }
 
+            Task.Run(() => TypeCredentials(index, 0));
+        }
+
+        private void TypeCredentials(int index, int tryCount)
+        {
+            loginThreads.Add(Thread.CurrentThread);
+
+            WindowHandle steamLoginWindow = Utils.GetSteamLoginWindow();
+
+            while (!steamLoginWindow.IsValid)
+            {
+                Thread.Sleep(10);
+                steamLoginWindow = Utils.GetSteamLoginWindow();
+            }
+
+            Process steamLoginProcess = Utils.WaitForSteamProcess(steamLoginWindow);
+            steamLoginProcess.WaitForInputIdle();
+
+            Thread.Sleep(2000);
+
+            SetForegroundWindow(steamLoginWindow.RawPtr);
+
+            Thread.Sleep(100);
+            System.Windows.Forms.SendKeys.SendWait(decryptedAccounts[index].Name);
+            Thread.Sleep(100);
+            System.Windows.Forms.SendKeys.SendWait("{TAB}");
+            Thread.Sleep(100);
+
+            foreach (char c in decryptedAccounts[index].Password.ToCharArray())
+            {
+                SetForegroundWindow(steamLoginWindow.RawPtr);
+
+                if (Utils.IsSpecialCharacter(c))
+                {
+                    System.Windows.Forms.SendKeys.SendWait("{" + c.ToString() + "}");
+                }
+                else
+                {
+                    System.Windows.Forms.SendKeys.SendWait(c.ToString());
+                }
+
+                Thread.Sleep(10);
+            }
+
+            if (rememberPassword)
+            {
+                SetForegroundWindow(steamLoginWindow.RawPtr);
+
+                Thread.Sleep(100);
+                System.Windows.Forms.SendKeys.SendWait("{TAB}");
+                Thread.Sleep(100);
+                System.Windows.Forms.SendKeys.SendWait(" ");
+            }
+
+            SetForegroundWindow(steamLoginWindow.RawPtr);
+
+            Thread.Sleep(100);
+            System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+
             // Only handle 2FA if shared secret was entered.
             if (decryptedAccounts[index].SharedSecret != null && decryptedAccounts[index].SharedSecret.Length > 0)
             {
-                Task.Run(() => Type2FA(index, 0));
+                Type2FA(index, 0);
             }
         }
 
         private void Type2FA(int index, int tryCount)
         {
-            loginThreads.Add(Thread.CurrentThread);
-
             // Need both the Steam Login and Steam Guard windows.
             // Can't focus the Steam Guard window directly.
-            var steamLoginWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().Contains("Steam") && !wh.GetWindowText().Contains("-") && !wh.GetWindowText().Contains("—"));
-            var steamGuardWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - ") || wh.GetWindowText().StartsWith("Steam Guard — "));
+            var steamLoginWindow = Utils.GetSteamLoginWindow();
+            var steamGuardWindow = Utils.GetSteamGuardWindow();
 
             while (!steamLoginWindow.IsValid || !steamGuardWindow.IsValid)
             {
                 Thread.Sleep(10);
-                steamLoginWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().Contains("Steam") && !wh.GetWindowText().Contains("-") && !wh.GetWindowText().Contains("—"));
-                steamGuardWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - ") || wh.GetWindowText().StartsWith("Steam Guard — "));
+                steamLoginWindow = Utils.GetSteamLoginWindow();
+                steamGuardWindow = Utils.GetSteamGuardWindow();
 
                 // Check for Steam warning window.
-                var steamWarningWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam - ") || wh.GetWindowText().StartsWith("Steam — "));
+                var steamWarningWindow = Utils.GetSteamWarningWindow();
                 if (steamWarningWindow.IsValid)
                 {
                     //Cancel the 2FA process since Steam connection is likely unavailable. 
@@ -978,32 +1044,7 @@ namespace SAM
 
             Console.WriteLine("Found windows.");
 
-            Process steamGuardProcess = null;
-
-            // Wait for valid process to wait for input idle.
-            Console.WriteLine("Waiting for it to be idle.");
-            while (steamGuardProcess == null)
-            {
-                int procId = 0;
-                GetWindowThreadProcessId(steamGuardWindow.RawPtr, out procId);
-
-                // Wait for valid process id from handle.
-                while (procId == 0)
-                {
-                    Thread.Sleep(10);
-                    GetWindowThreadProcessId(steamGuardWindow.RawPtr, out procId);
-                }
-
-                try
-                {
-                    steamGuardProcess = Process.GetProcessById(procId);
-                }
-                catch
-                {
-                    steamGuardProcess = null;
-                }
-            }
-
+            Process steamGuardProcess = Utils.WaitForSteamProcess(steamGuardWindow);
             steamGuardProcess.WaitForInputIdle();
 
             // Wait a bit for the window to fully initialize just in case.
@@ -1013,15 +1054,13 @@ namespace SAM
             Console.WriteLine("It is idle now, typing code...");
 
             SetForegroundWindow(steamLoginWindow.RawPtr);
-            //SetActiveWindow(steamLoginWindow.RawPtr);
 
             Thread.Sleep(10);
 
             foreach (char c in Generate2FACode(decryptedAccounts[index].SharedSecret).ToCharArray())
             {
                 SetForegroundWindow(steamLoginWindow.RawPtr);
-                //SetActiveWindow(steamLoginWindow.RawPtr);
-
+                
                 Thread.Sleep(10);
 
                 // Can also send keys to login window handle, but nothing works unless it is the foreground window.
@@ -1031,7 +1070,6 @@ namespace SAM
             }
 
             SetForegroundWindow(steamLoginWindow.RawPtr);
-            //SetActiveWindow(steamLoginWindow.RawPtr);
 
             Thread.Sleep(10);
 
@@ -1043,7 +1081,7 @@ namespace SAM
             Thread.Sleep(3000);
 
             // Check if we still have a 2FA popup, which means the previous one failed.
-            steamGuardWindow = TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - ") || wh.GetWindowText().StartsWith("Steam Guard — "));
+            steamGuardWindow = Utils.GetSteamGuardWindow();
 
             if (tryCount < 2 && steamGuardWindow.IsValid)
             {
