@@ -308,16 +308,18 @@ namespace SAM
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
+
                 // Attempt to find Steam Id from web api.
-                Uri vanityUri = new Uri("http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + apiKey + "&vanityurl=" + userName);
+                //Uri vanityUri = new Uri("http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + apiKey + "&vanityurl=" + userName);
 
-                using (WebClient client = new WebClient())
-                {
-                    string vanityJson = await client.DownloadStringTaskAsync(vanityUri);
-                    dynamic vanityValue = JValue.Parse(vanityJson);
+                //using (WebClient client = new WebClient())
+                //{
+                //    string vanityJson = await client.DownloadStringTaskAsync(vanityUri);
+                //    dynamic vanityValue = JValue.Parse(vanityJson);
 
-                    steamId = vanityValue.response.steamid;
-                }
+                //    steamId = vanityValue.response.steamid;
+                //}
             }
 
             if (steamId != null)
