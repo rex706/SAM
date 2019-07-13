@@ -49,28 +49,26 @@ namespace SAM
     {
         #region Globals
 
-        [DllImport("user32.dll", EntryPoint = "FindWindow")]
-        private static extern IntPtr FindWindow(string lp1, string lp2);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern int GetWindowThreadProcessId(IntPtr handle, out int processId);
-
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, IntPtr lParam);
+        #region Send/Post Message
 
-        [return: MarshalAs(UnmanagedType.Bool)]
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+        //[DllImport("user32.dll", CharSet = CharSet.Auto)]
+        //public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, IntPtr lParam);
 
-        public const int WM_SETTEXT = 0x000C;
-        public const int WM_KEYDOWN = 0x0100;
-        public const int WM_CHAR = 0x0102;
-        public const int VK_RETURN = 0x0D;
-        
+        //[return: MarshalAs(UnmanagedType.Bool)]
+        //[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        //static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+        //public const int WM_SETTEXT = 0x000C;
+        //public const int WM_KEYDOWN = 0x0100;
+        //public const int WM_CHAR = 0x0102;
+        //public const int VK_RETURN = 0x0D;
+
+        #endregion
+
         public static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
         private static Dictionary<int, Account> exportAccounts;

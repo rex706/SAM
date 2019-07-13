@@ -16,7 +16,6 @@ using Win32Interop.WinHandles;
 using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
-using System.Windows.Interop;
 
 namespace SAM
 {
@@ -24,12 +23,6 @@ namespace SAM
     {
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern int GetWindowThreadProcessId(IntPtr handle, out int processId);
-
-        [DllImport("user32.dll")]
-        static extern IntPtr AttachThreadInput(IntPtr idAttach, IntPtr idAttachTo, bool fAttach);
-
-        [DllImport("user32.dll")]
-        static extern IntPtr GetFocus();
 
         readonly static char[] specialChars = { '{', '}', '(', ')', '[', ']', '+', '^', '%', '~' };
 
