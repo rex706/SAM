@@ -1546,7 +1546,7 @@ namespace SAM
 
         private void ContextMenu_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            if (exporting == true)
+            if (exporting == true || deleting == true)
             {
                 e.Handled = true;
             }
