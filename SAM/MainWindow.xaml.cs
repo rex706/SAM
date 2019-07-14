@@ -50,6 +50,7 @@ namespace SAM
         public static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
         private static Dictionary<int, Account> exportAccounts;
+        private static Dictionary<int, Account> deleteAccounts;
 
         private static List<Thread> loginThreads;
         private static List<System.Timers.Timer> timeoutTimers;
@@ -79,6 +80,7 @@ namespace SAM
         private static string AssemblyVer;
 
         private static bool exporting = false;
+        private static bool deleting = false;
 
         private static Button holdingButton = null;
         private static bool dragging = false;
@@ -695,7 +697,7 @@ namespace SAM
                     reloadItem.Click += async delegate { await ReloadAccount_ClickAsync(Int32.Parse(accountButton.Tag.ToString())); };
                     setTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(Int32.Parse(accountButton.Tag.ToString())); };
                     clearTimeoutItem.Click += delegate { AccountButtonClearTimeout_Click(Int32.Parse(accountButton.Tag.ToString())); };
-                    copyPasswordItem.Click += delegate { copyPasswordToClipboard(Int32.Parse(accountButton.Tag.ToString())); };
+                    copyPasswordItem.Click += delegate { CopyPasswordToClipboard(Int32.Parse(accountButton.Tag.ToString())); };
 
                     buttonGrid.Children.Add(accountButtonGrid);
 
@@ -1486,7 +1488,7 @@ namespace SAM
             if (exportAccounts.Count > 0)
             {
                 Utils.ExportSelectedAccounts(exportAccounts.Values.ToList());
-                ResetFromExport();
+                ResetFromExportOrDelete();
             }
             else
             {
@@ -1496,7 +1498,7 @@ namespace SAM
 
         private void CancelExportButton_Click(object sender, RoutedEventArgs e)
         {
-            ResetFromExport();
+            ResetFromExportOrDelete();
         }
 
         private void ShowWindowButton_Click(object sender, RoutedEventArgs e)
@@ -1505,16 +1507,17 @@ namespace SAM
             Focus();
         }
 
-        private void copyPasswordToClipboard(int index)
+        private void CopyPasswordToClipboard(int index)
         {
             Clipboard.SetText(decryptedAccounts[index].Password);
         }
 
         #endregion
 
-        private void ResetFromExport()
+        private void ResetFromExportOrDelete()
         {
             NewButton.Visibility = Visibility.Visible;
+            DeleteButton.Visibility = Visibility.Hidden;
             ExportButton.Visibility = Visibility.Hidden;
             CancelExportButton.Visibility = Visibility.Hidden;
             FileMenuItem.IsEnabled = true;
@@ -1528,6 +1531,7 @@ namespace SAM
 
                 accountButton.Style = (Style)Resources["SAMButtonStyle"];
                 accountButton.Click -= new RoutedEventHandler(AccountButtonExport_Click);
+                accountButton.Click -= new RoutedEventHandler(AccountButtonDelete_Click);
                 accountButton.Click += new RoutedEventHandler(AccountButton_Click);
                 accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
                 accountButton.PreviewMouseLeftButtonUp += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
@@ -1536,6 +1540,7 @@ namespace SAM
                 accountButton.Opacity = 1;
             }
 
+            deleting = false;
             exporting = false;
         }
 
@@ -1623,6 +1628,80 @@ namespace SAM
         {
             MainScrollViewer.VerticalScrollBarVisibility = visibility;
             MainScrollViewer.HorizontalScrollBarVisibility = visibility;
+        }
+
+        private void DeleteSelectedMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            deleting = true;
+
+            deleteAccounts = new Dictionary<int, Account>();
+
+            NewButton.Visibility = Visibility.Hidden;
+            DeleteButton.Visibility = Visibility.Visible;
+            CancelExportButton.Visibility = Visibility.Visible;
+            FileMenuItem.IsEnabled = false;
+            EditMenuItem.IsEnabled = false;
+
+            IEnumerable<Grid> buttonGridCollection = buttonGrid.Children.OfType<Grid>();
+
+            foreach (Grid accountButtonGrid in buttonGridCollection)
+            {
+                Button accountButton = accountButtonGrid.Children.OfType<Button>().FirstOrDefault();
+
+                accountButton.Style = (Style)Resources["DeleteButtonStyle"];
+                accountButton.Click -= new RoutedEventHandler(AccountButton_Click);
+                accountButton.Click += new RoutedEventHandler(AccountButtonDelete_Click);
+                accountButton.PreviewMouseLeftButtonDown -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
+                accountButton.PreviewMouseLeftButtonUp -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
+                accountButton.MouseLeave -= new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+            }
+        }
+
+        private void AccountButtonDelete_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                int index = Int32.Parse(btn.Tag.ToString());
+
+                // Check if this index has already been added.
+                // Remove if it is, add if it isn't.
+                if (deleteAccounts.ContainsKey(index))
+                {
+                    deleteAccounts.Remove(index);
+                    btn.Opacity = 1;
+                }
+                else
+                {
+                    deleteAccounts.Add(index, encryptedAccounts[index]);
+                    btn.Opacity = 0.5;
+                }
+            }
+        }
+
+        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (deleteAccounts.Count > 0)
+            {
+                MessageBoxResult messageBoxResult = MessageBox.Show("Are you sure you want to delete the selected accounts?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (messageBoxResult == MessageBoxResult.Yes)
+                {
+                    foreach (Account account in deleteAccounts.Values.ToList())
+                    {
+                        encryptedAccounts.Remove(account);
+                    }
+
+                    Utils.Serialize(encryptedAccounts);
+                    RefreshWindow();
+                }
+            }
+            else
+            {
+                MessageBox.Show("No accounts selected!", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            ResetFromExportOrDelete();
         }
     }
 }
