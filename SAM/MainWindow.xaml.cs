@@ -164,7 +164,6 @@ namespace SAM
                 settingsFile.Write("RecentAcc", "", "AutoLog");
                 settingsFile.Write("Selected", "false", "AutoLog");
                 settingsFile.Write("SelectedAcc", "", "AutoLog");
-                accountsPerRow = 5;
 
                 MessageBoxResult messageBoxResult = MessageBox.Show("Do you want to password protect SAM?", "Protect", MessageBoxButton.YesNo, MessageBoxImage.Information);
 

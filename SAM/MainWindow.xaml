@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:tb="http://www.hardcodet.net/taskbar" 
         xmlns:local="clr-namespace:SAM"
-        mc:Ignorable="d" Height="190" Width="138" WindowStartupLocation="CenterScreen" Icon="steam_alt-10.ico" ResizeMode="CanMinimize" Title="SAM" Background="#FF333638" StateChanged="Window_StateChanged" TextOptions.TextFormattingMode="Display" LocationChanged="Window_LocationChanged">
+        mc:Ignorable="d" Height="180" Width="138" WindowStartupLocation="CenterScreen" Icon="steam_alt-10.ico" ResizeMode="CanMinimize" Title="SAM" Background="#FF333638" StateChanged="Window_StateChanged" TextOptions.TextFormattingMode="Display" LocationChanged="Window_LocationChanged">
     <Window.Resources>
         <!-- This style is used for buttons, to remove the WPF default 'animated' mouse over effect -->
         <Style x:Key="SAMButtonStyle" TargetType="Button">
@@ -65,7 +65,7 @@
         <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
             <Grid x:Name="ScrollViewerGrid">
                 <Border x:Name="BackgroundBorder" Background="Transparent" Margin="0,20,0,0" Padding="0,20,0,0"/>
-                <Grid x:Name="NewButtonGrid" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,57,0,0">
+                <Grid x:Name="NewButtonGrid" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="30,55,0,0">
                     <Button x:Name="NewButton" Margin="0" Width="64" Click="NewButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="63" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{x:Null}" RenderTransformOrigin="0.5,0.5">
                         <Button.Style>
                             <Style TargetType="{x:Type Button}">

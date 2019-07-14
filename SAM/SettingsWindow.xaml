@@ -22,7 +22,7 @@
                     <CheckBox x:Name="passwordProtectCheckBox" Content="Password Protect" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Password protect SAM"/>
                     <Label x:Name="ButtonSizeLabel" Content="Button Size (px)" HorizontalAlignment="Left" Margin="55,36,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
                     <CheckBox x:Name="rememberLoginPasswordCheckBox" Content="Remember Password" HorizontalAlignment="Left" Margin="171,71,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Checks the Remember Password checkbox when logging into Steam"/>
-                    <CheckBox x:Name="clearUserDataCheckBox" Content="Clear User Data" HorizontalAlignment="Left" Margin="171,91,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Deletes all files in the ..\Steam\userdata folder"/>
+                    <CheckBox x:Name="clearUserDataCheckBox" Content="Clear User Data" HorizontalAlignment="Left" Margin="172,91,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Deletes all files in the ..\Steam\userdata folder after every login"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Auto-Login">
