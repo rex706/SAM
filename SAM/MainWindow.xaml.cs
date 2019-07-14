@@ -11,7 +11,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -84,7 +83,7 @@ namespace SAM
 
         private static string account;
 
-        private static string accPerRow = "0";
+        private static int accountsPerRow = 0;
         private static string steamPath;
         private static bool rememberPassword = false;
         private static bool clearUserData = false;
@@ -163,7 +162,7 @@ namespace SAM
                 settingsFile.Write("RecentAcc", "", "AutoLog");
                 settingsFile.Write("Selected", "false", "AutoLog");
                 settingsFile.Write("SelectedAcc", "", "AutoLog");
-                accPerRow = "5";
+                accountsPerRow = 5;
 
                 MessageBoxResult messageBoxResult = MessageBox.Show("Do you want to password protect SAM?", "Protect", MessageBoxButton.YesNo, MessageBoxImage.Information);
 
@@ -263,20 +262,28 @@ namespace SAM
         {
             settingsFile = new IniFile("SAMSettings.ini");
 
+            if (settingsFile.KeyExists("WindowLeft", "Location") && settingsFile.KeyExists("WindowTop", "Location"))
+            {
+                this.Left = Double.Parse(settingsFile.Read("WindowLeft", "Location"));
+                this.Top = Double.Parse(settingsFile.Read("WindowTop", "Location"));
+            }
+
             if (!settingsFile.KeyExists("AccountsPerRow", "Settings"))
             {
                 settingsFile.Write("AccountsPerRow", "5", "Settings");
-                accPerRow = "5";
+                accountsPerRow = 5;
             }
             else
             {
-                accPerRow = settingsFile.Read("AccountsPerRow", "Settings");
+                string accountsPerRowString = settingsFile.Read("AccountsPerRow", "Settings");
 
-                if (!Regex.IsMatch(accPerRow, @"^\d+$") || Int32.Parse(accPerRow) < 1)
+                if (!Regex.IsMatch(accountsPerRowString, @"^\d+$") || Int32.Parse(accountsPerRowString) < 1)
                 {
                     settingsFile.Write("AccountsPerRow", "5", "Settings");
-                    accPerRow = "5";
+                    accountsPerRow = 5;
                 }
+
+                accountsPerRow = Int32.Parse(accountsPerRowString);
             }
 
             if (!settingsFile.KeyExists("ButtonSize", "Settings"))
@@ -726,7 +733,7 @@ namespace SAM
                     bCounter++;
                     xCounter++;
 
-                    if ((xCounter % Int32.Parse(accPerRow) == 0) && xCounter != 0)
+                    if (accountsPerRow > 0 && (xCounter % accountsPerRow == 0) && xCounter != 0)
                     {
                         yCounter++;
                         xCounter = 0;
@@ -734,7 +741,7 @@ namespace SAM
                 }
 
                 // Adjust window size and info positions
-                int xVal = Int32.Parse(accPerRow);
+                int xVal = accountsPerRow;
 
                 if (yCounter == 0)
                 {
@@ -1374,7 +1381,7 @@ namespace SAM
             var settingsDialog = new SettingsWindow();
             settingsDialog.ShowDialog();
 
-            accPerRow = settingsDialog.ResponseText;
+            accountsPerRow = settingsDialog.AccountsPerRow;
 
             string previousPass = ePassword;
 
@@ -1611,6 +1618,15 @@ namespace SAM
             {
                 timeoutLabel.Text = Utils.FormatTimespanString(timeLeft);
                 timeoutLabel.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void Window_LocationChanged(object sender, EventArgs e)
+        {
+            if (settingsFile != null)
+            {
+                settingsFile.Write("WindowLeft", Left.ToString(), "Location");
+                settingsFile.Write("WindowTop", Top.ToString(), "Location");
             }
         }
     }

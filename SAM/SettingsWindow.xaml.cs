@@ -15,17 +15,17 @@ namespace SAM
     {
         public int AutoAccIdx { get; set; }
 
-        public string ResponseText
+        public int AccountsPerRow
         {
             get
             {
                 if (!Regex.IsMatch(accountsPerRowSpinBox.Text, @"^\d+$") || Int32.Parse(accountsPerRowSpinBox.Text) < 1)
-                    return "1";
+                    return 1;
                 else
-                    return accountsPerRowSpinBox.Text;
+                    return Int32.Parse(accountsPerRowSpinBox.Text);
 
             }
-            set { accountsPerRowSpinBox.Text = value; }
+            set { accountsPerRowSpinBox.Text = value.ToString(); }
         }
 
         public int buttonSize { get; set; }
