@@ -110,6 +110,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Account.cs" />
     <Compile Include="ExposedInfoWindow.xaml.cs">
       <DependentUpon>ExposedInfoWindow.xaml</DependentUpon>
     </Compile>
