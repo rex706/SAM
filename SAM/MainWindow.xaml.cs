@@ -77,6 +77,8 @@ namespace SAM
 
         private static string updateCheckUrl = "https://raw.githubusercontent.com/rex706/SAM/master/latest.txt";
 
+        private static bool isLoadingSettings = false;
+
         // Keys are changed before releases/updates
         private static string eKey = "PRIVATE_KEY";
         private static string ePassword = "";
@@ -260,6 +262,8 @@ namespace SAM
 
         private void LoadSettings()
         {
+            isLoadingSettings = true;
+
             settingsFile = new IniFile("SAMSettings.ini");
 
             if (settingsFile.KeyExists("WindowLeft", "Location") && settingsFile.KeyExists("WindowTop", "Location"))
@@ -395,6 +399,8 @@ namespace SAM
             }
 
             settingsFile.Write("Version", AssemblyVer, "System");
+
+            isLoadingSettings = false;
         }
 
         public void RefreshWindow()
@@ -1628,7 +1634,7 @@ namespace SAM
 
         private void Window_LocationChanged(object sender, EventArgs e)
         {
-            if (settingsFile != null)
+            if (settingsFile != null && !isLoadingSettings)
             {
                 settingsFile.Write("WindowLeft", Left.ToString(), "Location");
                 settingsFile.Write("WindowTop", Top.ToString(), "Location");
