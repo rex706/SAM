@@ -45,6 +45,7 @@ namespace SAM
         private string recentAcc;
         private string selected;
         private string selectedAcc;
+        private string clearUserData;
 
         public SettingsWindow()
         {
@@ -66,6 +67,7 @@ namespace SAM
                 minimizeToTray = settingsFile.Read("MinimizeToTray", "Settings");
                 passwordProtect = settingsFile.Read("PasswordProtect", "Settings");
                 rememberPassword = settingsFile.Read("RememberPassword", "Settings");
+                clearUserData = settingsFile.Read("ClearUserData", "Settings");
                 recent = settingsFile.Read("Recent", "AutoLog");
                 recentAcc = settingsFile.Read("RecentAcc", "AutoLog");
                 selected = settingsFile.Read("Selected", "AutoLog");
@@ -94,6 +96,11 @@ namespace SAM
                 if (rememberPassword.ToLower().Equals("true"))
                 {
                     rememberLoginPasswordCheckBox.IsChecked = true;
+                }
+
+                if (clearUserData.ToLower().Equals("true"))
+                {
+                    clearUserDataCheckBox.IsChecked = true;
                 }
 
                 if (recent.ToLower().Equals("true"))
@@ -189,6 +196,15 @@ namespace SAM
                 settingsFile.Write("RememberPassword", "false", "Settings");
             }
             
+            if (clearUserDataCheckBox.IsChecked == true)
+            {
+                settingsFile.Write("ClearUserData", "true", "Settings");
+            }
+            else
+            {
+                settingsFile.Write("ClearUserData", "false", "Settings");
+            }
+
             settingsFile.Write("AccountsPerRow", apr, "Settings");
             settingsFile.Write("ButtonSize", buttonSizeSpinBox.Text, "Settings");
 
@@ -299,14 +315,6 @@ namespace SAM
             {
                 Console.WriteLine(m.Message);
             }
-        }
-
-        public static string RandomString(int length)
-        {
-            Random random = new Random();
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-
-            return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
         private void SelectedAccountLabel_Unchecked(object sender, RoutedEventArgs e)

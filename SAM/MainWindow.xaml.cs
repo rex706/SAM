@@ -87,6 +87,7 @@ namespace SAM
         private static string accPerRow = "0";
         private static string steamPath;
         private static bool rememberPassword = false;
+        private static bool clearUserData = false;
 
         private static int buttonSize = 100;
 
@@ -156,6 +157,8 @@ namespace SAM
                 settingsFile.Write("StartWithWindows", "false", "Settings");
                 settingsFile.Write("StartMinimized", "false", "Settings");
                 settingsFile.Write("MinimizeToTray", "false", "Settings");
+                settingsFile.Write("RememberPassword", "false", "Settings");
+                settingsFile.Write("ClearUserData", "false", "Settings");
                 settingsFile.Write("Recent", "false", "AutoLog");
                 settingsFile.Write("RecentAcc", "", "AutoLog");
                 settingsFile.Write("Selected", "false", "AutoLog");
@@ -373,6 +376,15 @@ namespace SAM
             else if (!settingsFile.KeyExists("RememberPassword", "Settings"))
             {
                 settingsFile.Write("RememberPassword", "false", "Settings");
+            }
+
+            if (settingsFile.KeyExists("ClearUserData", "Settings") && settingsFile.Read("ClearUserData", "Settings").ToLower().Equals("true"))
+            {
+                clearUserData = true;
+            }
+            else if (!settingsFile.KeyExists("ClearUserData", "Settings"))
+            {
+                settingsFile.Write("ClearUserData", "false", "Settings");
             }
 
             settingsFile.Write("Version", AssemblyVer, "System");
@@ -1016,6 +1028,10 @@ namespace SAM
             {
                 Type2FA(index, 0);
             }
+            else if (clearUserData == true)
+            {
+                Utils.ClearSteamUserDataFolder(steamPath, 0);
+            }
         }
 
         private void Type2FA(int index, int tryCount)
@@ -1098,6 +1114,11 @@ namespace SAM
             else if (tryCount == 3 && steamGuardWindow.IsValid)
             {
                 MessageBox.Show("2FA Failed\nPlease verify your shared secret is correct!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            if (clearUserData == true)
+            {
+                Utils.ClearSteamUserDataFolder(steamPath, 0);
             }
         }
 

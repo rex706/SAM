@@ -438,6 +438,20 @@ namespace SAM
             return process;
         }
 
+        public static void ClearSteamUserDataFolder(string steamPath, int delay)
+        {
+            Thread.Sleep(delay);
+
+            try
+            {
+                Directory.Delete(steamPath + "\\userdata", true);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
+        }
+
         public static bool IsSpecialCharacter(char c)
         {
             foreach (char special in specialChars)
@@ -449,6 +463,14 @@ namespace SAM
             }
 
             return false;
+        }
+
+        public static string RandomString(int length)
+        {
+            Random random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+
+            return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }
