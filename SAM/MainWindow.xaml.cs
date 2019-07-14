@@ -493,6 +493,8 @@ namespace SAM
 
         private void PostDeserializedRefresh(bool seedAcc)
         {
+            SetMainScrollViewerBarsVisibility(ScrollBarVisibility.Hidden);
+
             // Dispose and reinitialize timers each time grid is refreshed as to not clog up more resources than necessary. 
             if (timeoutTimers != null)
             {
@@ -750,6 +752,7 @@ namespace SAM
 
                 int newHeight = (buttonOffset * (yCounter + 1)) + 65;
                 int newWidth = (buttonOffset * xVal) + 21;
+
                 Resize(newHeight, newWidth);
 
                 // Adjust new account and export buttons
@@ -1195,6 +1198,8 @@ namespace SAM
 
                 this.Height = _Height;
                 this.Width = _Width;
+
+                SetMainScrollViewerBarsVisibility(ScrollBarVisibility.Auto);
             }
         }
 
@@ -1628,6 +1633,12 @@ namespace SAM
                 settingsFile.Write("WindowLeft", Left.ToString(), "Location");
                 settingsFile.Write("WindowTop", Top.ToString(), "Location");
             }
+        }
+
+        private void SetMainScrollViewerBarsVisibility(ScrollBarVisibility visibility)
+        {
+            MainScrollViewer.VerticalScrollBarVisibility = visibility;
+            MainScrollViewer.HorizontalScrollBarVisibility = visibility;
         }
     }
 }

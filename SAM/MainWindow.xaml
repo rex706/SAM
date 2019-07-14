@@ -62,72 +62,76 @@
         </Style>
     </Window.Resources>
     <Grid x:Name="MainGrid">
-        <Border x:Name="BackgroundBorder" Background="Transparent" Margin="0,20,0,0" Padding="0,20,0,0"/>
-        <Grid x:Name="NewButtonGrid" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="25,57,0,0">
-            <Button x:Name="NewButton" Margin="0" Width="64" Click="NewButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="63" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{x:Null}" RenderTransformOrigin="0.5,0.5">
-                <Button.Style>
-                    <Style TargetType="{x:Type Button}">
-                        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="Button">
-                                    <Grid Background="{TemplateBinding Background}">
-                                        <Rectangle Fill="Transparent"/>
-                                        <Image x:Name="img" Width="64" Height="64" Source="4ncBpopTA.png"/>
-                                    </Grid>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="img" Property="Source" Value="4ncBpopTA_glow.png"/>
-                                        </Trigger>
-                                        <Trigger Property="IsPressed" Value="True">
-                                            <Setter TargetName="img" Property="Opacity" Value="0.5" />
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </Button.Style>
-            </Button>
-            <Button x:Name="ExportButton" Content="Export" HorizontalAlignment="Center" Margin="0,0,0,25" VerticalAlignment="Center" Height="23" Width="50" Click="ExportButton_Click" Visibility="Hidden"/>
-            <Button x:Name="CancelExportButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,25,0,0" VerticalAlignment="Center" Height="23" Width="50" Click="CancelExportButton_Click" Visibility="Hidden"/>
-        </Grid>
-        <DockPanel>
-            <Border DockPanel.Dock="Top" Height="20" VerticalAlignment="Top" Background="#FFF0F0F0">
-                <Menu x:Name="FileMenu"  Margin="0,1,0,0">
-                    <MenuItem x:Name="FileMenuItem" Header="File">
-                        <MenuItem Header="New" Click="NewButton_Click" />
-                        <MenuItem Header="Import">
-                            <MenuItem Header="From DAT File" Click="ImportFromFileMenuItem_Click" />
-                            <MenuItem Header="Delimiter Separated" Click="ImportDelimitedTextMenuItem_Click" />
-                        </MenuItem>
-                        <MenuItem Header="Export">
-                            <MenuItem Header="All" Click="ExportAllMenuItem_Click"/>
-                            <MenuItem Header="Select" Click="ExportSelectedMenuItem_Click" />
-                        </MenuItem>
-                        <MenuItem Header="Expose Credentials" Click="ExposeCredentialsMenuItem_Click"/>
-                        <Separator />
-                        <MenuItem Header="Exit" Click="ExitMenuItem_Click" />
-                    </MenuItem>
-                    <MenuItem x:Name="EditMenuItem" Header="Edit">
-                        <MenuItem Header="Refresh" Click="RefreshMenuItem_Click" ToolTip="Refresh entire window"/>
-                        <MenuItem Header="Reload Accounts" Click="ReloadAccounts_Click" ToolTip="Reload account web data"/>
-                        <MenuItem Header="Settings" Click="SettingsButton_Click" />
-                        <MenuItem Header="Sort">
-                            <MenuItem Header="Alphabetical" Click="SortAlphabetical_Click"/>
-                            <MenuItem Header="Shuffle" Click="ShuffleAccounts_Click" IsEnabled="False"/>
-                        </MenuItem>
-                    </MenuItem>
-                    <MenuItem Header="Help">
-                        <MenuItem Header="GitHub" Click="GitMenuItem_Click" />
-                        <MenuItem Header="Check Updates" Click="Ver_Click"/>
-                        <Separator />
-                    </MenuItem>
-                </Menu>
-            </Border>
-            <Grid x:Name="buttonGrid"/>
-        </DockPanel>
+        <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
+            <Grid x:Name="ScrollViewerGrid">
+                <Border x:Name="BackgroundBorder" Background="Transparent" Margin="0,20,0,0" Padding="0,20,0,0"/>
+                <Grid x:Name="NewButtonGrid" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,57,0,0">
+                    <Button x:Name="NewButton" Margin="0" Width="64" Click="NewButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="63" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{x:Null}" RenderTransformOrigin="0.5,0.5">
+                        <Button.Style>
+                            <Style TargetType="{x:Type Button}">
+                                <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Grid Background="{TemplateBinding Background}">
+                                                <Rectangle Fill="Transparent"/>
+                                                <Image x:Name="img" Width="64" Height="64" Source="4ncBpopTA.png"/>
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="img" Property="Source" Value="4ncBpopTA_glow.png"/>
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="img" Property="Opacity" Value="0.5" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button x:Name="ExportButton" Content="Export" HorizontalAlignment="Center" Margin="0,0,0,25" VerticalAlignment="Center" Height="23" Width="50" Click="ExportButton_Click" Visibility="Hidden"/>
+                    <Button x:Name="CancelExportButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,25,0,0" VerticalAlignment="Center" Height="23" Width="50" Click="CancelExportButton_Click" Visibility="Hidden"/>
+                </Grid>
+                <DockPanel>
+                    <Border DockPanel.Dock="Top" Height="20" VerticalAlignment="Top" Background="#FFF0F0F0">
+                        <Menu x:Name="FileMenu"  Margin="0,1,0,0">
+                            <MenuItem x:Name="FileMenuItem" Header="File">
+                                <MenuItem Header="New" Click="NewButton_Click" />
+                                <MenuItem Header="Import">
+                                    <MenuItem Header="From DAT File" Click="ImportFromFileMenuItem_Click" />
+                                    <MenuItem Header="Delimiter Separated" Click="ImportDelimitedTextMenuItem_Click" />
+                                </MenuItem>
+                                <MenuItem Header="Export">
+                                    <MenuItem Header="All" Click="ExportAllMenuItem_Click"/>
+                                    <MenuItem Header="Select" Click="ExportSelectedMenuItem_Click" />
+                                </MenuItem>
+                                <MenuItem Header="Expose Credentials" Click="ExposeCredentialsMenuItem_Click"/>
+                                <Separator />
+                                <MenuItem Header="Exit" Click="ExitMenuItem_Click" />
+                            </MenuItem>
+                            <MenuItem x:Name="EditMenuItem" Header="Edit">
+                                <MenuItem Header="Refresh" Click="RefreshMenuItem_Click" ToolTip="Refresh entire window"/>
+                                <MenuItem Header="Reload Accounts" Click="ReloadAccounts_Click" ToolTip="Reload account web data"/>
+                                <MenuItem Header="Settings" Click="SettingsButton_Click" />
+                                <MenuItem Header="Sort">
+                                    <MenuItem Header="Alphabetical" Click="SortAlphabetical_Click"/>
+                                    <MenuItem Header="Shuffle" Click="ShuffleAccounts_Click" IsEnabled="False"/>
+                                </MenuItem>
+                            </MenuItem>
+                            <MenuItem Header="Help">
+                                <MenuItem Header="GitHub" Click="GitMenuItem_Click" />
+                                <MenuItem Header="Check Updates" Click="Ver_Click"/>
+                                <Separator />
+                            </MenuItem>
+                        </Menu>
+                    </Border>
+                    <Grid x:Name="buttonGrid"/>
+                </DockPanel>
+            </Grid>
+        </ScrollViewer>
         <tb:TaskbarIcon IconSource="steam_alt-10.ico" ToolTipText="SAM">
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu x:Name="TaskbarIconContextMenu">
