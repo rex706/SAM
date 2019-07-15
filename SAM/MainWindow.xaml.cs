@@ -71,6 +71,7 @@ namespace SAM
         private static bool clearUserData = false;
 
         private static int buttonSize = 100;
+        private static int sleepTime = 2000;
 
         private static bool selected = false;
         private static int selectedAcc = -1;
@@ -138,6 +139,7 @@ namespace SAM
                 settingsFile.Write("Version", AssemblyVer, "System");
                 settingsFile.Write("AccountsPerRow", "5", "Settings");
                 settingsFile.Write("ButtonSize", "100", "Settings");
+                settingsFile.Write("SleepTime", "2", "Settings");
                 settingsFile.Write("StartWithWindows", "false", "Settings");
                 settingsFile.Write("StartMinimized", "false", "Settings");
                 settingsFile.Write("MinimizeToTray", "false", "Settings");
@@ -284,6 +286,25 @@ namespace SAM
                 {
                     settingsFile.Write("ButtonSize", "100", "Settings");
                     buttonSize = 100;
+                }
+            }
+
+            if (!settingsFile.KeyExists("SleepTime", "Settings"))
+            {
+                settingsFile.Write("SleepTime", "2", "Settings");
+            }
+            else
+            {
+                string sleepTimeString = settingsFile.Read("SleepTime", "Settings");
+
+                if (!Regex.IsMatch(sleepTimeString, @"^\d+$") || !Int32.TryParse(sleepTimeString, out sleepTime) || sleepTime < 0 || sleepTime > 100)
+                {
+                    settingsFile.Write("SleepTime", "2", "Settings");
+                    sleepTime = 2000;
+                }
+                else
+                {
+                    sleepTime = sleepTime * 1000;
                 }
             }
 
@@ -986,7 +1007,7 @@ namespace SAM
             Process steamLoginProcess = Utils.WaitForSteamProcess(steamLoginWindow);
             steamLoginProcess.WaitForInputIdle();
 
-            Thread.Sleep(2000);
+            Thread.Sleep(sleepTime);
 
             SetForegroundWindow(steamLoginWindow.RawPtr);
 
@@ -1036,7 +1057,7 @@ namespace SAM
 
                 while (!steamGuardWindow.IsValid && waitCount < maxRetry)
                 {
-                    Thread.Sleep(2000);
+                    Thread.Sleep(sleepTime);
 
                     steamGuardWindow = Utils.GetSteamGuardWindow();
 
@@ -1064,7 +1085,7 @@ namespace SAM
             {
                 if (steamLoginWindow.IsValid && waitCount < maxRetry)
                 {
-                    Thread.Sleep(2000);
+                    Thread.Sleep(sleepTime);
                     waitCount++;
                 }
 
@@ -1113,7 +1134,7 @@ namespace SAM
             steamGuardProcess.WaitForInputIdle();
 
             // Wait a bit for the window to fully initialize just in case.
-            Thread.Sleep(2000);
+            Thread.Sleep(sleepTime);
 
             // Generate 2FA code, then send it to the client.
             Console.WriteLine("It is idle now, typing code...");
@@ -1143,7 +1164,7 @@ namespace SAM
             //PostMessage(steamGuardWindow.RawPtr, WM_KEYDOWN, (IntPtr)VK_RETURN, IntPtr.Zero);
 
             // Need a little pause here to more reliably check for popup later.
-            Thread.Sleep(3000);
+            Thread.Sleep(sleepTime + 1000);
 
             // Check if we still have a 2FA popup, which means the previous one failed.
             steamGuardWindow = Utils.GetSteamGuardWindow();

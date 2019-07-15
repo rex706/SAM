@@ -62,6 +62,7 @@ namespace SAM
                 settingsFile = new IniFile("SAMSettings.ini");
                 accountsPerRowSpinBox.Text = settingsFile.Read("AccountsPerRow", "Settings");
                 buttonSizeSpinBox.Text = settingsFile.Read("ButtonSize", "Settings");
+                sleepTimeSpinBox.Text = settingsFile.Read("SleepTime", "Settings");
                 start = settingsFile.Read("StartWithWindows", "Settings");
                 minimized = settingsFile.Read("StartMinimized", "Settings");
                 minimizeToTray = settingsFile.Read("MinimizeToTray", "Settings");
@@ -207,6 +208,7 @@ namespace SAM
 
             settingsFile.Write("AccountsPerRow", apr, "Settings");
             settingsFile.Write("ButtonSize", buttonSizeSpinBox.Text, "Settings");
+            settingsFile.Write("SleepTime", sleepTimeSpinBox.Text, "Settings");
 
             if (startupCheckBox.IsChecked == true)
             {
