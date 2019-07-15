@@ -60,6 +60,7 @@ namespace SAM
             if (System.IO.File.Exists("SAMSettings.ini"))
             {
                 settingsFile = new IniFile("SAMSettings.ini");
+
                 accountsPerRowSpinBox.Text = settingsFile.Read("AccountsPerRow", "Settings");
                 buttonSizeSpinBox.Text = settingsFile.Read("ButtonSize", "Settings");
                 sleepTimeSpinBox.Text = settingsFile.Read("SleepTime", "Settings");
@@ -69,6 +70,7 @@ namespace SAM
                 passwordProtect = settingsFile.Read("PasswordProtect", "Settings");
                 rememberPassword = settingsFile.Read("RememberPassword", "Settings");
                 clearUserData = settingsFile.Read("ClearUserData", "Settings");
+
                 recent = settingsFile.Read("Recent", "AutoLog");
                 recentAcc = settingsFile.Read("RecentAcc", "AutoLog");
                 selected = settingsFile.Read("Selected", "AutoLog");
@@ -113,6 +115,66 @@ namespace SAM
                 {
                     selectedAccountCheckBox.IsChecked = true;
                     selectedAccountLabel.Text = MainWindow.encryptedAccounts[Int32.Parse(selectedAcc)].Name;
+                }
+
+                if (settingsFile.Read("cafeapplaunch", "Parameters").ToLower().Equals("true"))
+                {
+                    CafeAppLaunchCheckBox.IsChecked = true;
+                }
+                
+                if (settingsFile.Read("clearbeta", "Parameters").ToLower().Equals("true"))
+                {
+                    ClearBetaCheckBox.IsChecked = true;
+                }
+
+                if (settingsFile.Read("console", "Parameters").ToLower().Equals("true"))
+                {
+                    ConsoleCheckBox.IsChecked = true;
+                }
+
+                if (settingsFile.Read("debug_steamapi", "Parameters").ToLower().Equals("true"))
+                {
+                    DebugApiCheckBox.IsChecked = true;
+                }
+
+                if (settingsFile.Read("developer", "Parameters").ToLower().Equals("true"))
+                {
+                    DeveloperCheckBox.IsChecked = true;
+                }
+
+                if (settingsFile.Read("forceservice", "Parameters").ToLower().Equals("true"))
+                {
+                    ConsoleCheckBox.IsChecked = true;
+                }
+
+                if (settingsFile.Read("nocache", "Parameters").ToLower().Equals("true"))
+                {
+                    NoCacheCheckBox.IsChecked = true;
+                }
+
+                if (settingsFile.Read("noverifyfiles", "Parameters").ToLower().Equals("true"))
+                {
+                    NoVerifyFilesCheckBox.IsChecked = true;
+                }
+
+                if (settingsFile.Read("silent", "Parameters").ToLower().Equals("true"))
+                {
+                    SilentCheckBox.IsChecked = true;
+                }
+
+                if (settingsFile.Read("single_core", "Parameters").ToLower().Equals("true"))
+                {
+                    SingleCoreCheckBox.IsChecked = true;
+                }
+
+                if (settingsFile.Read("tcp", "Parameters").ToLower().Equals("true"))
+                {
+                    TcpCheckBox.IsChecked = true;
+                }
+
+                if (settingsFile.Read("tenfoot", "Parameters").ToLower().Equals("true"))
+                {
+                    TenFootCheckBox.IsChecked = true;
                 }
 
                 SteamPathTextBox.Text = settingsFile.Read("Steam", "Settings");
@@ -188,24 +250,8 @@ namespace SAM
                 settingsFile.Write("PasswordProtect", "false", "Settings");
             }
 
-            if (rememberLoginPasswordCheckBox.IsChecked == true)
-            {
-                settingsFile.Write("RememberPassword", "true", "Settings");
-            }
-            else
-            {
-                settingsFile.Write("RememberPassword", "false", "Settings");
-            }
-            
-            if (clearUserDataCheckBox.IsChecked == true)
-            {
-                settingsFile.Write("ClearUserData", "true", "Settings");
-            }
-            else
-            {
-                settingsFile.Write("ClearUserData", "false", "Settings");
-            }
-
+            settingsFile.Write("RememberPassword", rememberLoginPasswordCheckBox.IsChecked.ToString(), "Settings");
+            settingsFile.Write("ClearUserData", clearUserDataCheckBox.IsChecked.ToString(), "Settings");
             settingsFile.Write("AccountsPerRow", apr, "Settings");
             settingsFile.Write("ButtonSize", buttonSizeSpinBox.Text, "Settings");
             settingsFile.Write("SleepTime", sleepTimeSpinBox.Text, "Settings");
@@ -232,25 +278,24 @@ namespace SAM
                 settingsFile.Write("StartWithWindows", "false", "Settings");
             }
 
-            if (startupMinCheckBox.IsChecked == true)
-                settingsFile.Write("StartMinimized", "true", "Settings");
-            else
-                settingsFile.Write("StartMinimized", "false", "Settings");
+            settingsFile.Write("StartMinimized", startupMinCheckBox.IsChecked.ToString(), "Settings");
+            settingsFile.Write("MinimizeToTray", minimizeToTrayCheckBox.IsChecked.ToString(), "Settings");
 
-            if (minimizeToTrayCheckBox.IsChecked == true)
-                settingsFile.Write("MinimizeToTray", "true", "Settings");
-            else
-                settingsFile.Write("MinimizeToTray", "false", "Settings");
+            settingsFile.Write("Recent", mostRecentCheckBox.IsChecked.ToString(), "AutoLog");
+            settingsFile.Write("Selected", selectedAccountCheckBox.IsChecked.ToString(), "AutoLog");
 
-            if (mostRecentCheckBox.IsChecked == true)
-                settingsFile.Write("Recent", "true", "AutoLog");
-            else
-                settingsFile.Write("Recent", "false", "AutoLog");
-
-            if (selectedAccountCheckBox.IsChecked == true)
-                settingsFile.Write("Selected", "true", "AutoLog");
-            else
-                settingsFile.Write("Selected", "false", "AutoLog");
+            settingsFile.Write("cafeapplaunch", CafeAppLaunchCheckBox.IsChecked.ToString(), "Parameters");
+            settingsFile.Write("clearbeta", ClearBetaCheckBox.IsChecked.ToString(), "Parameters");
+            settingsFile.Write("console", ConsoleCheckBox.IsChecked.ToString(), "Parameters");
+            settingsFile.Write("debug_steamapi", DebugApiCheckBox.IsChecked.ToString(), "Parameters");
+            settingsFile.Write("developer", DeveloperCheckBox.IsChecked.ToString(), "Parameters");
+            settingsFile.Write("forceservice", ForceServiceCheckBox.IsChecked.ToString(), "Parameters");
+            settingsFile.Write("nocache", NoCacheCheckBox.IsChecked.ToString(), "Parameters");
+            settingsFile.Write("noverifyfiles", NoVerifyFilesCheckBox.IsChecked.ToString(), "Parameters");
+            settingsFile.Write("silent", SilentCheckBox.IsChecked.ToString(), "Parameters");
+            settingsFile.Write("single_core", SingleCoreCheckBox.IsChecked.ToString(), "Parameters");
+            settingsFile.Write("tcp", TcpCheckBox.IsChecked.ToString(), "Parameters");
+            settingsFile.Write("tenfoot", TenFootCheckBox.IsChecked.ToString(), "Parameters");
 
             settingsFile.Write("Steam", SteamPathTextBox.Text, "Settings");
         }

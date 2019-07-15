@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -78,6 +79,8 @@ namespace SAM
         private static bool recent = false;
         private static int recentAcc = -1;
 
+        private static List<string> launchParameters;
+
         private static string AssemblyVer;
 
         private static bool exporting = false;
@@ -136,7 +139,9 @@ namespace SAM
             if (!File.Exists("SAMSettings.ini"))
             {
                 settingsFile = new IniFile("SAMSettings.ini");
+
                 settingsFile.Write("Version", AssemblyVer, "System");
+
                 settingsFile.Write("AccountsPerRow", "5", "Settings");
                 settingsFile.Write("ButtonSize", "100", "Settings");
                 settingsFile.Write("SleepTime", "2", "Settings");
@@ -145,10 +150,24 @@ namespace SAM
                 settingsFile.Write("MinimizeToTray", "false", "Settings");
                 settingsFile.Write("RememberPassword", "false", "Settings");
                 settingsFile.Write("ClearUserData", "false", "Settings");
+
                 settingsFile.Write("Recent", "false", "AutoLog");
                 settingsFile.Write("RecentAcc", "", "AutoLog");
                 settingsFile.Write("Selected", "false", "AutoLog");
                 settingsFile.Write("SelectedAcc", "", "AutoLog");
+
+                settingsFile.Write("cafeapplaunch", "false", "Parameters");
+                settingsFile.Write("clearbeta", "false", "Parameters");
+                settingsFile.Write("console", "false", "Parameters");
+                settingsFile.Write("debug_steamapi", "false", "Parameters");
+                settingsFile.Write("developer", "false", "Parameters");
+                settingsFile.Write("forceservice", "false", "Parameters");
+                settingsFile.Write("nocache", "false", "Parameters");
+                settingsFile.Write("noverifyfiles", "false", "Parameters");
+                settingsFile.Write("silent", "false", "Parameters");
+                settingsFile.Write("single_core", "false", "Parameters");
+                settingsFile.Write("tcp", "false", "Parameters");
+                settingsFile.Write("tenfoot", "false", "Parameters");
 
                 MessageBoxResult messageBoxResult = MessageBox.Show("Do you want to password protect SAM?", "Protect", MessageBoxButton.YesNo, MessageBoxImage.Information);
 
@@ -247,6 +266,7 @@ namespace SAM
         private void LoadSettings()
         {
             isLoadingSettings = true;
+            launchParameters = new List<string>();
 
             settingsFile = new IniFile("SAMSettings.ini");
 
@@ -399,6 +419,114 @@ namespace SAM
             else if (!settingsFile.KeyExists("ClearUserData", "Settings"))
             {
                 settingsFile.Write("ClearUserData", "false", "Settings");
+            }
+
+            if (settingsFile.KeyExists("cafeapplaunch", "Parameters") && settingsFile.Read("cafeapplaunch", "Parameters").ToLower().Equals("true"))
+            {
+                launchParameters.Add("-cafeapplaunch");
+            }
+            else if (!settingsFile.KeyExists("cafeapplaunch", "Parameters"))
+            {
+                settingsFile.Write("cafeapplaunch", "false", "Parameters");
+            }
+
+            if (settingsFile.KeyExists("clearbeta", "Parameters") && settingsFile.Read("clearbeta", "Parameters").ToLower().Equals("true"))
+            {
+                launchParameters.Add("-clearbeta");
+            }
+            else if (!settingsFile.KeyExists("clearbeta", "Parameters"))
+            {
+                settingsFile.Write("clearbeta", "false", "Parameters");
+            }
+
+            if (settingsFile.KeyExists("console", "Parameters") && settingsFile.Read("console", "Parameters").ToLower().Equals("true"))
+            {
+                launchParameters.Add("-console");
+            }
+            else if (!settingsFile.KeyExists("console", "Parameters"))
+            {
+                settingsFile.Write("console", "false", "Parameters");
+            }
+
+            if (settingsFile.KeyExists("debug_steamapi", "Parameters") && settingsFile.Read("debug_steamapi", "Parameters").ToLower().Equals("true"))
+            {
+                launchParameters.Add("-debug_steamapi");
+            }
+            else if (!settingsFile.KeyExists("debug_steamapi", "Parameters"))
+            {
+                settingsFile.Write("debug_steamapi", "false", "Parameters");
+            }
+
+            if (settingsFile.KeyExists("developer", "Parameters") && settingsFile.Read("developer", "Parameters").ToLower().Equals("true"))
+            {
+                launchParameters.Add("-developer");
+            }
+            else if (!settingsFile.KeyExists("developer", "Parameters"))
+            {
+                settingsFile.Write("developer", "false", "Parameters");
+            }
+
+            if (settingsFile.KeyExists("forceservice", "Parameters") && settingsFile.Read("forceservice", "Parameters").ToLower().Equals("true"))
+            {
+                launchParameters.Add("-forceservice");
+            }
+            else if (!settingsFile.KeyExists("forceservice", "Parameters"))
+            {
+                settingsFile.Write("forceservice", "false", "Parameters");
+            }
+
+            if (settingsFile.KeyExists("nocache", "Parameters") && settingsFile.Read("nocache", "Parameters").ToLower().Equals("true"))
+            {
+                launchParameters.Add("-nocache");
+            }
+            else if (!settingsFile.KeyExists("nocache", "Parameters"))
+            {
+                settingsFile.Write("nocache", "false", "Parameters");
+            }
+
+            if (settingsFile.KeyExists("noverifyfiles", "Parameters") && settingsFile.Read("noverifyfiles", "Parameters").ToLower().Equals("true"))
+            {
+                launchParameters.Add("-noverifyfiles");
+            }
+            else if (!settingsFile.KeyExists("noverifyfiles", "Parameters"))
+            {
+                settingsFile.Write("noverifyfiles", "false", "Parameters");
+            }
+
+            if (settingsFile.KeyExists("silent", "Parameters") && settingsFile.Read("silent", "Parameters").ToLower().Equals("true"))
+            {
+                launchParameters.Add("-silent");
+            }
+            else if (!settingsFile.KeyExists("silent", "Parameters"))
+            {
+                settingsFile.Write("silent", "false", "Parameters");
+            }
+
+            if (settingsFile.KeyExists("single_core", "Parameters") && settingsFile.Read("single_core", "Parameters").ToLower().Equals("true"))
+            {
+                launchParameters.Add("-single_core");
+            }
+            else if (!settingsFile.KeyExists("single_core", "Parameters"))
+            {
+                settingsFile.Write("single_core", "false", "Parameters");
+            }
+
+            if (settingsFile.KeyExists("tcp", "Parameters") && settingsFile.Read("tcp", "Parameters").ToLower().Equals("true"))
+            {
+                launchParameters.Add("-tcp");
+            }
+            else if (!settingsFile.KeyExists("tcp", "Parameters"))
+            {
+                settingsFile.Write("tcp", "false", "Parameters");
+            }
+
+            if (settingsFile.KeyExists("tenfoot", "Parameters") && settingsFile.Read("tenfoot", "Parameters").ToLower().Equals("true"))
+            {
+                launchParameters.Add("-tenfoot");
+            }
+            else if (!settingsFile.KeyExists("tenfoot", "Parameters"))
+            {
+                settingsFile.Write("tenfoot", "false", "Parameters");
             }
 
             settingsFile.Write("Version", AssemblyVer, "System");
@@ -974,6 +1102,13 @@ namespace SAM
             // Make sure Username field is empty and Remember Password checkbox is unchecked.
             Utils.ClearAutoLoginUserKeyValues();
 
+            StringBuilder parametersBuilder = new StringBuilder();
+
+            foreach (string parameter in launchParameters)
+            {
+                parametersBuilder.Append(parameter).Append(" ");
+            }
+
             // Start Steam process with the selected path.
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
@@ -982,6 +1117,7 @@ namespace SAM
                 FileName = steamPath + "steam.exe",
                 WorkingDirectory = steamPath,
                 WindowStyle = ProcessWindowStyle.Hidden,
+                Arguments = parametersBuilder.ToString()
             }; 
 
             try
