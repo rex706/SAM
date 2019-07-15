@@ -1164,7 +1164,7 @@ namespace SAM
             //PostMessage(steamGuardWindow.RawPtr, WM_KEYDOWN, (IntPtr)VK_RETURN, IntPtr.Zero);
 
             // Need a little pause here to more reliably check for popup later.
-            Thread.Sleep(sleepTime + 1000);
+            Thread.Sleep(sleepTime);
 
             // Check if we still have a 2FA popup, which means the previous one failed.
             steamGuardWindow = Utils.GetSteamGuardWindow();
