@@ -751,21 +751,26 @@ namespace SAM
                     }
                 }
 
-                // Adjust window size and info positions
-                int xVal = accountsPerRow;
-
-                if (yCounter == 0)
+                if (bCounter > 0)
                 {
-                    xVal = xCounter + 1;
+                    // Adjust window size and info positions
+                    int xVal = accountsPerRow;
+
+                    if (yCounter == 0)
+                    {
+                        xVal = xCounter + 1;
+                    }
+
+                    int newHeight = (buttonOffset * (yCounter + 1)) + 65;
+                    int newWidth = (buttonOffset * xVal) + 21;
+
+                    Resize(newHeight, newWidth);
+
+                    // Adjust new account and export buttons
+                    NewButtonGrid.HorizontalAlignment = HorizontalAlignment.Left;
+                    NewButtonGrid.VerticalAlignment = VerticalAlignment.Top;
+                    NewButtonGrid.Margin = new Thickness((xCounter * buttonOffset) + 5, (yCounter * buttonOffset) + 25, 0, 0);
                 }
-
-                int newHeight = (buttonOffset * (yCounter + 1)) + 65;
-                int newWidth = (buttonOffset * xVal) + 21;
-
-                Resize(newHeight, newWidth);
-
-                // Adjust new account and export buttons
-                NewButtonGrid.Margin = new Thickness((xCounter * buttonOffset) + 5, (yCounter * buttonOffset) + 25, 0, 0);
             }
         }
 

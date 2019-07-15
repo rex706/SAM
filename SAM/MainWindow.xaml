@@ -91,7 +91,7 @@
         <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
             <Grid x:Name="ScrollViewerGrid">
                 <Border x:Name="BackgroundBorder" Background="Transparent" Margin="0,20,0,0" Padding="0,20,0,0"/>
-                <Grid x:Name="NewButtonGrid" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="21,42,0,0">
+                <Grid x:Name="NewButtonGrid" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,0">
                     <Button x:Name="NewButton" Margin="0" Width="64" Click="NewButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="63" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{x:Null}" RenderTransformOrigin="0.5,0.5">
                         <Button.Style>
                             <Style TargetType="{x:Type Button}">
