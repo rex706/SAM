@@ -86,6 +86,8 @@ namespace SAM
         private static bool dragging = false;
         private static System.Timers.Timer mouseHoldTimer;
 
+        private static int maxRetry = 2;
+
         IniFile settingsFile;
 
         // Resize animation variables
@@ -170,9 +172,9 @@ namespace SAM
             if (SteamProc.Length == 0)
             {
                 if (recent == true)
-                    Login(recentAcc);
+                    Login(recentAcc, 0);
                 else if (selected == true)
-                    Login(selectedAcc);
+                    Login(selectedAcc, 0);
             }
         }
 
@@ -890,8 +892,14 @@ namespace SAM
             }
         }
 
-        private void Login(int index)
+        private void Login(int index, int tryCount)
         {
+            if (tryCount == maxRetry)
+            {
+                MessageBox.Show("Login Failed! Please try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             if (Utils.AccountHasActiveTimeout(encryptedAccounts[index]))
             { 
                 MessageBoxResult result = MessageBox.Show("Account timeout is active!\nLogin anyway?", "Timeout", MessageBoxButton.YesNo, MessageBoxImage.Warning, 0, MessageBoxOptions.DefaultDesktopOnly);
@@ -1019,13 +1027,54 @@ namespace SAM
             Thread.Sleep(100);
             System.Windows.Forms.SendKeys.SendWait("{ENTER}");
 
+            int waitCount = 0;
+
             // Only handle 2FA if shared secret was entered.
             if (decryptedAccounts[index].SharedSecret != null && decryptedAccounts[index].SharedSecret.Length > 0)
             {
+                WindowHandle steamGuardWindow = Utils.GetSteamGuardWindow();
+
+                while (!steamGuardWindow.IsValid && waitCount < maxRetry)
+                {
+                    Thread.Sleep(2000);
+
+                    steamGuardWindow = Utils.GetSteamGuardWindow();
+
+                    // Check for Steam warning window.
+                    var steamWarningWindow = Utils.GetSteamWarningWindow();
+                    if (steamWarningWindow.IsValid)
+                    {
+                        //Cancel the 2FA process since Steam connection is likely unavailable. 
+                        return;
+                    }
+
+                    waitCount++;
+                }
+
+                // 2FA window not found, login probably failed. Try again.
+                if (waitCount == maxRetry)
+                {
+                    Login(index, tryCount + 1);
+                    return;
+                }
+
                 Type2FA(index, 0);
             }
             else if (clearUserData == true)
             {
+                if (steamLoginWindow.IsValid && waitCount < maxRetry)
+                {
+                    Thread.Sleep(2000);
+                    waitCount++;
+                }
+
+                // Login probably failed if Steam Login window is still open.
+                if (waitCount == maxRetry)
+                {
+                    Login(index, tryCount + 1);
+                    return;
+                }
+
                 Utils.ClearSteamUserDataFolder(steamPath, 0);
             }
         }
@@ -1099,12 +1148,12 @@ namespace SAM
             // Check if we still have a 2FA popup, which means the previous one failed.
             steamGuardWindow = Utils.GetSteamGuardWindow();
 
-            if (tryCount < 2 && steamGuardWindow.IsValid)
+            if (tryCount < maxRetry && steamGuardWindow.IsValid)
             {
                 Console.WriteLine("2FA code failed, retrying...");
                 Type2FA(index, tryCount + 1);
             }
-            else if (tryCount == 2 && steamGuardWindow.IsValid)
+            else if (tryCount == maxRetry && steamGuardWindow.IsValid)
             {
                 MessageBoxResult result = MessageBox.Show("2FA Failed\nPlease wait or bring the Steam Guard\nwindow to the front before clicking OK", "Error", MessageBoxButton.OKCancel, MessageBoxImage.Error);
 
@@ -1113,7 +1162,7 @@ namespace SAM
                     Type2FA(index, tryCount + 1);
                 }
             }
-            else if (tryCount == 3 && steamGuardWindow.IsValid)
+            else if (tryCount == maxRetry + 1 && steamGuardWindow.IsValid)
             {
                 MessageBox.Show("2FA Failed\nPlease verify your shared secret is correct!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -1287,7 +1336,7 @@ namespace SAM
                 // Login with clicked button's index, which stored in Tag.
 
                 int index = Int32.Parse(btn.Tag.ToString());
-                Login(index);
+                Login(index, 0);
             }
         }
 
@@ -1295,7 +1344,7 @@ namespace SAM
         {
             if (sender is MenuItem item)
             {
-                Login(Int32.Parse(item.Tag.ToString()));
+                Login(Int32.Parse(item.Tag.ToString()), 0);
             }
         }
 
