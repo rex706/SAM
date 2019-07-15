@@ -153,7 +153,7 @@ namespace SAM
                     settingsFile.Write("PasswordProtect", VerifyAndSetPassword(), "Settings");
                 }
             }
-            // Else load settings from preexisting file.
+            // Else load settings from existing file.
             else
             {
                 LoadSettings();
@@ -1037,6 +1037,12 @@ namespace SAM
             var steamLoginWindow = Utils.GetSteamLoginWindow();
             var steamGuardWindow = Utils.GetSteamGuardWindow();
 
+            if (!steamLoginWindow.IsValid)
+            {
+                MessageBox.Show("Invalid Steam Process");
+                return;
+            }
+
             while (!steamLoginWindow.IsValid || !steamGuardWindow.IsValid)
             {
                 Thread.Sleep(10);
@@ -1063,13 +1069,13 @@ namespace SAM
             // Generate 2FA code, then send it to the client.
             Console.WriteLine("It is idle now, typing code...");
 
-            SetForegroundWindow(steamLoginWindow.RawPtr);
+            SetForegroundWindow(steamGuardWindow.RawPtr);
 
             Thread.Sleep(10);
 
             foreach (char c in Generate2FACode(decryptedAccounts[index].SharedSecret).ToCharArray())
             {
-                SetForegroundWindow(steamLoginWindow.RawPtr);
+                SetForegroundWindow(steamGuardWindow.RawPtr);
                 
                 Thread.Sleep(10);
 
@@ -1079,7 +1085,7 @@ namespace SAM
                 //PostMessage(steamGuardWindow.RawPtr, WM_CHAR, (IntPtr)c, IntPtr.Zero);
             }
 
-            SetForegroundWindow(steamLoginWindow.RawPtr);
+            SetForegroundWindow(steamGuardWindow.RawPtr);
 
             Thread.Sleep(10);
 
@@ -1456,51 +1462,7 @@ namespace SAM
             await ReloadAccountsAsync();
         }
 
-        private void ExportSelectedMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            exporting = true;
-
-            exportAccounts = new Dictionary<int, Account>();
-
-            NewButton.Visibility = Visibility.Hidden;
-            ExportButton.Visibility = Visibility.Visible;
-            CancelExportButton.Visibility = Visibility.Visible;
-            FileMenuItem.IsEnabled = false;
-            EditMenuItem.IsEnabled = false;
-
-            IEnumerable<Grid> buttonGridCollection = buttonGrid.Children.OfType<Grid>();
-
-            foreach (Grid accountButtonGrid in buttonGridCollection)
-            {
-                Button accountButton = accountButtonGrid.Children.OfType<Button>().FirstOrDefault();
-
-                accountButton.Style = (Style)Resources["ExportButtonStyle"];
-                accountButton.Click -= new RoutedEventHandler(AccountButton_Click);
-                accountButton.Click += new RoutedEventHandler(AccountButtonExport_Click);
-                accountButton.PreviewMouseLeftButtonDown -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
-                accountButton.PreviewMouseLeftButtonUp -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
-                accountButton.MouseLeave -= new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
-            }
-        }
-
-        private void ExportButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (exportAccounts.Count > 0)
-            {
-                Utils.ExportSelectedAccounts(exportAccounts.Values.ToList());
-                ResetFromExportOrDelete();
-            }
-            else
-            {
-                MessageBox.Show("No accounts selected to export!");
-            }
-        }
-
-        private void CancelExportButton_Click(object sender, RoutedEventArgs e)
-        {
-            ResetFromExportOrDelete();
-        }
-
+        
         private void ShowWindowButton_Click(object sender, RoutedEventArgs e)
         {
             WindowState = WindowState.Normal;
@@ -1513,36 +1475,6 @@ namespace SAM
         }
 
         #endregion
-
-        private void ResetFromExportOrDelete()
-        {
-            NewButton.Visibility = Visibility.Visible;
-            DeleteButton.Visibility = Visibility.Hidden;
-            ExportButton.Visibility = Visibility.Hidden;
-            CancelExportButton.Visibility = Visibility.Hidden;
-            FileMenuItem.IsEnabled = true;
-            EditMenuItem.IsEnabled = true;
-
-            IEnumerable<Grid> buttonGridCollection = buttonGrid.Children.OfType<Grid>();
-
-            foreach (Grid accountButtonGrid in buttonGridCollection)
-            {
-                Button accountButton = accountButtonGrid.Children.OfType<Button>().FirstOrDefault();
-
-                accountButton.Style = (Style)Resources["SAMButtonStyle"];
-                accountButton.Click -= new RoutedEventHandler(AccountButtonExport_Click);
-                accountButton.Click -= new RoutedEventHandler(AccountButtonDelete_Click);
-                accountButton.Click += new RoutedEventHandler(AccountButton_Click);
-                accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
-                accountButton.PreviewMouseLeftButtonUp += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
-                accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
-
-                accountButton.Opacity = 1;
-            }
-
-            deleting = false;
-            exporting = false;
-        }
 
         private void ContextMenu_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
@@ -1630,6 +1562,54 @@ namespace SAM
             MainScrollViewer.HorizontalScrollBarVisibility = visibility;
         }
 
+        #region Account Button State Handling
+
+        private void ExportSelectedMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            exporting = true;
+
+            exportAccounts = new Dictionary<int, Account>();
+
+            NewButton.Visibility = Visibility.Hidden;
+            ExportButton.Visibility = Visibility.Visible;
+            CancelExportButton.Visibility = Visibility.Visible;
+            FileMenuItem.IsEnabled = false;
+            EditMenuItem.IsEnabled = false;
+
+            IEnumerable<Grid> buttonGridCollection = buttonGrid.Children.OfType<Grid>();
+
+            foreach (Grid accountButtonGrid in buttonGridCollection)
+            {
+                Button accountButton = accountButtonGrid.Children.OfType<Button>().FirstOrDefault();
+
+                accountButton.Style = (Style)Resources["ExportButtonStyle"];
+                accountButton.Click -= new RoutedEventHandler(AccountButton_Click);
+                accountButton.Click += new RoutedEventHandler(AccountButtonExport_Click);
+                accountButton.PreviewMouseLeftButtonDown -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
+                accountButton.PreviewMouseLeftButtonUp -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
+                accountButton.MouseLeave -= new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+            }
+        }
+
+        private void ExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (exportAccounts.Count > 0)
+            {
+                Utils.ExportSelectedAccounts(exportAccounts.Values.ToList());
+                ResetFromExportOrDelete();
+            }
+            else
+            {
+                MessageBox.Show("No accounts selected to export!");
+            }
+        }
+
+        private void CancelExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            ResetFromExportOrDelete();
+        }
+
+
         private void DeleteSelectedMenuItem_Click(object sender, RoutedEventArgs e)
         {
             deleting = true;
@@ -1703,5 +1683,37 @@ namespace SAM
 
             ResetFromExportOrDelete();
         }
+
+        private void ResetFromExportOrDelete()
+        {
+            NewButton.Visibility = Visibility.Visible;
+            DeleteButton.Visibility = Visibility.Hidden;
+            ExportButton.Visibility = Visibility.Hidden;
+            CancelExportButton.Visibility = Visibility.Hidden;
+            FileMenuItem.IsEnabled = true;
+            EditMenuItem.IsEnabled = true;
+
+            IEnumerable<Grid> buttonGridCollection = buttonGrid.Children.OfType<Grid>();
+
+            foreach (Grid accountButtonGrid in buttonGridCollection)
+            {
+                Button accountButton = accountButtonGrid.Children.OfType<Button>().FirstOrDefault();
+
+                accountButton.Style = (Style)Resources["SAMButtonStyle"];
+                accountButton.Click -= new RoutedEventHandler(AccountButtonExport_Click);
+                accountButton.Click -= new RoutedEventHandler(AccountButtonDelete_Click);
+                accountButton.Click += new RoutedEventHandler(AccountButton_Click);
+                accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
+                accountButton.PreviewMouseLeftButtonUp += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
+                accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+
+                accountButton.Opacity = 1;
+            }
+
+            deleting = false;
+            exporting = false;
+        }
+
+        #endregion
     }
 }
