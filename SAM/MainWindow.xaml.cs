@@ -766,7 +766,7 @@ namespace SAM
 
                     Resize(newHeight, newWidth);
 
-                    // Adjust new account and export buttons
+                    // Adjust new account and export/delete buttons
                     NewButtonGrid.HorizontalAlignment = HorizontalAlignment.Left;
                     NewButtonGrid.VerticalAlignment = VerticalAlignment.Top;
                     NewButtonGrid.Margin = new Thickness((xCounter * buttonOffset) + 5, (yCounter * buttonOffset) + 25, 0, 0);
@@ -1600,7 +1600,23 @@ namespace SAM
 
         private bool IsPasswordProtected()
         {
-            return settingsFile.KeyExists("PasswordProtect", "Settings") && settingsFile.Read("PasswordProtect", "Settings").ToLower().Equals("true");
+            if (settingsFile.KeyExists("PasswordProtect", "Settings") && settingsFile.Read("PasswordProtect", "Settings").ToLower().Equals("true"))
+            {
+                return true;
+            }
+            else
+            {
+                try
+                {
+                    Utils.Deserialize("info.dat");
+                }
+                catch
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         void TimeoutTimer_Tick(int index, TextBlock timeoutLabel, System.Timers.Timer timeoutTimer)
@@ -1684,6 +1700,30 @@ namespace SAM
             ResetFromExportOrDelete();
         }
 
+        private void DeleteAllAccountsMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (encryptedAccounts.Count > 0)
+            {
+                MessageBoxResult messageBoxResult = MessageBox.Show("Are you sure you want to delete all accounts?\nThis action will perminantly delete the account data file.", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (messageBoxResult == MessageBoxResult.Yes)
+                {
+                    if ((IsPasswordProtected() && VerifyPassword()) || !IsPasswordProtected())
+                    {
+                        try
+                        {
+                            File.Delete("info.dat");
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message);
+                        }
+
+                        RefreshWindow();
+                    }
+                }
+            }
+        }
 
         private void DeleteSelectedMenuItem_Click(object sender, RoutedEventArgs e)
         {
