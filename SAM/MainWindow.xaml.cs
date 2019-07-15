@@ -1054,7 +1054,7 @@ namespace SAM
                 // 2FA window not found, login probably failed. Try again.
                 if (waitCount == maxRetry)
                 {
-                    Login(index, tryCount + 1);
+                    Dispatcher.Invoke(delegate () { Login(index, tryCount + 1); });
                     return;
                 }
 
@@ -1071,7 +1071,7 @@ namespace SAM
                 // Login probably failed if Steam Login window is still open.
                 if (waitCount == maxRetry)
                 {
-                    Login(index, tryCount + 1);
+                    Dispatcher.Invoke(delegate () { Login(index, tryCount + 1); });
                     return;
                 }
 
