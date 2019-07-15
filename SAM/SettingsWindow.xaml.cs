@@ -284,9 +284,10 @@ namespace SAM
                     selectedAccountLabel.Text = "";
                 }
             }
-            catch (Exception m)
+            catch (Exception ex)
             {
-                Console.WriteLine(m.Message);
+                Console.WriteLine(ex.Message);
+                mostRecentCheckBox.IsChecked = false;
             }
         }
 
@@ -313,9 +314,10 @@ namespace SAM
                     selectedAccountLabel.Text = MainWindow.encryptedAccounts[idx].Name;
                 }
             }
-            catch (Exception m)
+            catch (Exception ex)
             {
-                Console.WriteLine(m.Message);
+                Console.WriteLine(ex.Message);
+                selectedAccountCheckBox.IsChecked = false;
             }
         }
 
@@ -365,9 +367,9 @@ namespace SAM
             {
                 SteamPathTextBox.Text = Utils.CheckSteamPath();
             }
-            catch (Exception m)
+            catch (Exception ex)
             {
-                MessageBox.Show(m.Message);
+                MessageBox.Show(ex.Message);
             }
         }
     }
