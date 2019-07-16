@@ -81,6 +81,10 @@ namespace SAM
 
         private static List<string> launchParameters;
 
+        private static double originalHeight;
+        private static double originalWidth;
+        private static Thickness initialNewButtonGridMargin;
+
         private static string AssemblyVer;
 
         private static bool exporting = false;
@@ -183,6 +187,13 @@ namespace SAM
             }
 
             loginThreads = new List<Thread>();
+
+            // Save New Button inital margin.
+            initialNewButtonGridMargin = NewButtonGrid.Margin;
+
+            // Save initial window height and width;
+            originalHeight = Height;
+            originalWidth = Width;
 
             // Load window with account buttons.
             RefreshWindow();
@@ -537,7 +548,9 @@ namespace SAM
         public void RefreshWindow()
         {
             decryptedAccounts = new List<Account>();
+
             buttonGrid.Children.Clear();
+
             TaskBarIconLoginContextMenu.Items.Clear();
             TaskBarIconLoginContextMenu.IsEnabled = false;
 
@@ -898,6 +911,15 @@ namespace SAM
                     NewButtonGrid.HorizontalAlignment = HorizontalAlignment.Left;
                     NewButtonGrid.VerticalAlignment = VerticalAlignment.Top;
                     NewButtonGrid.Margin = new Thickness((xCounter * buttonOffset) + 5, (yCounter * buttonOffset) + 25, 0, 0);
+                }
+                else
+                {
+                    // Reset New Button position.
+                    Resize(originalHeight, originalWidth);
+
+                    NewButtonGrid.HorizontalAlignment = HorizontalAlignment.Center;
+                    NewButtonGrid.VerticalAlignment = VerticalAlignment.Center;
+                    NewButtonGrid.Margin = initialNewButtonGridMargin;
                 }
             }
         }
