@@ -206,6 +206,31 @@ namespace SAM
             }
         }
 
+        public static void SetRememeberPassowrdKeyValue(int value)
+        {
+            string registryValue = string.Empty;
+            RegistryKey localKey = null;
+
+            if (Environment.Is64BitOperatingSystem)
+            {
+                localKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64);
+            }
+            else
+            {
+                localKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32);
+            }
+
+            try
+            {
+                localKey = localKey.OpenSubKey(@"Software\\Valve\\Steam", true);
+                localKey.SetValue("RememberPassword", value, RegistryValueKind.DWord);
+            }
+            catch (NullReferenceException nre)
+            {
+                Console.WriteLine(nre.Message);
+            }
+        }
+
         public static string CheckSteamPath()
         {
             var settingsFile = new IniFile("SAMSettings.ini");

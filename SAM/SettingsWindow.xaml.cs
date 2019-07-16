@@ -132,9 +132,9 @@ namespace SAM
                     ConsoleCheckBox.IsChecked = true;
                 }
 
-                if (settingsFile.Read("debug_steamapi", "Parameters").ToLower().Equals("true"))
+                if (settingsFile.Read("login", "Parameters").ToLower().Equals("true"))
                 {
-                    DebugApiCheckBox.IsChecked = true;
+                    loginCheckBox.IsChecked = true;
                 }
 
                 if (settingsFile.Read("developer", "Parameters").ToLower().Equals("true"))
@@ -287,7 +287,7 @@ namespace SAM
             settingsFile.Write("cafeapplaunch", CafeAppLaunchCheckBox.IsChecked.ToString(), "Parameters");
             settingsFile.Write("clearbeta", ClearBetaCheckBox.IsChecked.ToString(), "Parameters");
             settingsFile.Write("console", ConsoleCheckBox.IsChecked.ToString(), "Parameters");
-            settingsFile.Write("debug_steamapi", DebugApiCheckBox.IsChecked.ToString(), "Parameters");
+            settingsFile.Write("login", loginCheckBox.IsChecked.ToString(), "Parameters");
             settingsFile.Write("developer", DeveloperCheckBox.IsChecked.ToString(), "Parameters");
             settingsFile.Write("forceservice", ForceServiceCheckBox.IsChecked.ToString(), "Parameters");
             settingsFile.Write("nocache", NoCacheCheckBox.IsChecked.ToString(), "Parameters");

@@ -80,6 +80,7 @@ namespace SAM
         private static int recentAcc = -1;
 
         private static List<string> launchParameters;
+        private static bool loginParameter = false;
 
         private static double originalHeight;
         private static double originalWidth;
@@ -163,9 +164,9 @@ namespace SAM
                 settingsFile.Write("cafeapplaunch", "false", "Parameters");
                 settingsFile.Write("clearbeta", "false", "Parameters");
                 settingsFile.Write("console", "false", "Parameters");
-                settingsFile.Write("debug_steamapi", "false", "Parameters");
                 settingsFile.Write("developer", "false", "Parameters");
                 settingsFile.Write("forceservice", "false", "Parameters");
+                settingsFile.Write("login", "false", "Parameters");
                 settingsFile.Write("nocache", "false", "Parameters");
                 settingsFile.Write("noverifyfiles", "false", "Parameters");
                 settingsFile.Write("silent", "false", "Parameters");
@@ -278,6 +279,7 @@ namespace SAM
         {
             isLoadingSettings = true;
             launchParameters = new List<string>();
+            loginParameter = false;
 
             settingsFile = new IniFile("SAMSettings.ini");
 
@@ -459,13 +461,14 @@ namespace SAM
                 settingsFile.Write("console", "false", "Parameters");
             }
 
-            if (settingsFile.KeyExists("debug_steamapi", "Parameters") && settingsFile.Read("debug_steamapi", "Parameters").ToLower().Equals("true"))
+            if (settingsFile.KeyExists("login", "Parameters") && settingsFile.Read("login", "Parameters").ToLower().Equals("true"))
             {
-                launchParameters.Add("-debug_steamapi");
+                launchParameters.Add("-login");
+                loginParameter = true;
             }
-            else if (!settingsFile.KeyExists("debug_steamapi", "Parameters"))
+            else if (!settingsFile.KeyExists("login", "Parameters"))
             {
-                settingsFile.Write("debug_steamapi", "false", "Parameters");
+                settingsFile.Write("login", "true", "Parameters");
             }
 
             if (settingsFile.KeyExists("developer", "Parameters") && settingsFile.Read("developer", "Parameters").ToLower().Equals("true"))
@@ -1122,13 +1125,21 @@ namespace SAM
             }
 
             // Make sure Username field is empty and Remember Password checkbox is unchecked.
-            Utils.ClearAutoLoginUserKeyValues();
+            if (!loginParameter)
+            {
+                Utils.ClearAutoLoginUserKeyValues();
+            }
 
             StringBuilder parametersBuilder = new StringBuilder();
 
             foreach (string parameter in launchParameters)
             {
                 parametersBuilder.Append(parameter).Append(" ");
+
+                if (parameter.Equals("-login"))
+                {
+                    parametersBuilder.Append(decryptedAccounts[index].Name).Append(" ").Append(decryptedAccounts[index].Password).Append(" ");
+                }
             }
 
             // Start Steam process with the selected path.
@@ -1152,7 +1163,22 @@ namespace SAM
                 return;
             }
 
-            Task.Run(() => TypeCredentials(index, 0));
+            if (loginParameter == true)
+            {
+                if (rememberPassword == true)
+                {
+                    Utils.SetRememeberPassowrdKeyValue(1);
+                }
+
+                if (decryptedAccounts[index].SharedSecret != null && decryptedAccounts[index].SharedSecret.Length > 0)
+                {
+                    Task.Run(() => Type2FA(index, 0));
+                }
+            }
+            else
+            {
+                Task.Run(() => TypeCredentials(index, 0));
+            }
         }
 
         private void TypeCredentials(int index, int tryCount)
@@ -1269,12 +1295,6 @@ namespace SAM
             // Can't focus the Steam Guard window directly.
             var steamLoginWindow = Utils.GetSteamLoginWindow();
             var steamGuardWindow = Utils.GetSteamGuardWindow();
-
-            if (!steamLoginWindow.IsValid)
-            {
-                MessageBox.Show("Invalid Steam Process");
-                return;
-            }
 
             while (!steamLoginWindow.IsValid || !steamGuardWindow.IsValid)
             {
