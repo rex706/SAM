@@ -166,7 +166,7 @@ namespace SAM
                 settingsFile.Write("console", "false", "Parameters");
                 settingsFile.Write("developer", "false", "Parameters");
                 settingsFile.Write("forceservice", "false", "Parameters");
-                settingsFile.Write("login", "false", "Parameters");
+                settingsFile.Write("login", "true", "Parameters");
                 settingsFile.Write("nocache", "false", "Parameters");
                 settingsFile.Write("noverifyfiles", "false", "Parameters");
                 settingsFile.Write("silent", "false", "Parameters");
