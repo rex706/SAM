@@ -23,9 +23,11 @@ namespace SAM
                     return 1;
                 else
                     return Int32.Parse(accountsPerRowSpinBox.Text);
-
             }
-            set { accountsPerRowSpinBox.Text = value.ToString(); }
+            set
+            {
+                accountsPerRowSpinBox.Text = value.ToString();
+            }
         }
 
         public int buttonSize { get; set; }
@@ -35,17 +37,6 @@ namespace SAM
         public bool Decrypt { get; set; }
 
         private IniFile settingsFile;
-        
-        private string start;
-        private string minimized;
-        private string minimizeToTray;
-        private string passwordProtect;
-        private string rememberPassword;
-        private string recent;
-        private string recentAcc;
-        private string selected;
-        private string selectedAcc;
-        private string clearUserData;
 
         public SettingsWindow()
         {
@@ -64,118 +55,37 @@ namespace SAM
                 accountsPerRowSpinBox.Text = settingsFile.Read("AccountsPerRow", "Settings");
                 buttonSizeSpinBox.Text = settingsFile.Read("ButtonSize", "Settings");
                 sleepTimeSpinBox.Text = settingsFile.Read("SleepTime", "Settings");
-                start = settingsFile.Read("StartWithWindows", "Settings");
-                minimized = settingsFile.Read("StartMinimized", "Settings");
-                minimizeToTray = settingsFile.Read("MinimizeToTray", "Settings");
-                passwordProtect = settingsFile.Read("PasswordProtect", "Settings");
-                rememberPassword = settingsFile.Read("RememberPassword", "Settings");
-                clearUserData = settingsFile.Read("ClearUserData", "Settings");
 
-                recent = settingsFile.Read("Recent", "AutoLog");
-                recentAcc = settingsFile.Read("RecentAcc", "AutoLog");
-                selected = settingsFile.Read("Selected", "AutoLog");
-                selectedAcc = settingsFile.Read("SelectedAcc", "AutoLog");
-
-                if (start.ToLower().Equals("true"))
-                {
-                    startupCheckBox.IsChecked = true;
-                }
-
-                if (minimized.ToLower().Equals("true"))
-                {
-                    startupMinCheckBox.IsChecked = true;
-                }
-
-                if (minimizeToTray.ToLower().Equals("true"))
-                {
-                    minimizeToTrayCheckBox.IsChecked = true;
-                }
-                
-                if (passwordProtect.ToLower().Equals("true"))
-                {
-                    passwordProtectCheckBox.IsChecked = true;
-                }
-
-                if (rememberPassword.ToLower().Equals("true"))
-                {
-                    rememberLoginPasswordCheckBox.IsChecked = true;
-                }
-
-                if (clearUserData.ToLower().Equals("true"))
-                {
-                    clearUserDataCheckBox.IsChecked = true;
-                }
-
-                if (recent.ToLower().Equals("true"))
+                startupCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("StartWithWindows", "Settings"));
+                startupMinCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("StartMinimized", "Settings"));
+                minimizeToTrayCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("MinimizeToTray", "Settings"));
+                passwordProtectCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("PasswordProtect", "Settings"));
+                rememberLoginPasswordCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("RememberPassword", "Settings"));
+                clearUserDataCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("ClearUserData", "Settings"));
+               
+                if (Convert.ToBoolean(settingsFile.Read("Recent", "AutoLog")))
                 {
                     mostRecentCheckBox.IsChecked = true;
-                    recentAccountLabel.Text = MainWindow.encryptedAccounts[Int32.Parse(recentAcc)].Name;
+                    recentAccountLabel.Text = MainWindow.encryptedAccounts[Int32.Parse(settingsFile.Read("RecentAcc", "AutoLog"))].Name;
                 }
-                else if (selected.ToLower().Equals("true"))
+                else if (Convert.ToBoolean(settingsFile.Read("Selected", "AutoLog")))
                 {
                     selectedAccountCheckBox.IsChecked = true;
-                    selectedAccountLabel.Text = MainWindow.encryptedAccounts[Int32.Parse(selectedAcc)].Name;
+                    selectedAccountLabel.Text = MainWindow.encryptedAccounts[Int32.Parse(settingsFile.Read("SelectedAcc", "AutoLog"))].Name;
                 }
 
-                if (settingsFile.Read("cafeapplaunch", "Parameters").ToLower().Equals("true"))
-                {
-                    CafeAppLaunchCheckBox.IsChecked = true;
-                }
-                
-                if (settingsFile.Read("clearbeta", "Parameters").ToLower().Equals("true"))
-                {
-                    ClearBetaCheckBox.IsChecked = true;
-                }
-
-                if (settingsFile.Read("console", "Parameters").ToLower().Equals("true"))
-                {
-                    ConsoleCheckBox.IsChecked = true;
-                }
-
-                if (settingsFile.Read("login", "Parameters").ToLower().Equals("true"))
-                {
-                    loginCheckBox.IsChecked = true;
-                }
-
-                if (settingsFile.Read("developer", "Parameters").ToLower().Equals("true"))
-                {
-                    DeveloperCheckBox.IsChecked = true;
-                }
-
-                if (settingsFile.Read("forceservice", "Parameters").ToLower().Equals("true"))
-                {
-                    ConsoleCheckBox.IsChecked = true;
-                }
-
-                if (settingsFile.Read("nocache", "Parameters").ToLower().Equals("true"))
-                {
-                    NoCacheCheckBox.IsChecked = true;
-                }
-
-                if (settingsFile.Read("noverifyfiles", "Parameters").ToLower().Equals("true"))
-                {
-                    NoVerifyFilesCheckBox.IsChecked = true;
-                }
-
-                if (settingsFile.Read("silent", "Parameters").ToLower().Equals("true"))
-                {
-                    SilentCheckBox.IsChecked = true;
-                }
-
-                if (settingsFile.Read("single_core", "Parameters").ToLower().Equals("true"))
-                {
-                    SingleCoreCheckBox.IsChecked = true;
-                }
-
-                if (settingsFile.Read("tcp", "Parameters").ToLower().Equals("true"))
-                {
-                    TcpCheckBox.IsChecked = true;
-                }
-
-                if (settingsFile.Read("tenfoot", "Parameters").ToLower().Equals("true"))
-                {
-                    TenFootCheckBox.IsChecked = true;
-                }
+                CafeAppLaunchCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("cafeapplaunch", "Parameters"));
+                ClearBetaCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("clearbeta", "Parameters"));
+                ConsoleCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("console", "Parameters"));
+                LoginCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("login", "Parameters"));
+                DeveloperCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("developer", "Parameters"));
+                ConsoleCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("forceservice", "Parameters"));
+                NoCacheCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("forceservice", "Parameters"));
+                NoVerifyFilesCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("noverifyfiles", "Parameters"));
+                SilentCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("silent", "Parameters"));
+                SingleCoreCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("single_core", "Parameters"));
+                TcpCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("tcp", "Parameters"));
+                TenFootCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("tenfoot", "Parameters"));
 
                 SteamPathTextBox.Text = settingsFile.Read("Steam", "Settings");
             }
@@ -183,9 +93,9 @@ namespace SAM
 
         private void SaveSettings(string apr)
         {
-            var settingsFile = new IniFile("SAMSettings.ini");
+            settingsFile = new IniFile("SAMSettings.ini");
 
-            if (passwordProtectCheckBox.IsChecked == true && passwordProtect.ToLower().Equals("false"))
+            if (passwordProtectCheckBox.IsChecked == true && !Convert.ToBoolean(settingsFile.Read("PasswordProtect", "Settings")))
             {
                 var passwordDialog = new PasswordWindow();
 
@@ -199,7 +109,7 @@ namespace SAM
                     Password = "";
                 }
             }
-            else if (passwordProtectCheckBox.IsChecked == false && passwordProtect.ToLower().Equals("true"))
+            else if (passwordProtectCheckBox.IsChecked == false && Convert.ToBoolean(settingsFile.Read("PasswordProtect", "Settings")))
             {
                 MessageBoxResult messageBoxResult = MessageBox.Show("Are you sure you want to decrypt your data file?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
@@ -287,7 +197,7 @@ namespace SAM
             settingsFile.Write("cafeapplaunch", CafeAppLaunchCheckBox.IsChecked.ToString(), "Parameters");
             settingsFile.Write("clearbeta", ClearBetaCheckBox.IsChecked.ToString(), "Parameters");
             settingsFile.Write("console", ConsoleCheckBox.IsChecked.ToString(), "Parameters");
-            settingsFile.Write("login", loginCheckBox.IsChecked.ToString(), "Parameters");
+            settingsFile.Write("login", LoginCheckBox.IsChecked.ToString(), "Parameters");
             settingsFile.Write("developer", DeveloperCheckBox.IsChecked.ToString(), "Parameters");
             settingsFile.Write("forceservice", ForceServiceCheckBox.IsChecked.ToString(), "Parameters");
             settingsFile.Write("nocache", NoCacheCheckBox.IsChecked.ToString(), "Parameters");
@@ -314,7 +224,7 @@ namespace SAM
         {
             try
             {
-                int idx = Int32.Parse(recentAcc);
+                int idx = Int32.Parse(settingsFile.Read("RecentAcc", "AutoLog"));
 
                 // If index is invalid, uncheck box.
                 if (idx < 0)
@@ -345,7 +255,7 @@ namespace SAM
         {
             try
             {
-                int idx = Int32.Parse(selectedAcc);
+                int idx = Int32.Parse(settingsFile.Read("SelectedAcc", "AutoLog"));
 
                 if (idx < 0)
                 {

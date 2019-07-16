@@ -80,7 +80,7 @@ namespace SAM
         private static int recentAcc = -1;
 
         private static List<string> launchParameters;
-        private static bool loginParameter = false;
+        private static bool loginByParameter = false;
 
         private static double originalHeight;
         private static double originalWidth;
@@ -279,7 +279,7 @@ namespace SAM
         {
             isLoadingSettings = true;
             launchParameters = new List<string>();
-            loginParameter = false;
+            loginByParameter = false;
 
             settingsFile = new IniFile("SAMSettings.ini");
 
@@ -464,7 +464,7 @@ namespace SAM
             if (settingsFile.KeyExists("login", "Parameters") && settingsFile.Read("login", "Parameters").ToLower().Equals("true"))
             {
                 launchParameters.Add("-login");
-                loginParameter = true;
+                loginByParameter = true;
             }
             else if (!settingsFile.KeyExists("login", "Parameters"))
             {
@@ -1125,7 +1125,7 @@ namespace SAM
             }
 
             // Make sure Username field is empty and Remember Password checkbox is unchecked.
-            if (!loginParameter)
+            if (!loginByParameter)
             {
                 Utils.ClearAutoLoginUserKeyValues();
             }
@@ -1163,7 +1163,7 @@ namespace SAM
                 return;
             }
 
-            if (loginParameter == true)
+            if (loginByParameter == true)
             {
                 if (rememberPassword == true)
                 {

@@ -30,7 +30,11 @@ Easily log in and switch between Steam accounts.
 
 **CHANGELOG**
 
-**Latest version:** 1.3.0.0
+**Latest version:** 1.3.0.1
+* Restore login by parameter functionality.
+	- Can be disabled in Parameters settings.
+
+1.3.0.0
 * Send user credentials as key presses rather than launch paramters.
 * Better account button position logic.
 * Set button size ranging between 50-200px.
