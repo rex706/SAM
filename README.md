@@ -11,7 +11,6 @@ Easily log in and switch between Steam accounts.
 
 * 1-click Steam logins for multiple accounts with 2FA support.
 	- Your 'Shared Secret' can be found in your decrypted .maFile generated from [SteamDesktopAuthenticator](https://github.com/Jessecar96/SteamDesktopAuthenticator)
-
 * Auto login a selected or the most recently used account.
 * Remember Steam password for next independent run.
 * Encrypts saved user password.
