@@ -180,6 +180,10 @@ namespace SAM
                 {
                     settingsFile.Write("PasswordProtect", VerifyAndSetPassword(), "Settings");
                 }
+                else
+                {
+                    settingsFile.Write("PasswordProtect", "false", "Settings");
+                }
             }
             // Else load settings from existing file.
             else
