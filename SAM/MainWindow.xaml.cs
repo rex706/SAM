@@ -143,47 +143,7 @@ namespace SAM
             // If no settings file exists, create one and initialize values.
             if (!File.Exists("SAMSettings.ini"))
             {
-                settingsFile = new IniFile("SAMSettings.ini");
-
-                settingsFile.Write("Version", AssemblyVer, "System");
-
-                settingsFile.Write("AccountsPerRow", "5", "Settings");
-                settingsFile.Write("ButtonSize", "100", "Settings");
-                settingsFile.Write("SleepTime", "2", "Settings");
-                settingsFile.Write("StartWithWindows", "false", "Settings");
-                settingsFile.Write("StartMinimized", "false", "Settings");
-                settingsFile.Write("MinimizeToTray", "false", "Settings");
-                settingsFile.Write("RememberPassword", "false", "Settings");
-                settingsFile.Write("ClearUserData", "false", "Settings");
-
-                settingsFile.Write("Recent", "false", "AutoLog");
-                settingsFile.Write("RecentAcc", "", "AutoLog");
-                settingsFile.Write("Selected", "false", "AutoLog");
-                settingsFile.Write("SelectedAcc", "", "AutoLog");
-
-                settingsFile.Write("cafeapplaunch", "false", "Parameters");
-                settingsFile.Write("clearbeta", "false", "Parameters");
-                settingsFile.Write("console", "false", "Parameters");
-                settingsFile.Write("developer", "false", "Parameters");
-                settingsFile.Write("forceservice", "false", "Parameters");
-                settingsFile.Write("login", "true", "Parameters");
-                settingsFile.Write("nocache", "false", "Parameters");
-                settingsFile.Write("noverifyfiles", "false", "Parameters");
-                settingsFile.Write("silent", "false", "Parameters");
-                settingsFile.Write("single_core", "false", "Parameters");
-                settingsFile.Write("tcp", "false", "Parameters");
-                settingsFile.Write("tenfoot", "false", "Parameters");
-
-                MessageBoxResult messageBoxResult = MessageBox.Show("Do you want to password protect SAM?", "Protect", MessageBoxButton.YesNo, MessageBoxImage.Information);
-
-                if (messageBoxResult == MessageBoxResult.Yes)
-                {
-                    settingsFile.Write("PasswordProtect", VerifyAndSetPassword(), "Settings");
-                }
-                else
-                {
-                    settingsFile.Write("PasswordProtect", "false", "Settings");
-                }
+                GenerateSettings();
             }
             // Else load settings from existing file.
             else
@@ -277,6 +237,51 @@ namespace SAM
             }
 
             return false;
+        }
+
+        private void GenerateSettings()
+        {
+            settingsFile = new IniFile("SAMSettings.ini");
+
+            settingsFile.Write("Version", AssemblyVer, "System");
+
+            settingsFile.Write("AccountsPerRow", "5", "Settings");
+            settingsFile.Write("ButtonSize", "100", "Settings");
+            settingsFile.Write("SleepTime", "2", "Settings");
+            settingsFile.Write("StartWithWindows", "false", "Settings");
+            settingsFile.Write("StartMinimized", "false", "Settings");
+            settingsFile.Write("MinimizeToTray", "false", "Settings");
+            settingsFile.Write("RememberPassword", "false", "Settings");
+            settingsFile.Write("ClearUserData", "false", "Settings");
+
+            settingsFile.Write("Recent", "false", "AutoLog");
+            settingsFile.Write("RecentAcc", "", "AutoLog");
+            settingsFile.Write("Selected", "false", "AutoLog");
+            settingsFile.Write("SelectedAcc", "", "AutoLog");
+
+            settingsFile.Write("cafeapplaunch", "false", "Parameters");
+            settingsFile.Write("clearbeta", "false", "Parameters");
+            settingsFile.Write("console", "false", "Parameters");
+            settingsFile.Write("developer", "false", "Parameters");
+            settingsFile.Write("forceservice", "false", "Parameters");
+            settingsFile.Write("login", "true", "Parameters");
+            settingsFile.Write("nocache", "false", "Parameters");
+            settingsFile.Write("noverifyfiles", "false", "Parameters");
+            settingsFile.Write("silent", "false", "Parameters");
+            settingsFile.Write("single_core", "false", "Parameters");
+            settingsFile.Write("tcp", "false", "Parameters");
+            settingsFile.Write("tenfoot", "false", "Parameters");
+
+            MessageBoxResult messageBoxResult = MessageBox.Show("Do you want to password protect SAM?", "Protect", MessageBoxButton.YesNo, MessageBoxImage.Information);
+
+            if (messageBoxResult == MessageBoxResult.Yes)
+            {
+                settingsFile.Write("PasswordProtect", VerifyAndSetPassword(), "Settings");
+            }
+            else
+            {
+                settingsFile.Write("PasswordProtect", "false", "Settings");
+            }
         }
 
         private void LoadSettings()

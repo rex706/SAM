@@ -8,8 +8,9 @@
         mc:Ignorable="d"
         Title="Settings" Height="255" Width="350" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" Icon="steam_alt-10.ico" Background="#FF333638">
     <Grid>
-        <Button Name="OKButton" Content="OK" Margin="80,0,0,10" Click="OKButton_Click" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="23" Width="85" />
-        <Button Name="CancelButton" Content="Cancel"  Click="CancelButton_Click" Margin="0,0,80,10" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="23" Width="85" />
+        <Button x:Name="DefaultButton" Content="Default" Margin="35,0,0,10" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="23" Width="85" Click="DefaultButton_Click" />
+        <Button Name="OKButton" Content="OK" Margin="0,0,0,10" Click="OKButton_Click" HorizontalAlignment="Center" VerticalAlignment="Bottom" Height="23" Width="85" />
+        <Button Name="CancelButton" Content="Cancel"  Click="CancelButton_Click" Margin="0,0,35,10" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="23" Width="85" />
         <TabControl Background="{x:Null}" Margin="10,10,10,0" VerticalAlignment="Top" Height="160">
             <TabItem Header="General">
                 <Grid>

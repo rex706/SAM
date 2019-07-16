@@ -327,5 +327,39 @@ namespace SAM
                 MessageBox.Show(ex.Message);
             }
         }
+
+        private void DefaultButton_Click(object sender, RoutedEventArgs e)
+        {
+            accountsPerRowSpinBox.Text = "5";
+            buttonSizeSpinBox.Text = "100";
+            sleepTimeSpinBox.Text = "2";
+
+            startupCheckBox.IsChecked = false;
+            startupMinCheckBox.IsChecked = false;
+            minimizeToTrayCheckBox.IsChecked = false;
+            rememberLoginPasswordCheckBox.IsChecked = false;
+            clearUserDataCheckBox.IsChecked = false;
+
+            // Ignore password protect checkbox.
+            //passwordProtectCheckBox.IsChecked = false;
+
+            mostRecentCheckBox.IsChecked = false;
+            selectedAccountCheckBox.IsChecked = false;
+
+            SteamPathTextBox.Text = Utils.CheckSteamPath();
+
+            CafeAppLaunchCheckBox.IsChecked = false;
+            ClearBetaCheckBox.IsChecked = false;
+            ConsoleCheckBox.IsChecked = false;
+            DeveloperCheckBox.IsChecked = false;
+            ForceServiceCheckBox.IsChecked = false;
+            LoginCheckBox.IsChecked = true;
+            NoCacheCheckBox.IsChecked = false;
+            NoVerifyFilesCheckBox.IsChecked = false;
+            SilentCheckBox.IsChecked = false;
+            SingleCoreCheckBox.IsChecked = false;
+            TcpCheckBox.IsChecked = false;
+            TenFootCheckBox.IsChecked = false;
+        }
     }
 }
