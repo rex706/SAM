@@ -3,29 +3,48 @@
 Easily log in and switch between Steam accounts.
 
 
-![alt tag](http://i.imgur.com/7sUxieF.png)
-
+![alt tag](http://i.imgur.com/3qyK3jU.png)
 [**DOWNLOAD**](https://github.com/rex706/SAM/releases)
 
 **Features**
 
-* 1-click Steam logins for multiple accounts.
-* 2FA Support.
+* 1-click Steam logins for multiple accounts with 2FA support.
+	- Your 'Shared Secret' can be found in your decrypted .maFile generated from [SteamDesktopAuthenticator](https://github.com/Jessecar96/SteamDesktopAuthenticator)
+
 * Auto login a selected or the most recently used account.
+* Remember Steam password for next independent run.
 * Encrypts saved user password.
-* Adjust number of accounts per row.
+* Set number of accounts per row.
+* Set button size ranging between 50-200px.
 * Import/Export accounts.
 * Start with Windows.
 * Start minimized.
 * Minimize to tray.
 * Data password protection.
-* Set/clear account timeouts.
+* Set/Clear account timeouts.
+* Delete userdata folder after every login toggle.
+* Set custom sleep time for waiting actions.
+* Toggle certain Steam client launch parameters.
 
 ------------------------------------
 
 **CHANGELOG**
 
-**Latest version:** 1.2.6.2
+**Latest version:** 1.3.0.0
+* Send user credentials as key presses rather than launch paramters.
+* Better account button position logic.
+* Set button size ranging between 50-200px.
+* Show account names/aliases on hover.
+* Delete userdata folder after login toggle setting.
+* Delete all or selected accounts in bulk file menu items.
+* Fix scaling issue when window size is greater than screen size.
+* Disable Steam Vanity URL API call.
+* Remember window position.
+* Improve SteamGuard window focus.
+* Set custom sleep time for waiting actions.
+* Potentially useful Steam client launch parameter toggles.
+
+1.2.6.2
 * Fix importing delimited accounts without a shared secret.
 
 1.2.6.1

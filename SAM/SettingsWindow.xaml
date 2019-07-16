@@ -58,11 +58,8 @@
                     <CheckBox x:Name="SingleCoreCheckBox" Content="-single__core" HorizontalAlignment="Left" Margin="189,67,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Force Steam to run on your primary CPU only."/>
                     <CheckBox x:Name="TcpCheckBox" Content="-tcp" HorizontalAlignment="Left" Margin="189,87,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Forces connection to Steam backend to be via TCP."/>
                     <CheckBox x:Name="TenFootCheckBox" Content="-tenfoot" HorizontalAlignment="Left" Margin="189,107,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Start Steam in Big Picture Mode."/>
-
-
                 </Grid>
             </TabItem>
         </TabControl>
-
     </Grid>
 </Window>
