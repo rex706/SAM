@@ -4,6 +4,7 @@ Easily log in and switch between Steam accounts.
 
 
 ![alt tag](http://i.imgur.com/3qyK3jU.png)
+
 [**DOWNLOAD**](https://github.com/rex706/SAM/releases)
 
 **Features**
