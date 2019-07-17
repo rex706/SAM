@@ -1184,6 +1184,10 @@ namespace SAM
                 {
                     Task.Run(() => Type2FA(index, 0));
                 }
+                else if (clearUserData == true)
+                {
+                    Utils.ClearSteamUserDataFolder(steamPath, sleepTime, maxRetry);
+                }
             }
             else
             {
@@ -1282,20 +1286,7 @@ namespace SAM
             }
             else if (clearUserData == true)
             {
-                if (steamLoginWindow.IsValid && waitCount < maxRetry)
-                {
-                    Thread.Sleep(sleepTime);
-                    waitCount++;
-                }
-
-                // Login probably failed if Steam Login window is still open.
-                if (waitCount == maxRetry)
-                {
-                    Dispatcher.Invoke(delegate () { Login(index, tryCount + 1); });
-                    return;
-                }
-
-                Utils.ClearSteamUserDataFolder(steamPath, 0);
+                Utils.ClearSteamUserDataFolder(steamPath, sleepTime, maxRetry);
             }
         }
 
@@ -1383,7 +1374,7 @@ namespace SAM
 
             if (clearUserData == true)
             {
-                Utils.ClearSteamUserDataFolder(steamPath, 0);
+                Utils.ClearSteamUserDataFolder(steamPath, sleepTime, maxRetry);
             }
         }
 

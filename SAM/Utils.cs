@@ -463,13 +463,22 @@ namespace SAM
             return process;
         }
 
-        public static void ClearSteamUserDataFolder(string steamPath, int delay)
+        public static void ClearSteamUserDataFolder(string steamPath, int sleepTime, int maxRetry)
         {
-            Thread.Sleep(delay);
+            WindowHandle steamLoginWindow = GetSteamLoginWindow();
+            int waitCount = 0;
+
+            while (steamLoginWindow.IsValid && waitCount < maxRetry)
+            {
+                Thread.Sleep(sleepTime);
+                waitCount++;
+            }
 
             try
             {
+                Console.WriteLine("Deleting userdata files...");
                 Directory.Delete(steamPath + "\\userdata", true);
+                Console.WriteLine("userdata files deleted!");
             }
             catch (Exception e)
             {
