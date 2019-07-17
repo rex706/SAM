@@ -56,12 +56,13 @@ namespace SAM
         private static List<Thread> loginThreads;
         private static List<System.Timers.Timer> timeoutTimers;
 
-        private static string updateCheckUrl = "https://raw.githubusercontent.com/rex706/SAM/master/latest.txt";
+        private static readonly string updateCheckUrl = "https://raw.githubusercontent.com/rex706/SAM/master/latest.txt";
+        private static readonly string repositoryUrl = "https://github.com/rex706/SAM";
 
         private static bool isLoadingSettings = false;
 
         // Keys are changed before releases/updates
-        private static string eKey = "PRIVATE_KEY";
+        private static readonly string eKey = "PRIVATE_KEY";
         private static string ePassword = "";
 
         private static string account;
@@ -132,7 +133,7 @@ namespace SAM
             newExistMenuItem.Items.Add(ver);
 
             // Check for a new version.
-            if (await UpdateCheck.CheckForUpdate(updateCheckUrl) == 1)
+            if (await UpdateCheck.CheckForUpdate(updateCheckUrl, repositoryUrl) == 1)
             {
                 // An update is available, but user has chosen not to update.
                 ver.Header = "Update Available!";
@@ -1208,7 +1209,7 @@ namespace SAM
             Thread.Sleep(sleepTime);
 
             SetForegroundWindow(steamLoginWindow.RawPtr);
-
+            
             Thread.Sleep(100);
             System.Windows.Forms.SendKeys.SendWait(decryptedAccounts[index].Name);
             Thread.Sleep(100);
@@ -1669,12 +1670,12 @@ namespace SAM
 
         private void GitMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start("https://github.com/rex706/SAM");
+            Process.Start(repositoryUrl);
         }
 
         private async void Ver_Click(object sender, RoutedEventArgs e)
         {
-            if (await UpdateCheck.CheckForUpdate(updateCheckUrl) < 1)
+            if (await UpdateCheck.CheckForUpdate(updateCheckUrl, repositoryUrl) < 1)
             {
                 MessageBox.Show(Process.GetCurrentProcess().ProcessName + " is up to date!");
             }

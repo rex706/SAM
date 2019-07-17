@@ -21,7 +21,7 @@ namespace SAM
         /// Check program for updates with the given text url.
         /// Returns 1 if the user chose not to update or 0 if there is no update available.
         /// </summary>
-        public static async Task<int> CheckForUpdate(string url)
+        public static async Task<int> CheckForUpdate(string updateUrl, string repoUrl)
         {
             // Nkosi Note: Always use asynchronous versions of network and IO methods.
 
@@ -74,7 +74,7 @@ namespace SAM
             try
             {
                 // Open the text file using a stream reader.
-                using (Stream stream = await client.GetStreamAsync(url))
+                using (Stream stream = await client.GetStreamAsync(updateUrl))
                 {
                     StreamReader reader = new StreamReader(stream);
 
@@ -98,17 +98,25 @@ namespace SAM
                         // Update is available, and user wants to update. Requires app to close.
                         if (answer == MessageBoxResult.Yes)
                         {
-                            // Setup update process information.
-                            ProcessStartInfo startInfo = new ProcessStartInfo();
-                            startInfo.CreateNoWindow = false;
-                            startInfo.UseShellExecute = true;
-                            startInfo.FileName = "Updater.exe";
-                            startInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                            startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                            startInfo.Arguments = url;
+                            if (File.Exists("Updater.exe"))
+                            {
+                                // Setup update process information.
+                                ProcessStartInfo startInfo = new ProcessStartInfo();
+                                startInfo.CreateNoWindow = false;
+                                startInfo.UseShellExecute = true;
+                                startInfo.FileName = "Updater.exe";
+                                startInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                                startInfo.WindowStyle = ProcessWindowStyle.Normal;
+                                startInfo.Arguments = updateUrl;
 
-                            // Launch updater and exit.
-                            Process.Start(startInfo);
+                                // Launch updater and exit.
+                                Process.Start(startInfo);
+                            }
+                            else
+                            {
+                                Process.Start(repoUrl);
+                            }
+                            
                             Environment.Exit(0);
 
                             return 2;
