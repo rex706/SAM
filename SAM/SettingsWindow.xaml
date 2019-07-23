@@ -6,26 +6,25 @@
         xmlns:local="clr-namespace:SAM"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="Settings" Height="255" Width="350" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" Icon="steam_alt-10.ico" Background="#FF333638">
+        Title="Settings" Height="275" Width="350" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" Icon="steam_alt-10.ico" Background="#FF333638">
     <Grid>
         <Button x:Name="DefaultButton" Content="Default" Margin="35,0,0,10" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="23" Width="85" Click="DefaultButton_Click" />
         <Button Name="OKButton" Content="OK" Margin="0,0,0,10" Click="OKButton_Click" HorizontalAlignment="Center" VerticalAlignment="Bottom" Height="23" Width="85" />
         <Button Name="CancelButton" Content="Cancel"  Click="CancelButton_Click" Margin="0,0,35,10" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="23" Width="85" />
-        <TabControl Background="{x:Null}" Margin="10,10,10,0" VerticalAlignment="Top" Height="160">
+        <TabControl Background="{x:Null}" Margin="10,10,10,0" VerticalAlignment="Top" Height="187">
             <TabItem Header="General">
                 <Grid>
-                    <Label x:Name="NumPerRowLabel" Content="Accounts Per Row" HorizontalAlignment="Left" Margin="55,7,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
-                    <xctk:IntegerUpDown x:Name="accountsPerRowSpinBox" Minimum="1" Maximum="999" HorizontalAlignment="Left" Height="23" Margin="10,10,0,0" VerticalAlignment="Top" Width="45" TextAlignment="Center" ToolTip="Number of accounts displayed per row" BorderBrush="#FF707070"/>
-                    <xctk:IntegerUpDown x:Name="buttonSizeSpinBox" Minimum="50" Maximum="200" HorizontalAlignment="Left" Height="23" Margin="10,38,0,0" VerticalAlignment="Top" Width="45" TextAlignment="Center" ToolTip="Size of the account buttons in pixels" BorderBrush="#FF707070"/>
-                    <CheckBox x:Name="startupCheckBox" Content="Start with Windows" HorizontalAlignment="Left" Margin="171,9,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
-                    <CheckBox x:Name="startupMinCheckBox" Content="Start Minimized" HorizontalAlignment="Left" Margin="171,29,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
-                    <CheckBox x:Name="minimizeToTrayCheckBox" Content="Minimize To Tray" HorizontalAlignment="Left" Margin="171,49,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
-                    <CheckBox x:Name="passwordProtectCheckBox" Content="Password Protect" HorizontalAlignment="Left" Margin="171,109,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Password protect SAM"/>
-                    <Label x:Name="ButtonSizeLabel" Content="Button Size (px)" HorizontalAlignment="Left" Margin="55,36,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
-                    <CheckBox x:Name="rememberLoginPasswordCheckBox" Content="Remember Password" HorizontalAlignment="Left" Margin="171,69,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Checks the 'Remember my password' checkbox when logging into Steam. (Currently not working with '-login' parameter)"/>
-                    <CheckBox x:Name="clearUserDataCheckBox" Content="Clear User Data" HorizontalAlignment="Left" Margin="171,89,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Deletes all files in the '..\Steam\userdata' folder after every login"/>
-                    <xctk:IntegerUpDown x:Name="sleepTimeSpinBox" Minimum="1" Maximum="99" HorizontalAlignment="Left" Height="23" Margin="10,66,0,0" VerticalAlignment="Top" Width="45" TextAlignment="Center" ToolTip="Sleep time for waiting actions" BorderBrush="#FF707070"/>
-                    <Label x:Name="sleepTimeLabel" Content="Sleep Time (sec)" HorizontalAlignment="Left" Margin="55,64,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" Width="104"/>
+                    <Label x:Name="NumPerRowLabel" Content="Accounts Per Row" HorizontalAlignment="Left" Margin="203,7,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <xctk:IntegerUpDown x:Name="accountsPerRowSpinBox" Minimum="1" Maximum="999" HorizontalAlignment="Left" Height="23" Margin="158,10,0,0" VerticalAlignment="Top" Width="45" TextAlignment="Center" ToolTip="Number of accounts displayed per row" BorderBrush="#FF707070"/>
+                    <CheckBox x:Name="startupCheckBox" Content="Start with Windows" HorizontalAlignment="Left" Margin="10,128,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <CheckBox x:Name="startupMinCheckBox" Content="Start Minimized" HorizontalAlignment="Left" Margin="10,108,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <CheckBox x:Name="minimizeToTrayCheckBox" Content="Minimize To Tray" HorizontalAlignment="Left" Margin="10,68,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <CheckBox x:Name="passwordProtectCheckBox" Content="Password Protect" HorizontalAlignment="Left" Margin="10,48,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Password protect SAM"/>
+                    <CheckBox x:Name="rememberLoginPasswordCheckBox" Content="Remember Password" HorizontalAlignment="Left" Margin="10,88,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Checks the 'Remember my password' checkbox when logging into Steam. (Currently not working with '-login' parameter)"/>
+                    <CheckBox x:Name="clearUserDataCheckBox" Content="Clear User Data" HorizontalAlignment="Left" Margin="10,8,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Deletes all files in the '..\Steam\userdata' folder after every login"/>
+                    <xctk:IntegerUpDown x:Name="sleepTimeSpinBox" Minimum="1" Maximum="99" HorizontalAlignment="Left" Height="23" Margin="158,40,0,0" VerticalAlignment="Top" Width="45" TextAlignment="Center" ToolTip="Sleep time for waiting actions" BorderBrush="#FF707070"/>
+                    <Label x:Name="sleepTimeLabel" Content="Sleep Time (sec)" HorizontalAlignment="Left" Margin="203,38,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" Width="104"/>
+                    <CheckBox x:Name="HideAddButtonCheckBox" Content="Hide Add Button" HorizontalAlignment="Left" Margin="10,28,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Hide the Add account button in the button grid."/>
                 </Grid>
             </TabItem>
             <TabItem Header="Auto-Login">
@@ -35,6 +34,26 @@
                     <TextBlock x:Name="selectedAccountLabel" Text="" HorizontalAlignment="Left" Margin="110,75,0,0" VerticalAlignment="Top" Foreground="White"/>
                     <TextBlock x:Name="recentAccountLabel" Text="" HorizontalAlignment="Left" Margin="110,47,0,0" VerticalAlignment="Top" Foreground="White"/>
                     <TextBlock Text="Only triggers if Steam is closed" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" TextDecorations="Underline"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Customize">
+                <Grid>
+                    <xctk:IntegerUpDown x:Name="buttonSizeSpinBox" Minimum="50" Maximum="200" HorizontalAlignment="Left" Height="23" Margin="10,39,0,0" VerticalAlignment="Top" Width="45" TextAlignment="Center" ToolTip="Account button size in pixels." BorderBrush="#FF707070"/>
+                    <Label x:Name="ButtonSizeLabel" Content="Size (px)" HorizontalAlignment="Left" Margin="55,37,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <xctk:ColorPicker x:Name="ButtonColorPicker" HorizontalAlignment="Left" Height="23" Margin="10,67,0,0" VerticalAlignment="Top" Width="45" ToolTip="Account button background color when profile images are not used." BorderBrush="#FF707070"/>
+                    <Label x:Name="ButtonColorPickerLabel" Content="Color" HorizontalAlignment="Left" Margin="55,65,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="When profile images are not used."/>
+                    <xctk:IntegerUpDown x:Name="ButtonFontSizeSpinBox" Text="Auto" Minimum="0" Maximum="99" HorizontalAlignment="Left" Height="23" Margin="10,95,0,0" VerticalAlignment="Top" Width="45" TextAlignment="Center" ToolTip="Default button text font size when profile images are not used." BorderBrush="#FF707070"/>
+                    <Label x:Name="ButtonSizeFontSizeLabel" Content="Font Size" HorizontalAlignment="Left" Margin="55,93,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <xctk:ColorPicker x:Name="ButtonFontColorPicker" HorizontalAlignment="Left" Height="23" Margin="10,123,0,0" VerticalAlignment="Top" Width="45" ToolTip="Account button font size for when profile images are not used." BorderBrush="#FF707070"/>
+                    <Label x:Name="ButtonFontColorLabel" Content="Font Color" HorizontalAlignment="Left" Margin="55,121,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <xctk:ColorPicker x:Name="BannerColorPicker" HorizontalAlignment="Left" Height="23" Margin="158,66,0,0" VerticalAlignment="Top" Width="45" ToolTip="Hover over banner background color." BorderBrush="#FF707070"/>
+                    <Label x:Name="BannerColorPickerLabel" Content="Banner Color" HorizontalAlignment="Left" Margin="203,64,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="When profile images are not used."/>
+                    <TextBlock Text="Account Button Customization" HorizontalAlignment="Center" Margin="0,13,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <xctk:IntegerUpDown x:Name="BannerFontSizeSpinBox" Text="Auto" Minimum="0" Maximum="99" HorizontalAlignment="Left" Height="23" Margin="158,95,0,0" VerticalAlignment="Top" Width="45" TextAlignment="Center" ToolTip="Hover over text font size." BorderBrush="#FF707070"/>
+                    <Label x:Name="BannerFontSizeLabel" Content="Banner Font Size" HorizontalAlignment="Left" Margin="203,93,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <xctk:ColorPicker x:Name="BannerFontColorPicker" HorizontalAlignment="Left" Height="23" Margin="158,123,0,0" VerticalAlignment="Top" Width="45" ToolTip="Hover over banner font color." BorderBrush="#FF707070"/>
+                    <Label x:Name="BannerFontColorPickerLabel" Content="Banner Font Color" HorizontalAlignment="Left" Margin="203,121,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+
                 </Grid>
             </TabItem>
             <TabItem Header="Steam">
@@ -47,18 +66,18 @@
             </TabItem>
             <TabItem Header="Parameters">
                 <Grid>
-                    <CheckBox x:Name="CafeAppLaunchCheckBox" Content="-cafeapplaunch" HorizontalAlignment="Left" Margin="33,7,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Launch apps in a cyber cafe context (Forces apps to be verified / validated before launch)."/>
-                    <CheckBox x:Name="ClearBetaCheckBox" Content="-clearbeta" HorizontalAlignment="Left" Margin="33,27,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Opts out of beta participation (in case for some reason it can't be done via settings)."/>
-                    <CheckBox x:Name="ConsoleCheckBox" Content="-console" HorizontalAlignment="Left" Margin="33,47,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Enables the Steam debug console tab."/>
-                    <CheckBox x:Name="DeveloperCheckBox" Content="-developer" HorizontalAlignment="Left" Margin="33,67,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Sets the 'developer' variable to 1. Can be used to open the VGUI editor by pressing F6 or VGUI zoo by pressing F7. Intended for skin development."/>
-                    <CheckBox x:Name="ForceServiceCheckBox" Content="-forceservice" HorizontalAlignment="Left" Margin="33,87,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Run Steam Client Service even if Steam has admin rights."/>
-                    <CheckBox x:Name="LoginCheckBox" Content="-login" HorizontalAlignment="Left" Margin="33,107,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Logs into Steam with the specified Username and Password combination."/>
-                    <CheckBox x:Name="NoCacheCheckBox" Content="-nocache" HorizontalAlignment="Left" Margin="189,7,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Starts steam with no cache."/>
-                    <CheckBox x:Name="NoVerifyFilesCheckBox" Content="-noverifyfiles" HorizontalAlignment="Left" Margin="189,27,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Prevents from the client from checking files integrity, especially useful when testing localization."/>
-                    <CheckBox x:Name="SilentCheckBox" Content="-silent" HorizontalAlignment="Left" Margin="189,47,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Suppresses the dialog box that opens when you start steam. It is used when you have Steam set to auto-start when your computer turns on."/>
-                    <CheckBox x:Name="SingleCoreCheckBox" Content="-single__core" HorizontalAlignment="Left" Margin="189,67,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Force Steam to run on your primary CPU only."/>
-                    <CheckBox x:Name="TcpCheckBox" Content="-tcp" HorizontalAlignment="Left" Margin="189,87,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Forces connection to Steam backend to be via TCP."/>
-                    <CheckBox x:Name="TenFootCheckBox" Content="-tenfoot" HorizontalAlignment="Left" Margin="189,107,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Start Steam in Big Picture Mode."/>
+                    <CheckBox x:Name="CafeAppLaunchCheckBox" Content="-cafeapplaunch" HorizontalAlignment="Left" Margin="33,10,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Launch apps in a cyber cafe context (Forces apps to be verified / validated before launch)."/>
+                    <CheckBox x:Name="ClearBetaCheckBox" Content="-clearbeta" HorizontalAlignment="Left" Margin="33,30,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Opts out of beta participation (in case for some reason it can't be done via settings)."/>
+                    <CheckBox x:Name="ConsoleCheckBox" Content="-console" HorizontalAlignment="Left" Margin="33,50,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Enables the Steam debug console tab."/>
+                    <CheckBox x:Name="DeveloperCheckBox" Content="-developer" HorizontalAlignment="Left" Margin="33,70,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Sets the 'developer' variable to 1. Can be used to open the VGUI editor by pressing F6 or VGUI zoo by pressing F7. Intended for skin development."/>
+                    <CheckBox x:Name="ForceServiceCheckBox" Content="-forceservice" HorizontalAlignment="Left" Margin="33,90,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Run Steam Client Service even if Steam has admin rights."/>
+                    <CheckBox x:Name="LoginCheckBox" Content="-login" HorizontalAlignment="Left" Margin="33,110,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Logs into Steam with the specified Username and Password combination."/>
+                    <CheckBox x:Name="NoCacheCheckBox" Content="-nocache" HorizontalAlignment="Left" Margin="189,10,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Starts steam with no cache."/>
+                    <CheckBox x:Name="NoVerifyFilesCheckBox" Content="-noverifyfiles" HorizontalAlignment="Left" Margin="189,30,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Prevents from the client from checking files integrity, especially useful when testing localization."/>
+                    <CheckBox x:Name="SilentCheckBox" Content="-silent" HorizontalAlignment="Left" Margin="189,50,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Suppresses the dialog box that opens when you start steam. It is used when you have Steam set to auto-start when your computer turns on."/>
+                    <CheckBox x:Name="SingleCoreCheckBox" Content="-single__core" HorizontalAlignment="Left" Margin="189,70,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Force Steam to run on your primary CPU only."/>
+                    <CheckBox x:Name="TcpCheckBox" Content="-tcp" HorizontalAlignment="Left" Margin="189,90,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Forces connection to Steam backend to be via TCP."/>
+                    <CheckBox x:Name="TenFootCheckBox" Content="-tenfoot" HorizontalAlignment="Left" Margin="189,110,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Start Steam in Big Picture Mode."/>
                 </Grid>
             </TabItem>
         </TabControl>

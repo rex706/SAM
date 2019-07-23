@@ -235,7 +235,7 @@ namespace SAM
         {
             var settingsFile = new IniFile("SAMSettings.ini");
 
-            string steamPath = settingsFile.Read("Steam", "Settings");
+            string steamPath = settingsFile.Read("Path", "Steam");
 
             int tryCount = 0;
 
@@ -297,7 +297,7 @@ namespace SAM
             }
 
             // Save path to settings file.
-            settingsFile.Write("Steam", steamPath, "Settings");
+            settingsFile.Write("Path", steamPath, "Steam");
 
             return steamPath;
         }

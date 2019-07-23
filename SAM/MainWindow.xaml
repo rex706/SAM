@@ -91,8 +91,8 @@
         <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
             <Grid x:Name="ScrollViewerGrid">
                 <Border x:Name="BackgroundBorder" Background="Transparent" Margin="0,20,0,0" Padding="0,20,0,0"/>
-                <Grid x:Name="NewButtonGrid" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,0">
-                    <Button x:Name="NewButton" Margin="0" Width="64" Click="NewButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="63" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{x:Null}" RenderTransformOrigin="0.5,0.5">
+                <Grid x:Name="AddButtonGrid" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,0">
+                    <Button x:Name="AddButton" Margin="0" Width="64" Click="AddButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="63" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{x:Null}" RenderTransformOrigin="0.5,0.5">
                         <Button.Style>
                             <Style TargetType="{x:Type Button}">
                                 <Setter Property="VerticalContentAlignment" Value="Stretch"/>
@@ -126,7 +126,7 @@
                     <Border DockPanel.Dock="Top" Height="20" VerticalAlignment="Top" Background="#FFF0F0F0">
                         <Menu x:Name="FileMenu"  Margin="0,1,0,0">
                             <MenuItem x:Name="FileMenuItem" Header="File">
-                                <MenuItem Header="New" Click="NewButton_Click" />
+                                <MenuItem Header="Add" Click="AddButton_Click" />
                                 <MenuItem Header="Import">
                                     <MenuItem Header="From DAT File" Click="ImportFromFileMenuItem_Click" />
                                     <MenuItem Header="Delimiter Separated" Click="ImportDelimitedTextMenuItem_Click" />
@@ -166,7 +166,7 @@
         <tb:TaskbarIcon IconSource="steam_alt-10.ico" ToolTipText="SAM">
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu x:Name="TaskbarIconContextMenu">
-                    <MenuItem Header="New Account" Click="NewButton_Click"/>
+                    <MenuItem Header="New Account" Click="AddButton_Click"/>
                     <MenuItem x:Name="TaskBarIconLoginContextMenu" Header="Login" IsEnabled="False">
                         
                     </MenuItem>

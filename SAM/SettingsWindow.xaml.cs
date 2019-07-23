@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Media;
 
 namespace SAM
 {
@@ -35,11 +36,13 @@ namespace SAM
 
         public bool Decrypt { get; set; }
 
-        private IniFile settingsFile;
+        private SAMSettings settings;
 
         public SettingsWindow()
         {
             InitializeComponent();
+
+            settings = new SAMSettings();
 
             this.Loaded += new RoutedEventHandler(SettingsWindow_Loaded);
             this.Decrypt = false;
@@ -49,66 +52,76 @@ namespace SAM
         {
             if (System.IO.File.Exists("SAMSettings.ini"))
             {
-                settingsFile = new IniFile("SAMSettings.ini");
-
-                accountsPerRowSpinBox.Text = settingsFile.Read("AccountsPerRow", "Settings");
-                buttonSizeSpinBox.Text = settingsFile.Read("ButtonSize", "Settings");
-                sleepTimeSpinBox.Text = settingsFile.Read("SleepTime", "Settings");
-
-                startupCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("StartWithWindows", "Settings"));
-                startupMinCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("StartMinimized", "Settings"));
-                minimizeToTrayCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("MinimizeToTray", "Settings"));
-                passwordProtectCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("PasswordProtect", "Settings"));
-                rememberLoginPasswordCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("RememberPassword", "Settings"));
-                clearUserDataCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("ClearUserData", "Settings"));
+                // General
+                accountsPerRowSpinBox.Text = settings.File.Read("AccountsPerRow", "Settings");
+                sleepTimeSpinBox.Text = settings.File.Read("SleepTime", "Settings");
+                startupCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("StartWithWindows", "Settings"));
+                startupMinCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("StartMinimized", "Settings"));
+                minimizeToTrayCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("MinimizeToTray", "Settings"));
+                passwordProtectCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("PasswordProtect", "Settings"));
+                rememberLoginPasswordCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("RememberPassword", "Settings"));
+                clearUserDataCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("ClearUserData", "Settings"));
+                HideAddButtonCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("HideAddButton", "Settings"));
                
-                if (Convert.ToBoolean(settingsFile.Read("Recent", "AutoLog")))
+                // AutoLog
+                if (Convert.ToBoolean(settings.File.Read("LoginRecentAccount", "AutoLog")))
                 {
                     mostRecentCheckBox.IsChecked = true;
-                    recentAccountLabel.Text = MainWindow.encryptedAccounts[Int32.Parse(settingsFile.Read("RecentAcc", "AutoLog"))].Name;
+                    recentAccountLabel.Text = MainWindow.encryptedAccounts[Int32.Parse(settings.File.Read("RecentAccountIndex", "AutoLog"))].Name;
                 }
-                else if (Convert.ToBoolean(settingsFile.Read("Selected", "AutoLog")))
+                else if (Convert.ToBoolean(settings.File.Read("LoginSelectedAccount", "AutoLog")))
                 {
                     selectedAccountCheckBox.IsChecked = true;
-                    selectedAccountLabel.Text = MainWindow.encryptedAccounts[Int32.Parse(settingsFile.Read("SelectedAcc", "AutoLog"))].Name;
+                    selectedAccountLabel.Text = MainWindow.encryptedAccounts[Int32.Parse(settings.File.Read("SelectedAccountIndex", "AutoLog"))].Name;
                 }
 
-                CafeAppLaunchCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("cafeapplaunch", "Parameters"));
-                ClearBetaCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("clearbeta", "Parameters"));
-                ConsoleCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("console", "Parameters"));
-                LoginCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("login", "Parameters"));
-                DeveloperCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("developer", "Parameters"));
-                ConsoleCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("forceservice", "Parameters"));
-                NoCacheCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("forceservice", "Parameters"));
-                NoVerifyFilesCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("noverifyfiles", "Parameters"));
-                SilentCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("silent", "Parameters"));
-                SingleCoreCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("single_core", "Parameters"));
-                TcpCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("tcp", "Parameters"));
-                TenFootCheckBox.IsChecked = Convert.ToBoolean(settingsFile.Read("tenfoot", "Parameters"));
+                // Customize
+                buttonSizeSpinBox.Text = settings.File.Read("ButtonSize", "Customize");
+                ButtonColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.File.Read("ButtonColor", "Customize"));
+                ButtonFontSizeSpinBox.Text = settings.File.Read("ButtonFontSize", "Customize");
+                ButtonFontColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.File.Read("ButtonFontColor", "Customize"));
+                BannerColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.File.Read("ButtonBannerColor", "Customize"));
+                BannerFontSizeSpinBox.Text = settings.File.Read("ButtonBannerFontSize", "Customize");
+                BannerFontColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.File.Read("ButtonBannerFontColor", "Customize"));
 
-                SteamPathTextBox.Text = settingsFile.Read("Steam", "Settings");
+                // Steam
+                SteamPathTextBox.Text = settings.File.Read("Path", "Steam");
+
+                // Parameters
+                CafeAppLaunchCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("cafeapplaunch", "Parameters"));
+                ClearBetaCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("clearbeta", "Parameters"));
+                ConsoleCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("console", "Parameters"));
+                LoginCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("login", "Parameters"));
+                DeveloperCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("developer", "Parameters"));
+                ConsoleCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("forceservice", "Parameters"));
+                NoCacheCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("forceservice", "Parameters"));
+                NoVerifyFilesCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("noverifyfiles", "Parameters"));
+                SilentCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("silent", "Parameters"));
+                SingleCoreCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("single_core", "Parameters"));
+                TcpCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("tcp", "Parameters"));
+                TenFootCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("tenfoot", "Parameters"));
             }
         }
 
         private void SaveSettings(string apr)
         {
-            settingsFile = new IniFile("SAMSettings.ini");
+            settings.File = new IniFile("SAMSettings.ini");
 
-            if (passwordProtectCheckBox.IsChecked == true && !Convert.ToBoolean(settingsFile.Read("PasswordProtect", "Settings")))
+            if (passwordProtectCheckBox.IsChecked == true && !Convert.ToBoolean(settings.File.Read("PasswordProtect", "Settings")))
             {
                 var passwordDialog = new PasswordWindow();
 
                 if (passwordDialog.ShowDialog() == true && passwordDialog.PasswordText != "")
                 {
                     Password = passwordDialog.PasswordText;
-                    settingsFile.Write("PasswordProtect", "true", "Settings");
+                    settings.File.Write("PasswordProtect", "true", "Settings");
                 }
                 else
                 {
                     Password = "";
                 }
             }
-            else if (passwordProtectCheckBox.IsChecked == false && Convert.ToBoolean(settingsFile.Read("PasswordProtect", "Settings")))
+            else if (passwordProtectCheckBox.IsChecked == false && Convert.ToBoolean(settings.File.Read("PasswordProtect", "Settings")))
             {
                 MessageBoxResult messageBoxResult = MessageBox.Show("Are you sure you want to decrypt your data file?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
@@ -150,24 +163,24 @@ namespace SAM
                     return;
                 }
 
-                settingsFile.Write("PasswordProtect", "false", "Settings");
+                settings.File.Write("PasswordProtect", "false", "Settings");
                 Password = "";
                 Decrypt = true;
             }
             else if (passwordProtectCheckBox.IsChecked == false)
             {
-                settingsFile.Write("PasswordProtect", "false", "Settings");
+                settings.File.Write("PasswordProtect", "false", "Settings");
             }
 
-            settingsFile.Write("RememberPassword", rememberLoginPasswordCheckBox.IsChecked.ToString(), "Settings");
-            settingsFile.Write("ClearUserData", clearUserDataCheckBox.IsChecked.ToString(), "Settings");
-            settingsFile.Write("AccountsPerRow", apr, "Settings");
-            settingsFile.Write("ButtonSize", buttonSizeSpinBox.Text, "Settings");
-            settingsFile.Write("SleepTime", sleepTimeSpinBox.Text, "Settings");
+            // General
+            settings.File.Write("RememberPassword", rememberLoginPasswordCheckBox.IsChecked.ToString(), "Settings");
+            settings.File.Write("ClearUserData", clearUserDataCheckBox.IsChecked.ToString(), "Settings");
+            settings.File.Write("AccountsPerRow", apr, "Settings");
+            settings.File.Write("SleepTime", sleepTimeSpinBox.Text, "Settings");
 
             if (startupCheckBox.IsChecked == true)
             {
-                settingsFile.Write("StartWithWindows", "true", "Settings");
+                settings.File.Write("StartWithWindows", "true", "Settings");
 
                 WshShell shell = new WshShell();
                 string shortcutAddress = Environment.GetFolderPath(Environment.SpecialFolder.Startup) + @"\SAM.lnk";
@@ -184,29 +197,42 @@ namespace SAM
                 if (System.IO.File.Exists(filePath))
                     System.IO.File.Delete(filePath);
 
-                settingsFile.Write("StartWithWindows", "false", "Settings");
+                settings.File.Write("StartWithWindows", "false", "Settings");
             }
 
-            settingsFile.Write("StartMinimized", startupMinCheckBox.IsChecked.ToString(), "Settings");
-            settingsFile.Write("MinimizeToTray", minimizeToTrayCheckBox.IsChecked.ToString(), "Settings");
+            settings.File.Write("StartMinimized", startupMinCheckBox.IsChecked.ToString(), "Settings");
+            settings.File.Write("MinimizeToTray", minimizeToTrayCheckBox.IsChecked.ToString(), "Settings");
+            settings.File.Write("HideAddButton", HideAddButtonCheckBox.IsChecked.ToString(), "Settings");
 
-            settingsFile.Write("Recent", mostRecentCheckBox.IsChecked.ToString(), "AutoLog");
-            settingsFile.Write("Selected", selectedAccountCheckBox.IsChecked.ToString(), "AutoLog");
+            // Customize
+            settings.File.Write("ButtonSize", buttonSizeSpinBox.Text, "Customize");
+            settings.File.Write("ButtonColor", new ColorConverter().ConvertToString(ButtonColorPicker.SelectedColor), "Customize");
+            settings.File.Write("ButtonFontSize", ButtonFontSizeSpinBox.Text, "Customize");
+            settings.File.Write("ButtonFontColor", new ColorConverter().ConvertToString(ButtonFontColorPicker.SelectedColor), "Customize");
+            settings.File.Write("ButtonBannerColor", new ColorConverter().ConvertToString(BannerColorPicker.SelectedColor), "Customize");
+            settings.File.Write("ButtonBannerFontSize", BannerFontSizeSpinBox.Text, "Customize");
+            settings.File.Write("ButtonBannerFontColor", new ColorConverter().ConvertToString(BannerFontColorPicker.SelectedColor), "Customize");
 
-            settingsFile.Write("cafeapplaunch", CafeAppLaunchCheckBox.IsChecked.ToString(), "Parameters");
-            settingsFile.Write("clearbeta", ClearBetaCheckBox.IsChecked.ToString(), "Parameters");
-            settingsFile.Write("console", ConsoleCheckBox.IsChecked.ToString(), "Parameters");
-            settingsFile.Write("login", LoginCheckBox.IsChecked.ToString(), "Parameters");
-            settingsFile.Write("developer", DeveloperCheckBox.IsChecked.ToString(), "Parameters");
-            settingsFile.Write("forceservice", ForceServiceCheckBox.IsChecked.ToString(), "Parameters");
-            settingsFile.Write("nocache", NoCacheCheckBox.IsChecked.ToString(), "Parameters");
-            settingsFile.Write("noverifyfiles", NoVerifyFilesCheckBox.IsChecked.ToString(), "Parameters");
-            settingsFile.Write("silent", SilentCheckBox.IsChecked.ToString(), "Parameters");
-            settingsFile.Write("single_core", SingleCoreCheckBox.IsChecked.ToString(), "Parameters");
-            settingsFile.Write("tcp", TcpCheckBox.IsChecked.ToString(), "Parameters");
-            settingsFile.Write("tenfoot", TenFootCheckBox.IsChecked.ToString(), "Parameters");
+            // AutoLog
+            settings.File.Write("LoginRecentAccount", mostRecentCheckBox.IsChecked.ToString(), "AutoLog");
+            settings.File.Write("LoginSelectedAccount", selectedAccountCheckBox.IsChecked.ToString(), "AutoLog");
 
-            settingsFile.Write("Steam", SteamPathTextBox.Text, "Settings");
+            // Steam
+            settings.File.Write("Path", SteamPathTextBox.Text, "Steam");
+
+            // Parameters
+            settings.File.Write("cafeapplaunch", CafeAppLaunchCheckBox.IsChecked.ToString(), "Parameters");
+            settings.File.Write("clearbeta", ClearBetaCheckBox.IsChecked.ToString(), "Parameters");
+            settings.File.Write("console", ConsoleCheckBox.IsChecked.ToString(), "Parameters");
+            settings.File.Write("login", LoginCheckBox.IsChecked.ToString(), "Parameters");
+            settings.File.Write("developer", DeveloperCheckBox.IsChecked.ToString(), "Parameters");
+            settings.File.Write("forceservice", ForceServiceCheckBox.IsChecked.ToString(), "Parameters");
+            settings.File.Write("nocache", NoCacheCheckBox.IsChecked.ToString(), "Parameters");
+            settings.File.Write("noverifyfiles", NoVerifyFilesCheckBox.IsChecked.ToString(), "Parameters");
+            settings.File.Write("silent", SilentCheckBox.IsChecked.ToString(), "Parameters");
+            settings.File.Write("single_core", SingleCoreCheckBox.IsChecked.ToString(), "Parameters");
+            settings.File.Write("tcp", TcpCheckBox.IsChecked.ToString(), "Parameters");
+            settings.File.Write("tenfoot", TenFootCheckBox.IsChecked.ToString(), "Parameters");
         }
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
@@ -223,7 +249,7 @@ namespace SAM
         {
             try
             {
-                int idx = Int32.Parse(settingsFile.Read("RecentAcc", "AutoLog"));
+                int idx = Int32.Parse(settings.File.Read("LoginRecentAccount", "AutoLog"));
 
                 // If index is invalid, uncheck box.
                 if (idx < 0)
@@ -254,7 +280,7 @@ namespace SAM
         {
             try
             {
-                int idx = Int32.Parse(settingsFile.Read("SelectedAcc", "AutoLog"));
+                int idx = Int32.Parse(settings.File.Read("LoginSelectedAccount", "AutoLog"));
 
                 if (idx < 0)
                 {
@@ -329,36 +355,42 @@ namespace SAM
 
         private void DefaultButton_Click(object sender, RoutedEventArgs e)
         {
-            accountsPerRowSpinBox.Text = "5";
-            buttonSizeSpinBox.Text = "100";
-            sleepTimeSpinBox.Text = "2";
-
-            startupCheckBox.IsChecked = false;
-            startupMinCheckBox.IsChecked = false;
-            minimizeToTrayCheckBox.IsChecked = false;
-            rememberLoginPasswordCheckBox.IsChecked = false;
-            clearUserDataCheckBox.IsChecked = false;
+            clearUserDataCheckBox.IsChecked = settings.Default.ClearUserData;
+            rememberLoginPasswordCheckBox.IsChecked = settings.Default.RememberPassword;
+            startupCheckBox.IsChecked = settings.Default.StartWithWindows;
+            startupMinCheckBox.IsChecked = settings.Default.StartMinimized;
+            minimizeToTrayCheckBox.IsChecked = settings.Default.MinimizeToTray;
+            accountsPerRowSpinBox.Text = settings.Default.AccountsPerRow.ToString();
+            sleepTimeSpinBox.Text = settings.Default.SleepTime.ToString();
 
             // Ignore password protect checkbox.
-            //passwordProtectCheckBox.IsChecked = false;
+            //passwordProtectCheckBox.IsChecked = settings.Default.PasswordProtect;
 
-            mostRecentCheckBox.IsChecked = false;
-            selectedAccountCheckBox.IsChecked = false;
+            mostRecentCheckBox.IsChecked = settings.Default.LoginRecentAccount;
+            selectedAccountCheckBox.IsChecked = settings.Default.LoginSelectedAccount;
 
             SteamPathTextBox.Text = Utils.CheckSteamPath();
 
-            CafeAppLaunchCheckBox.IsChecked = false;
-            ClearBetaCheckBox.IsChecked = false;
-            ConsoleCheckBox.IsChecked = false;
-            DeveloperCheckBox.IsChecked = false;
-            ForceServiceCheckBox.IsChecked = false;
-            LoginCheckBox.IsChecked = true;
-            NoCacheCheckBox.IsChecked = false;
-            NoVerifyFilesCheckBox.IsChecked = false;
-            SilentCheckBox.IsChecked = false;
-            SingleCoreCheckBox.IsChecked = false;
-            TcpCheckBox.IsChecked = false;
-            TenFootCheckBox.IsChecked = false;
+            buttonSizeSpinBox.Text = settings.Default.ButtonSize.ToString();
+            ButtonColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.Default.ButtonColor);
+            ButtonFontSizeSpinBox.Text = settings.Default.ButtonFontSize.ToString();
+            ButtonFontColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.Default.ButtonFontColor);
+            BannerColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.Default.ButtonBannerColor);
+            BannerFontSizeSpinBox.Text = settings.Default.BannerFontSize.ToString();
+            BannerFontColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.Default.BannerFontColor);
+
+            CafeAppLaunchCheckBox.IsChecked = settings.Default.CafeAppLaunch;
+            ClearBetaCheckBox.IsChecked = settings.Default.ClearBeta;
+            ConsoleCheckBox.IsChecked = settings.Default.Console;
+            DeveloperCheckBox.IsChecked = settings.Default.Developer;
+            ForceServiceCheckBox.IsChecked = settings.Default.ForceService;
+            LoginCheckBox.IsChecked = settings.Default.Login;
+            NoCacheCheckBox.IsChecked = settings.Default.NoCache;
+            NoVerifyFilesCheckBox.IsChecked = settings.Default.NoVerifyFiles;
+            SilentCheckBox.IsChecked = settings.Default.Silent;
+            SingleCoreCheckBox.IsChecked = settings.Default.SingleCore;
+            TcpCheckBox.IsChecked = settings.Default.TCP;
+            TenFootCheckBox.IsChecked = settings.Default.TenFoot;
         }
     }
 }

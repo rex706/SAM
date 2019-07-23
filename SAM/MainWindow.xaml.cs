@@ -53,13 +53,15 @@ namespace SAM
         private static Dictionary<int, Account> exportAccounts;
         private static Dictionary<int, Account> deleteAccounts;
 
+        private static SAMSettings settings;
+
         private static List<Thread> loginThreads;
         private static List<System.Timers.Timer> timeoutTimers;
 
         private static readonly string updateCheckUrl = "https://raw.githubusercontent.com/rex706/SAM/master/latest.txt";
         private static readonly string repositoryUrl = "https://github.com/rex706/SAM";
 
-        private static bool isLoadingSettings = false;
+        private static bool isLoadingSettings = true;
 
         // Keys are changed before releases/updates
         private static readonly string eKey = "PRIVATE_KEY";
@@ -67,25 +69,11 @@ namespace SAM
 
         private static string account;
 
-        private static int accountsPerRow = 0;
-        private static string steamPath;
-        private static bool rememberPassword = false;
-        private static bool clearUserData = false;
-
-        private static int buttonSize = 100;
-        private static int sleepTime = 2000;
-
-        private static bool selected = false;
-        private static int selectedAcc = -1;
-        private static bool recent = false;
-        private static int recentAcc = -1;
-
         private static List<string> launchParameters;
-        private static bool loginByParameter = false;
 
         private static double originalHeight;
         private static double originalWidth;
-        private static Thickness initialNewButtonGridMargin;
+        private static Thickness initialAddButtonGridMargin;
 
         private static string AssemblyVer;
 
@@ -97,8 +85,6 @@ namespace SAM
         private static System.Timers.Timer mouseHoldTimer;
 
         private static int maxRetry = 2;
-
-        IniFile settingsFile;
 
         // Resize animation variables
         private static System.Windows.Forms.Timer _Timer = new System.Windows.Forms.Timer();
@@ -155,7 +141,7 @@ namespace SAM
             loginThreads = new List<Thread>();
 
             // Save New Button inital margin.
-            initialNewButtonGridMargin = NewButtonGrid.Margin;
+            initialAddButtonGridMargin = AddButtonGrid.Margin;
 
             // Save initial window height and width;
             originalHeight = Height;
@@ -169,10 +155,10 @@ namespace SAM
 
             if (SteamProc.Length == 0)
             {
-                if (recent == true)
-                    Login(recentAcc, 0);
-                else if (selected == true)
-                    Login(selectedAcc, 0);
+                if (settings.User.LoginRecentAccount == true)
+                    Login(settings.User.RecentAccountIndex, 0);
+                else if (settings.User.LoginSelectedAccount == true)
+                    Login(settings.User.SelectedAccountIndex, 0);
             }
         }
 
@@ -242,318 +228,140 @@ namespace SAM
 
         private void GenerateSettings()
         {
-            settingsFile = new IniFile("SAMSettings.ini");
+            settings = new SAMSettings();
 
-            settingsFile.Write("Version", AssemblyVer, "System");
+            settings.File.Write("Version", AssemblyVer, "System");
 
-            settingsFile.Write("AccountsPerRow", "5", "Settings");
-            settingsFile.Write("ButtonSize", "100", "Settings");
-            settingsFile.Write("SleepTime", "2", "Settings");
-            settingsFile.Write("StartWithWindows", "false", "Settings");
-            settingsFile.Write("StartMinimized", "false", "Settings");
-            settingsFile.Write("MinimizeToTray", "false", "Settings");
-            settingsFile.Write("RememberPassword", "false", "Settings");
-            settingsFile.Write("ClearUserData", "false", "Settings");
-
-            settingsFile.Write("Recent", "false", "AutoLog");
-            settingsFile.Write("RecentAcc", "", "AutoLog");
-            settingsFile.Write("Selected", "false", "AutoLog");
-            settingsFile.Write("SelectedAcc", "", "AutoLog");
-
-            settingsFile.Write("cafeapplaunch", "false", "Parameters");
-            settingsFile.Write("clearbeta", "false", "Parameters");
-            settingsFile.Write("console", "false", "Parameters");
-            settingsFile.Write("developer", "false", "Parameters");
-            settingsFile.Write("forceservice", "false", "Parameters");
-            settingsFile.Write("login", "true", "Parameters");
-            settingsFile.Write("nocache", "false", "Parameters");
-            settingsFile.Write("noverifyfiles", "false", "Parameters");
-            settingsFile.Write("silent", "false", "Parameters");
-            settingsFile.Write("single_core", "false", "Parameters");
-            settingsFile.Write("tcp", "false", "Parameters");
-            settingsFile.Write("tenfoot", "false", "Parameters");
+            foreach (KeyValuePair<string, string> entry in settings.KeyValuePairs)
+            {
+                settings.File.Write(entry.Key, settings.Default.KeyValuePairs[entry.Key].ToString(), entry.Value);
+            }
 
             MessageBoxResult messageBoxResult = MessageBox.Show("Do you want to password protect SAM?", "Protect", MessageBoxButton.YesNo, MessageBoxImage.Information);
 
             if (messageBoxResult == MessageBoxResult.Yes)
             {
-                settingsFile.Write("PasswordProtect", VerifyAndSetPassword(), "Settings");
+                settings.File.Write("PasswordProtect", VerifyAndSetPassword(), "Settings");
             }
             else
             {
-                settingsFile.Write("PasswordProtect", "false", "Settings");
+                settings.File.Write("PasswordProtect", "false", "Settings");
             }
         }
 
         private void LoadSettings()
         {
+            settings = new SAMSettings();
+
             isLoadingSettings = true;
             launchParameters = new List<string>();
-            loginByParameter = false;
 
-            settingsFile = new IniFile("SAMSettings.ini");
+            settings.HandleDeprecatedSettings();
 
-            if (settingsFile.KeyExists("WindowLeft", "Location") && settingsFile.KeyExists("WindowTop", "Location"))
+            foreach (KeyValuePair<string, string> entry in settings.KeyValuePairs)
             {
-                this.Left = Double.Parse(settingsFile.Read("WindowLeft", "Location"));
-                this.Top = Double.Parse(settingsFile.Read("WindowTop", "Location"));
-            }
-
-            if (!settingsFile.KeyExists("AccountsPerRow", "Settings"))
-            {
-                settingsFile.Write("AccountsPerRow", "5", "Settings");
-                accountsPerRow = 5;
-            }
-            else
-            {
-                string accountsPerRowString = settingsFile.Read("AccountsPerRow", "Settings");
-
-                if (!Regex.IsMatch(accountsPerRowString, @"^\d+$") || Int32.Parse(accountsPerRowString) < 1)
+                if (!settings.File.KeyExists(entry.Key, entry.Value))
                 {
-                    settingsFile.Write("AccountsPerRow", "5", "Settings");
-                    accountsPerRow = 5;
-                }
-
-                accountsPerRow = Int32.Parse(accountsPerRowString);
-            }
-
-            if (!settingsFile.KeyExists("ButtonSize", "Settings"))
-            {
-                settingsFile.Write("ButtonSize", "100", "Settings");
-            }
-            else
-            {
-                string buttonSizeString = settingsFile.Read("ButtonSize", "Settings");
-
-                if (!Regex.IsMatch(buttonSizeString, @"^\d+$") || !Int32.TryParse(buttonSizeString, out buttonSize) || buttonSize < 50 || buttonSize > 200)
-                {
-                    settingsFile.Write("ButtonSize", "100", "Settings");
-                    buttonSize = 100;
-                }
-            }
-
-            if (!settingsFile.KeyExists("SleepTime", "Settings"))
-            {
-                settingsFile.Write("SleepTime", "2", "Settings");
-            }
-            else
-            {
-                string sleepTimeString = settingsFile.Read("SleepTime", "Settings");
-
-                if (!Regex.IsMatch(sleepTimeString, @"^\d+$") || !Int32.TryParse(sleepTimeString, out sleepTime) || sleepTime < 0 || sleepTime > 100)
-                {
-                    settingsFile.Write("SleepTime", "2", "Settings");
-                    sleepTime = 2000;
+                    settings.File.Write(entry.Key, settings.Default.KeyValuePairs[entry.Key].ToString(), entry.Value);
                 }
                 else
                 {
-                    sleepTime = sleepTime * 1000;
+                    switch (entry.Key)
+                    {
+                        case "AccountsPerRow":
+                            string accountsPerRowString = settings.File.Read("AccountsPerRow", "Settings");
+
+                            if (!Regex.IsMatch(accountsPerRowString, @"^\d+$") || Int32.Parse(accountsPerRowString) < 1)
+                            {
+                                settings.File.Write("AccountsPerRow", settings.Default.AccountsPerRow.ToString(), "Settings");
+                                settings.User.AccountsPerRow = settings.Default.AccountsPerRow;
+                            }
+
+                            settings.User.AccountsPerRow = Int32.Parse(accountsPerRowString);
+                            break;
+
+                        case "SleepTime":
+                            string sleepTimeString = settings.File.Read("SleepTime", "Settings");
+                            int sleepTime = 0;
+
+                            if (!Regex.IsMatch(sleepTimeString, @"^\d+$") || !Int32.TryParse(sleepTimeString, out sleepTime) || sleepTime < 0 || sleepTime > 100)
+                            {
+                                settings.File.Write("SleepTime", settings.Default.SleepTime.ToString(), "Settings");
+                                settings.User.SleepTime = settings.Default.SleepTime * 1000;
+                            }
+                            else
+                            {
+                                settings.User.SleepTime = sleepTime * 1000;
+                            }
+                            break;
+
+                        case "StartMinimized":
+                            settings.User.StartMinimized = Convert.ToBoolean(settings.File.Read("StartMinimized", "Settings"));
+                            if (settings.User.StartMinimized)
+                            {
+                                WindowState = WindowState.Minimized;
+                            }
+                            break;
+
+                        case "PasswordProtect":
+                            settings.User.PasswordProtect = Convert.ToBoolean(settings.File.Read("PasswordProtect", "Settings"));
+                            if (settings.User.PasswordProtect && (encryptedAccounts == null || encryptedAccounts.Count == 0))
+                            {
+                                VerifyAndSetPassword();
+                            }
+                            break;
+
+                        case "ButtonSize":
+                            string buttonSizeString = settings.File.Read("ButtonSize", "Customize");
+                            int buttonSize = 0;
+
+                            if (!Regex.IsMatch(buttonSizeString, @"^\d+$") || !Int32.TryParse(buttonSizeString, out buttonSize) || buttonSize < 50 || buttonSize > 200)
+                            {
+                                settings.File.Write("ButtonSize", "100", "Customize");
+                                settings.User.ButtonSize = 100;
+                            }
+                            else
+                            {
+                                settings.User.ButtonSize = buttonSize;
+                            }
+                            break;
+
+                        default:
+                            switch (Type.GetTypeCode(settings.User.KeyValuePairs[entry.Key].GetType()))
+                            {
+                                case TypeCode.Boolean:
+                                    settings.User.KeyValuePairs[entry.Key] = Convert.ToBoolean(settings.File.Read(entry.Key, entry.Value));
+                                    if (entry.Value.Equals(SAMSettings.SECTION_PARAMETERS) && (bool)settings.User.KeyValuePairs[entry.Key] == true)
+                                    {
+                                        launchParameters.Add("-" + entry.Key);
+                                    }
+                                    break;
+
+                                case TypeCode.Int32:
+                                    settings.User.KeyValuePairs[entry.Key] = Convert.ToInt32(settings.File.Read(entry.Key, entry.Value));
+                                    break;
+
+                                default:
+                                    settings.User.KeyValuePairs[entry.Key] = settings.File.Read(entry.Key, entry.Value);
+                                    break;
+                            }
+                            break;
+                    }
                 }
             }
+
+            // Load and validate saved window loaction.
+            if (settings.File.KeyExists("WindowLeft", "Location") && settings.File.KeyExists("WindowTop", "Location"))
+            {
+                this.Left = Double.Parse(settings.File.Read("WindowLeft", "Location"));
+                this.Top = Double.Parse(settings.File.Read("WindowTop", "Location"));
+            }
+
+            SetWindowSettingsIntoScreenArea();
 
             Utils.CheckSteamPath();
 
-            // If the recent autolog entry exists and is set to true.
-            // else create defualt settings file entry.
-            if (settingsFile.KeyExists("Recent", "AutoLog") && settingsFile.Read("Recent", "AutoLog").ToLower().Equals("true"))
-            {
-                int tryParseResult = -1;
-                Int32.TryParse(settingsFile.Read("RecentAcc", "AutoLog"), out tryParseResult);
-
-                if (tryParseResult != -1)
-                {
-                    recent = true;
-                    recentAcc = tryParseResult;
-                }
-                else
-                {
-                    settingsFile.Write("Recent", "false", "AutoLog");
-                }
-            }
-            else if (!settingsFile.KeyExists("Recent", "AutoLog"))
-            {
-                settingsFile.Write("Recent", "false", "AutoLog");
-                settingsFile.Write("RecentAcc", "-1", "AutoLog");
-            }
-
-            // If the selected autolog entry exists and is set to true.
-            // else create defualt settings file entry.
-            if (settingsFile.KeyExists("Selected", "AutoLog") && settingsFile.KeyExists("SelectedAcc", "AutoLog") && settingsFile.Read("Selected", "AutoLog").ToLower().Equals("true"))
-            {
-                int tryParseResult = -1;
-                Int32.TryParse(settingsFile.Read("SelectedAcc", "AutoLog"), out tryParseResult);
-
-                if (tryParseResult != -1)
-                {
-                    selected = true;
-                    selectedAcc = tryParseResult;
-                }
-                else
-                {
-                    settingsFile.Write("Selected", "false", "AutoLog");
-                }
-            }
-            else if (!settingsFile.KeyExists("Selected", "AutoLog"))
-            {
-                settingsFile.Write("Selected", "false", "AutoLog");
-                settingsFile.Write("SelectedAcc", "-1", "AutoLog");
-            }
-
-            if (settingsFile.KeyExists("MinimizeToTray", "Settings") && settingsFile.Read("MinimizeToTray", "Settings").ToLower().Equals("true"))
-            {
-
-            }
-            else
-            {
-                settingsFile.Write("MinimizeToTray", "false", "Settings");
-            }
-
-            if (settingsFile.KeyExists("StartMinimized", "Settings") && settingsFile.Read("StartMinimized", "Settings").ToLower().Equals("true"))
-            {
-                WindowState = WindowState.Minimized;
-            }
-            else
-            {
-                settingsFile.Write("StartMinimized", "false", "Settings");
-            }
-
-            if (settingsFile.KeyExists("PasswordProtect", "Settings") && settingsFile.Read("PasswordProtect", "Settings").ToLower().Equals("true") && (encryptedAccounts == null || encryptedAccounts.Count == 0))
-            {
-                VerifyAndSetPassword();
-            }
-            else if (!settingsFile.KeyExists("PasswordProtect", "Settings") || encryptedAccounts == null || encryptedAccounts.Count == 0)
-            {
-                settingsFile.Write("PasswordProtect", "false", "Settings");
-            }
-
-            if (settingsFile.KeyExists("RememberPassword", "Settings") && settingsFile.Read("RememberPassword", "Settings").ToLower().Equals("true"))
-            {
-                rememberPassword = true;
-            }
-            else if (!settingsFile.KeyExists("RememberPassword", "Settings"))
-            {
-                settingsFile.Write("RememberPassword", "false", "Settings");
-            }
-
-            if (settingsFile.KeyExists("ClearUserData", "Settings") && settingsFile.Read("ClearUserData", "Settings").ToLower().Equals("true"))
-            {
-                clearUserData = true;
-            }
-            else if (!settingsFile.KeyExists("ClearUserData", "Settings"))
-            {
-                settingsFile.Write("ClearUserData", "false", "Settings");
-            }
-
-            if (settingsFile.KeyExists("cafeapplaunch", "Parameters") && settingsFile.Read("cafeapplaunch", "Parameters").ToLower().Equals("true"))
-            {
-                launchParameters.Add("-cafeapplaunch");
-            }
-            else if (!settingsFile.KeyExists("cafeapplaunch", "Parameters"))
-            {
-                settingsFile.Write("cafeapplaunch", "false", "Parameters");
-            }
-
-            if (settingsFile.KeyExists("clearbeta", "Parameters") && settingsFile.Read("clearbeta", "Parameters").ToLower().Equals("true"))
-            {
-                launchParameters.Add("-clearbeta");
-            }
-            else if (!settingsFile.KeyExists("clearbeta", "Parameters"))
-            {
-                settingsFile.Write("clearbeta", "false", "Parameters");
-            }
-
-            if (settingsFile.KeyExists("console", "Parameters") && settingsFile.Read("console", "Parameters").ToLower().Equals("true"))
-            {
-                launchParameters.Add("-console");
-            }
-            else if (!settingsFile.KeyExists("console", "Parameters"))
-            {
-                settingsFile.Write("console", "false", "Parameters");
-            }
-
-            if (settingsFile.KeyExists("login", "Parameters") && settingsFile.Read("login", "Parameters").ToLower().Equals("true"))
-            {
-                launchParameters.Add("-login");
-                loginByParameter = true;
-            }
-            else if (!settingsFile.KeyExists("login", "Parameters"))
-            {
-                settingsFile.Write("login", "true", "Parameters");
-            }
-
-            if (settingsFile.KeyExists("developer", "Parameters") && settingsFile.Read("developer", "Parameters").ToLower().Equals("true"))
-            {
-                launchParameters.Add("-developer");
-            }
-            else if (!settingsFile.KeyExists("developer", "Parameters"))
-            {
-                settingsFile.Write("developer", "false", "Parameters");
-            }
-
-            if (settingsFile.KeyExists("forceservice", "Parameters") && settingsFile.Read("forceservice", "Parameters").ToLower().Equals("true"))
-            {
-                launchParameters.Add("-forceservice");
-            }
-            else if (!settingsFile.KeyExists("forceservice", "Parameters"))
-            {
-                settingsFile.Write("forceservice", "false", "Parameters");
-            }
-
-            if (settingsFile.KeyExists("nocache", "Parameters") && settingsFile.Read("nocache", "Parameters").ToLower().Equals("true"))
-            {
-                launchParameters.Add("-nocache");
-            }
-            else if (!settingsFile.KeyExists("nocache", "Parameters"))
-            {
-                settingsFile.Write("nocache", "false", "Parameters");
-            }
-
-            if (settingsFile.KeyExists("noverifyfiles", "Parameters") && settingsFile.Read("noverifyfiles", "Parameters").ToLower().Equals("true"))
-            {
-                launchParameters.Add("-noverifyfiles");
-            }
-            else if (!settingsFile.KeyExists("noverifyfiles", "Parameters"))
-            {
-                settingsFile.Write("noverifyfiles", "false", "Parameters");
-            }
-
-            if (settingsFile.KeyExists("silent", "Parameters") && settingsFile.Read("silent", "Parameters").ToLower().Equals("true"))
-            {
-                launchParameters.Add("-silent");
-            }
-            else if (!settingsFile.KeyExists("silent", "Parameters"))
-            {
-                settingsFile.Write("silent", "false", "Parameters");
-            }
-
-            if (settingsFile.KeyExists("single_core", "Parameters") && settingsFile.Read("single_core", "Parameters").ToLower().Equals("true"))
-            {
-                launchParameters.Add("-single_core");
-            }
-            else if (!settingsFile.KeyExists("single_core", "Parameters"))
-            {
-                settingsFile.Write("single_core", "false", "Parameters");
-            }
-
-            if (settingsFile.KeyExists("tcp", "Parameters") && settingsFile.Read("tcp", "Parameters").ToLower().Equals("true"))
-            {
-                launchParameters.Add("-tcp");
-            }
-            else if (!settingsFile.KeyExists("tcp", "Parameters"))
-            {
-                settingsFile.Write("tcp", "false", "Parameters");
-            }
-
-            if (settingsFile.KeyExists("tenfoot", "Parameters") && settingsFile.Read("tenfoot", "Parameters").ToLower().Equals("true"))
-            {
-                launchParameters.Add("-tenfoot");
-            }
-            else if (!settingsFile.KeyExists("tenfoot", "Parameters"))
-            {
-                settingsFile.Write("tenfoot", "false", "Parameters");
-            }
-
-            settingsFile.Write("Version", AssemblyVer, "System");
+            settings.File.Write("Version", AssemblyVer, "System");
 
             isLoadingSettings = false;
         }
@@ -567,14 +375,13 @@ namespace SAM
             TaskBarIconLoginContextMenu.Items.Clear();
             TaskBarIconLoginContextMenu.IsEnabled = false;
 
-            NewButtonGrid.Height = buttonSize;
-            NewButtonGrid.Width = buttonSize;
+            AddButtonGrid.Height = settings.User.ButtonSize;
+            AddButtonGrid.Width = settings.User.ButtonSize;
 
             // Check if info.dat exists
             if (File.Exists("info.dat"))
             {
                 // Deserialize file
-
                 if (ePassword.Length > 0)
                 {
                     MessageBoxResult messageBoxResult = MessageBoxResult.OK;
@@ -676,7 +483,7 @@ namespace SAM
                 int xCounter = 0;
                 int yCounter = 0;
 
-                int buttonOffset = buttonSize + 5;
+                int buttonOffset = settings.User.ButtonSize + 5;
 
                 // Create new button and textblock for each account
                 foreach (var account in encryptedAccounts)
@@ -727,27 +534,36 @@ namespace SAM
                         
                     accountButtonGrid.HorizontalAlignment = HorizontalAlignment.Left;
                     accountButtonGrid.VerticalAlignment = VerticalAlignment.Top;
-                    accountButtonGrid.Margin = new Thickness((xCounter * buttonOffset), (yCounter * buttonOffset), 0, 0);
+                    accountButtonGrid.Margin = new Thickness(xCounter * buttonOffset, yCounter * buttonOffset, 0, 0);
 
-                    accountButton.Height = buttonSize;
-                    accountButton.Width = buttonSize;
+                    accountButton.Height = settings.User.ButtonSize;
+                    accountButton.Width = settings.User.ButtonSize;
                     accountButton.BorderBrush = null;
                     accountButton.HorizontalAlignment = HorizontalAlignment.Center;
                     accountButton.VerticalAlignment = VerticalAlignment.Center;
+                    accountButton.Background = Brushes.Transparent;
 
-                    accountText.Width = buttonSize;
-                    accountText.FontSize = buttonSize / 8;
+                    accountText.Width = settings.User.ButtonSize;
+                    if (settings.User.ButtonFontSize > 0)
+                    {
+                        accountText.FontSize = settings.User.ButtonFontSize;
+                    }
+                    else
+                    {
+                        accountText.FontSize = settings.User.ButtonSize / 8;
+                    }
+                    
                     accountText.HorizontalAlignment = HorizontalAlignment.Center;
                     accountText.VerticalAlignment = VerticalAlignment.Bottom;
                     accountText.Margin = new Thickness(0, 0, 0, 7);
                     accountText.Padding = new Thickness(0, 0, 0, 1);
                     accountText.TextAlignment = TextAlignment.Center;
-                    accountText.Foreground = new SolidColorBrush(Colors.White);
-                    accountText.Background = new SolidColorBrush(new Color { A = 128, R = 0, G = 0, B = 0 });
+                    accountText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.BannerFontColor));
+                    accountText.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonBannerColor));
                     accountText.Visibility = Visibility.Collapsed;
 
-                    timeoutTextBlock.Width = buttonSize;
-                    timeoutTextBlock.FontSize = buttonSize / 7;
+                    timeoutTextBlock.Width = settings.User.ButtonSize;
+                    timeoutTextBlock.FontSize = settings.User.ButtonSize / 8;
                     timeoutTextBlock.HorizontalAlignment = HorizontalAlignment.Center;
                     timeoutTextBlock.VerticalAlignment = VerticalAlignment.Center;
                     timeoutTextBlock.Padding = new Thickness(0, 0, 0, 1);
@@ -755,16 +571,18 @@ namespace SAM
                     timeoutTextBlock.Foreground = new SolidColorBrush(Colors.White);
                     timeoutTextBlock.Background = new SolidColorBrush(new Color { A = 128, R = 255, G = 0, B = 0 });
 
-                    accountButton.Background = Brushes.Transparent;
-
-                    accountImage.Height = buttonSize;
-                    accountImage.Width = buttonSize;
+                    accountImage.Height = settings.User.ButtonSize;
+                    accountImage.Width = settings.User.ButtonSize;
                     accountImage.HorizontalAlignment = HorizontalAlignment.Center;
                     accountImage.VerticalAlignment = VerticalAlignment.Center;
                     accountImage.CornerRadius = new CornerRadius(3);
 
                     if (account.ProfUrl == "" || account.AviUrl == null || account.AviUrl == "" || account.AviUrl == " ")
                     {
+                        accountImage.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonColor));
+                        accountButton.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonFontColor));
+                        timeoutTextBlock.Margin = new Thickness(0, 0, 0, 50);
+
                         if (account.Alias != null && account.Alias.Length > 0)
                         {
                             accountButton.Content = account.Alias;
@@ -785,8 +603,12 @@ namespace SAM
                         }
                         catch (Exception m)
                         {
-                            // Probably no internet connection or avatar url is bad
+                            // Probably no internet connection or avatar url is bad.
                             Console.WriteLine("Error: " + m.Message);
+
+                            accountImage.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonColor));
+                            accountButton.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonFontColor));
+                            timeoutTextBlock.Margin = new Thickness(0, 0, 0, 50);
 
                             if (account.Alias != null && account.Alias.Length > 0)
                             {
@@ -898,7 +720,7 @@ namespace SAM
                     bCounter++;
                     xCounter++;
 
-                    if (accountsPerRow > 0 && (xCounter % accountsPerRow == 0) && xCounter != 0)
+                    if (bCounter % settings.User.AccountsPerRow == 0 && (!settings.User.HideAddButton || (settings.User.HideAddButton && bCounter != encryptedAccounts.Count)))
                     {
                         yCounter++;
                         xCounter = 0;
@@ -908,11 +730,24 @@ namespace SAM
                 if (bCounter > 0)
                 {
                     // Adjust window size and info positions
-                    int xVal = accountsPerRow;
+                    int xVal = settings.User.AccountsPerRow;
 
-                    if (yCounter == 0)
+                    if (settings.User.HideAddButton)
+                    {
+                        AddButtonGrid.Visibility = Visibility.Collapsed;
+                    }
+                    else
+                    {
+                        AddButtonGrid.Visibility = Visibility.Visible;
+                    }
+
+                    if (yCounter == 0 && !settings.User.HideAddButton)
                     {
                         xVal = xCounter + 1;
+                    }
+                    else if (yCounter == 0)
+                    {
+                        xVal = xCounter;
                     }
 
                     int newHeight = (buttonOffset * (yCounter + 1)) + 65;
@@ -921,23 +756,23 @@ namespace SAM
                     Resize(newHeight, newWidth);
 
                     // Adjust new account and export/delete buttons
-                    NewButtonGrid.HorizontalAlignment = HorizontalAlignment.Left;
-                    NewButtonGrid.VerticalAlignment = VerticalAlignment.Top;
-                    NewButtonGrid.Margin = new Thickness((xCounter * buttonOffset) + 5, (yCounter * buttonOffset) + 25, 0, 0);
+                    AddButtonGrid.HorizontalAlignment = HorizontalAlignment.Left;
+                    AddButtonGrid.VerticalAlignment = VerticalAlignment.Top;
+                    AddButtonGrid.Margin = new Thickness((xCounter * buttonOffset) + 5, (yCounter * buttonOffset) + 25, 0, 0);
                 }
                 else
                 {
                     // Reset New Button position.
                     Resize(originalHeight, originalWidth);
 
-                    NewButtonGrid.HorizontalAlignment = HorizontalAlignment.Center;
-                    NewButtonGrid.VerticalAlignment = VerticalAlignment.Center;
-                    NewButtonGrid.Margin = initialNewButtonGridMargin;
+                    AddButtonGrid.HorizontalAlignment = HorizontalAlignment.Center;
+                    AddButtonGrid.VerticalAlignment = VerticalAlignment.Center;
+                    AddButtonGrid.Margin = initialAddButtonGridMargin;
                 }
             }
         }
 
-        private void NewAccount()
+        private void AddAccount()
         {
             // User entered info
             var dialog = new TextDialog();
@@ -963,12 +798,12 @@ namespace SAM
                 // If the auto login checkbox was checked, update settings file and global variables. 
                 if (dialog.AutoLogAccountIndex == true)
                 {
-                    settingsFile.Write("SelectedAcc", (encryptedAccounts.Count + 1).ToString(), "AutoLog");
-                    settingsFile.Write("Selected", "true", "AutoLog");
-                    settingsFile.Write("Recent", "false", "AutoLog");
-                    selected = true;
-                    recent = false;
-                    selectedAcc = encryptedAccounts.Count + 1;
+                    settings.File.Write("SelectedAcc", (encryptedAccounts.Count + 1).ToString(), "AutoLog");
+                    settings.File.Write("Selected", "true", "AutoLog");
+                    settings.File.Write("Recent", "false", "AutoLog");
+                    settings.User.LoginSelectedAccount = true;
+                    settings.User.LoginRecentAccount = false;
+                    settings.User.SelectedAccountIndex = encryptedAccounts.Count + 1;
                 }
 
                 try
@@ -988,7 +823,7 @@ namespace SAM
 
                     Utils.Serialize(encryptedAccounts);
 
-                    NewAccount();
+                    AddAccount();
                 }
             }
         }
@@ -1009,9 +844,9 @@ namespace SAM
             };
 
             // Reload slected boolean
-            selected = settingsFile.Read("Selected", "AutoLog") == "true" ? true : false;
+            settings.User.LoginSelectedAccount = settings.File.Read("Selected", "AutoLog") == "true" ? true : false;
 
-            if (selected == true && selectedAcc == index)
+            if (settings.User.LoginSelectedAccount == true && settings.User.SelectedAccountIndex == index)
                 dialog.autoLogCheckBox.IsChecked = true;
 
             if (dialog.ShowDialog() == true)
@@ -1031,19 +866,19 @@ namespace SAM
                 // If the auto login checkbox was checked, update settings file and global variables. 
                 if (dialog.AutoLogAccountIndex == true)
                 {
-                    settingsFile.Write("SelectedAcc", button.Tag.ToString(), "AutoLog");
-                    settingsFile.Write("Selected", "true", "AutoLog");
-                    settingsFile.Write("Recent", "false", "AutoLog");
-                    selected = true;
-                    recent = false;
-                    selectedAcc = index;
+                    settings.File.Write("SelectedAcc", button.Tag.ToString(), "AutoLog");
+                    settings.File.Write("Selected", "true", "AutoLog");
+                    settings.File.Write("Recent", "false", "AutoLog");
+                    settings.User.LoginSelectedAccount = true;
+                    settings.User.LoginRecentAccount = false;
+                    settings.User.SelectedAccountIndex = index;
                 }
                 else
                 {
-                    settingsFile.Write("SelectedAcc", "-1", "AutoLog");
-                    settingsFile.Write("Selected", "false", "AutoLog");
-                    selected = false;
-                    selectedAcc = -1;
+                    settings.File.Write("SelectedAcc", "-1", "AutoLog");
+                    settings.File.Write("Selected", "false", "AutoLog");
+                    settings.User.LoginSelectedAccount = false;
+                    settings.User.SelectedAccountIndex = -1;
                 }
 
                 try
@@ -1105,18 +940,18 @@ namespace SAM
             }
 
             // Update the most recently used account index.
-            recentAcc = index;
-            settingsFile.Write("RecentAcc", index.ToString(), "AutoLog");
+            settings.User.RecentAccountIndex = index;
+            settings.File.Write("RecentAcc", index.ToString(), "AutoLog");
 
-            steamPath = Utils.CheckSteamPath();
+            settings.User.SteamPath = Utils.CheckSteamPath();
 
             // Shutdown Steam process via command if it is already open.
             ProcessStartInfo stopInfo = new ProcessStartInfo
             {
                 CreateNoWindow = false,
                 UseShellExecute = true,
-                FileName = steamPath + "steam.exe",
-                WorkingDirectory = steamPath,
+                FileName = settings.User.SteamPath + "steam.exe",
+                WorkingDirectory = settings.User.SteamPath,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 Arguments = "-shutdown"
             };
@@ -1135,7 +970,7 @@ namespace SAM
             }
 
             // Make sure Username field is empty and Remember Password checkbox is unchecked.
-            if (!loginByParameter)
+            if (!settings.User.Login)
             {
                 Utils.ClearAutoLoginUserKeyValues();
             }
@@ -1157,8 +992,8 @@ namespace SAM
             {
                 CreateNoWindow = false,
                 UseShellExecute = true,
-                FileName = steamPath + "steam.exe",
-                WorkingDirectory = steamPath,
+                FileName = settings.User.SteamPath + "steam.exe",
+                WorkingDirectory = settings.User.SteamPath,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 Arguments = parametersBuilder.ToString()
             }; 
@@ -1173,9 +1008,9 @@ namespace SAM
                 return;
             }
 
-            if (loginByParameter == true)
+            if (settings.User.Login == true)
             {
-                if (rememberPassword == true)
+                if (settings.User.RememberPassword == true)
                 {
                     Utils.SetRememeberPassowrdKeyValue(1);
                 }
@@ -1184,9 +1019,9 @@ namespace SAM
                 {
                     Task.Run(() => Type2FA(index, 0));
                 }
-                else if (clearUserData == true)
+                else if (settings.User.ClearUserData == true)
                 {
-                    Utils.ClearSteamUserDataFolder(steamPath, sleepTime, maxRetry);
+                    Utils.ClearSteamUserDataFolder(settings.User.SteamPath, settings.User.SleepTime, maxRetry);
                 }
             }
             else
@@ -1210,7 +1045,7 @@ namespace SAM
             Process steamLoginProcess = Utils.WaitForSteamProcess(steamLoginWindow);
             steamLoginProcess.WaitForInputIdle();
 
-            Thread.Sleep(sleepTime);
+            Thread.Sleep(settings.User.SleepTime);
 
             SetForegroundWindow(steamLoginWindow.RawPtr);
             
@@ -1236,7 +1071,7 @@ namespace SAM
                 Thread.Sleep(10);
             }
 
-            if (rememberPassword)
+            if (settings.User.RememberPassword)
             {
                 SetForegroundWindow(steamLoginWindow.RawPtr);
 
@@ -1260,7 +1095,7 @@ namespace SAM
 
                 while (!steamGuardWindow.IsValid && waitCount < maxRetry)
                 {
-                    Thread.Sleep(sleepTime);
+                    Thread.Sleep(settings.User.SleepTime);
 
                     steamGuardWindow = Utils.GetSteamGuardWindow();
 
@@ -1284,9 +1119,9 @@ namespace SAM
 
                 Type2FA(index, 0);
             }
-            else if (clearUserData == true)
+            else if (settings.User.ClearUserData == true)
             {
-                Utils.ClearSteamUserDataFolder(steamPath, sleepTime, maxRetry);
+                Utils.ClearSteamUserDataFolder(settings.User.SteamPath, settings.User.SleepTime, maxRetry);
             }
         }
 
@@ -1318,7 +1153,7 @@ namespace SAM
             steamGuardProcess.WaitForInputIdle();
 
             // Wait a bit for the window to fully initialize just in case.
-            Thread.Sleep(sleepTime);
+            Thread.Sleep(settings.User.SleepTime);
 
             // Generate 2FA code, then send it to the client.
             Console.WriteLine("It is idle now, typing code...");
@@ -1348,7 +1183,7 @@ namespace SAM
             //PostMessage(steamGuardWindow.RawPtr, WM_KEYDOWN, (IntPtr)VK_RETURN, IntPtr.Zero);
 
             // Need a little pause here to more reliably check for popup later.
-            Thread.Sleep(sleepTime);
+            Thread.Sleep(settings.User.SleepTime);
 
             // Check if we still have a 2FA popup, which means the previous one failed.
             steamGuardWindow = Utils.GetSteamGuardWindow();
@@ -1372,9 +1207,9 @@ namespace SAM
                 MessageBox.Show("2FA Failed\nPlease verify your shared secret is correct!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-            if (clearUserData == true)
+            if (settings.User.ClearUserData == true)
             {
-                Utils.ClearSteamUserDataFolder(steamPath, sleepTime, maxRetry);
+                Utils.ClearSteamUserDataFolder(settings.User.SteamPath, settings.User.SleepTime, maxRetry);
             }
         }
 
@@ -1529,9 +1364,9 @@ namespace SAM
             }
         }
 
-        private void NewButton_Click(object sender, RoutedEventArgs e)
+        private void AddButton_Click(object sender, RoutedEventArgs e)
         {
-            NewAccount();
+            AddAccount();
         }
 
         private void AccountButton_Click(object sender, RoutedEventArgs e)
@@ -1539,7 +1374,6 @@ namespace SAM
             if (sender is Button btn)
             {
                 // Login with clicked button's index, which stored in Tag.
-
                 int index = Int32.Parse(btn.Tag.ToString());
                 Login(index, 0);
             }
@@ -1632,7 +1466,7 @@ namespace SAM
             var settingsDialog = new SettingsWindow();
             settingsDialog.ShowDialog();
 
-            accountsPerRow = settingsDialog.AccountsPerRow;
+            settings.User.AccountsPerRow = settingsDialog.AccountsPerRow;
 
             string previousPass = ePassword;
 
@@ -1745,7 +1579,7 @@ namespace SAM
                 case WindowState.Maximized:
                     break;
                 case WindowState.Minimized:
-                    if (settingsFile.KeyExists("MinimizeToTray", "Settings") && settingsFile.Read("MinimizeToTray", "Settings").ToLower().Equals("true"))
+                    if (settings.File.KeyExists("MinimizeToTray", "Settings") && settings.File.Read("MinimizeToTray", "Settings").ToLower().Equals("true"))
                     {
                         ShowInTaskbar = false;
                     }
@@ -1779,7 +1613,7 @@ namespace SAM
 
         private bool IsPasswordProtected()
         {
-            if (settingsFile.KeyExists("PasswordProtect", "Settings") && settingsFile.Read("PasswordProtect", "Settings").ToLower().Equals("true"))
+            if (settings.File.KeyExists("PasswordProtect", "Settings") && settings.File.Read("PasswordProtect", "Settings").ToLower().Equals("true"))
             {
                 return true;
             }
@@ -1819,10 +1653,10 @@ namespace SAM
 
         private void Window_LocationChanged(object sender, EventArgs e)
         {
-            if (settingsFile != null && !isLoadingSettings)
+            if (!isLoadingSettings && settings.File != null)
             {
-                settingsFile.Write("WindowLeft", Left.ToString(), "Location");
-                settingsFile.Write("WindowTop", Top.ToString(), "Location");
+                settings.File.Write("WindowLeft", Left.ToString(), "Location");
+                settings.File.Write("WindowTop", Top.ToString(), "Location");
             }
         }
 
@@ -1830,6 +1664,28 @@ namespace SAM
         {
             MainScrollViewer.VerticalScrollBarVisibility = visibility;
             MainScrollViewer.HorizontalScrollBarVisibility = visibility;
+        }
+
+        private void SetWindowSettingsIntoScreenArea()
+        {
+            // Get the screen to display the window.
+            var screen = System.Windows.Forms.Screen.FromPoint(new System.Drawing.Point((int)Left, (int)Top));
+
+            // Is bottom position out of screen for more than 1/3 Height of Window?
+            if (Top + (Height / 3) > screen.WorkingArea.Height)
+                Top = screen.WorkingArea.Height - Height;
+
+            // Is right position out of screen for more than 1/2 Width of Window?
+            if (Left + (Width / 2) > screen.WorkingArea.Width)
+                Left = screen.WorkingArea.Width - Width;
+
+            // Is top position out of screen?
+            if (Top < screen.WorkingArea.Top)
+                Top = screen.WorkingArea.Top;
+
+            // Is left position out of screen?
+            if (Left < screen.WorkingArea.Left)
+                Left = screen.WorkingArea.Left;
         }
 
         #region Account Button State Handling
@@ -1840,7 +1696,7 @@ namespace SAM
 
             exportAccounts = new Dictionary<int, Account>();
 
-            NewButton.Visibility = Visibility.Hidden;
+            AddButton.Visibility = Visibility.Hidden;
             ExportButton.Visibility = Visibility.Visible;
             CancelExportButton.Visibility = Visibility.Visible;
             FileMenuItem.IsEnabled = false;
@@ -1910,7 +1766,7 @@ namespace SAM
 
             deleteAccounts = new Dictionary<int, Account>();
 
-            NewButton.Visibility = Visibility.Hidden;
+            AddButton.Visibility = Visibility.Hidden;
             DeleteButton.Visibility = Visibility.Visible;
             CancelExportButton.Visibility = Visibility.Visible;
             FileMenuItem.IsEnabled = false;
@@ -1980,7 +1836,7 @@ namespace SAM
 
         private void ResetFromExportOrDelete()
         {
-            NewButton.Visibility = Visibility.Visible;
+            AddButton.Visibility = Visibility.Visible;
             DeleteButton.Visibility = Visibility.Hidden;
             ExportButton.Visibility = Visibility.Hidden;
             CancelExportButton.Visibility = Visibility.Hidden;

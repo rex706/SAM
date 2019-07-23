@@ -115,6 +115,7 @@
       <DependentUpon>ExposedInfoWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="IniFile.cs" />
+    <Compile Include="SAMSettings.cs" />
     <Compile Include="SetTimeoutWindow.xaml.cs">
       <DependentUpon>SetTimeoutWindow.xaml</DependentUpon>
     </Compile>
@@ -126,6 +127,7 @@
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="UpdateCheck.cs" />
+    <Compile Include="UserSettings.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="PasswordWindow.xaml.cs">
       <DependentUpon>PasswordWindow.xaml</DependentUpon>
