@@ -987,14 +987,14 @@ namespace SAM
 
                     foreach (char c in decryptedAccounts[index].Password)
                     {
-                        //if (c.Equals('"'))
-                        //{
-                        //    passwordBuilder.Append(c).Append(c);
-                        //}
-                        //else
-                        //{
+                        if (c.Equals('"'))
+                        {
+                            passwordBuilder.Append('\\').Append(c);
+                        }
+                        else
+                        {
                             passwordBuilder.Append(c);
-                        //}
+                        }
                     }
 
                     parametersBuilder.Append(decryptedAccounts[index].Name).Append(" \"").Append(passwordBuilder.ToString()).Append("\" ");
