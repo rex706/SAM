@@ -26,6 +26,7 @@ namespace SAM
             { "StartWithWindows", SECTION_GENERAL },
             { "AccountsPerRow", SECTION_GENERAL },
             { "SleepTime", SECTION_GENERAL },
+            { "CheckForUpdates", SECTION_GENERAL },
 
             { "LoginRecentAccount", SECTION_AUTOLOG },
             { "RecentAccountIndex", SECTION_AUTOLOG },

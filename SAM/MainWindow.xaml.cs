@@ -118,15 +118,6 @@ namespace SAM
             ver.IsEnabled = false;
             newExistMenuItem.Items.Add(ver);
 
-            // Check for a new version.
-            if (await UpdateCheck.CheckForUpdate(updateCheckUrl, repositoryUrl) == 1)
-            {
-                // An update is available, but user has chosen not to update.
-                ver.Header = "Update Available!";
-                ver.Click += Ver_Click;
-                ver.IsEnabled = true;
-            }
-
             // If no settings file exists, create one and initialize values.
             if (!File.Exists("SAMSettings.ini"))
             {
@@ -138,6 +129,15 @@ namespace SAM
                 LoadSettings();
             }
 
+            // Check for a new version if enabled.
+            if (settings.User.CheckForUpdates && await UpdateCheck.CheckForUpdate(updateCheckUrl, repositoryUrl) == 1)
+            {
+                // An update is available, but user has chosen not to update.
+                ver.Header = "Update Available!";
+                ver.Click += Ver_Click;
+                ver.IsEnabled = true;
+            }
+            
             loginThreads = new List<Thread>();
 
             // Save New Button inital margin.

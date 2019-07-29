@@ -15,6 +15,7 @@ namespace SAM
         public bool StartWithWindows { get { return (bool)KeyValuePairs["StartWithWindows"]; } set { KeyValuePairs["StartWithWindows"] = value; } }
         public int AccountsPerRow { get { return (int)KeyValuePairs["AccountsPerRow"]; } set { KeyValuePairs["AccountsPerRow"] = value; } }
         public int SleepTime { get { return (int)KeyValuePairs["SleepTime"]; } set { KeyValuePairs["SleepTime"] = value; } }
+        public bool CheckForUpdates { get { return (bool)KeyValuePairs["CheckForUpdates"]; } set { KeyValuePairs["CheckForUpdates"] = value;  } }
 
         #endregion
 
@@ -80,6 +81,7 @@ namespace SAM
             { "StartWithWindows", false },
             { "AccountsPerRow", 5 },
             { "SleepTime", 2 },
+            { "CheckForUpdates", true },
 
             { "LoginRecentAccount", false },
             { "RecentAccountIndex", -1 },

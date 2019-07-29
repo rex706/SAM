@@ -62,6 +62,7 @@ namespace SAM
                 rememberLoginPasswordCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("RememberPassword", "Settings"));
                 clearUserDataCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("ClearUserData", "Settings"));
                 HideAddButtonCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("HideAddButton", "Settings"));
+                CheckForUpdatesCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("CheckForUpdates", "Settings"));
                
                 // AutoLog
                 if (Convert.ToBoolean(settings.File.Read("LoginRecentAccount", "AutoLog")))
@@ -203,6 +204,7 @@ namespace SAM
             settings.File.Write("StartMinimized", startupMinCheckBox.IsChecked.ToString(), "Settings");
             settings.File.Write("MinimizeToTray", minimizeToTrayCheckBox.IsChecked.ToString(), "Settings");
             settings.File.Write("HideAddButton", HideAddButtonCheckBox.IsChecked.ToString(), "Settings");
+            settings.File.Write("CheckForUpdates", CheckForUpdatesCheckBox.IsChecked.ToString(), "Settings");
 
             // Customize
             settings.File.Write("ButtonSize", buttonSizeSpinBox.Text, "Customize");
