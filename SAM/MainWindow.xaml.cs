@@ -983,7 +983,21 @@ namespace SAM
 
                 if (parameter.Equals("-login"))
                 {
-                    parametersBuilder.Append(decryptedAccounts[index].Name).Append(" ").Append(decryptedAccounts[index].Password).Append(" ");
+                    StringBuilder passwordBuilder = new StringBuilder();
+
+                    foreach (char c in decryptedAccounts[index].Password)
+                    {
+                        //if (c.Equals('"'))
+                        //{
+                        //    passwordBuilder.Append(c).Append(c);
+                        //}
+                        //else
+                        //{
+                            passwordBuilder.Append(c);
+                        //}
+                    }
+
+                    parametersBuilder.Append(decryptedAccounts[index].Name).Append(" \"").Append(passwordBuilder.ToString()).Append("\" ");
                 }
             }
 
@@ -1554,6 +1568,12 @@ namespace SAM
         private void ShowWindowButton_Click(object sender, RoutedEventArgs e)
         {
             WindowState = WindowState.Normal;
+            Visibility = Visibility.Visible;
+            ShowInTaskbar = true;
+
+            Focusable = true;
+            IsEnabled = true;
+
             Focus();
         }
 
@@ -1581,10 +1601,12 @@ namespace SAM
                 case WindowState.Minimized:
                     if (settings.File.KeyExists("MinimizeToTray", "Settings") && settings.File.Read("MinimizeToTray", "Settings").ToLower().Equals("true"))
                     {
+                        Visibility = Visibility.Hidden;
                         ShowInTaskbar = false;
                     }
                     break;
                 case WindowState.Normal:
+                    Visibility = Visibility.Visible;
                     ShowInTaskbar = true;
                     break;
             }
