@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Windows;
 
 namespace SAM
@@ -48,14 +49,19 @@ namespace SAM
                     return;
                 }
 
+                // Remove new lines and white space from info.
+                string username = Regex.Replace(info[0], @"\s+", string.Empty);
+                string password = Regex.Replace(info[1], @"\s+", string.Empty);
+
                 // Shared secret.
                 if (info.Length > 2 && info[2] != null && info[2] != string.Empty)
                 {
-                    accounts.Add(new Account { Name = info[0], Password = StringCipher.Encrypt(info[1], eKey), SharedSecret = StringCipher.Encrypt(info[2], eKey) });
+                    string secret = Regex.Replace(info[2], @"\s+", string.Empty);
+                    accounts.Add(new Account { Name = info[0], Password = StringCipher.Encrypt(password, eKey), SharedSecret = StringCipher.Encrypt(secret, eKey) });
                 }
                 else
                 {
-                    accounts.Add(new Account { Name = info[0], Password = StringCipher.Encrypt(info[1], eKey) });
+                    accounts.Add(new Account { Name = username, Password = StringCipher.Encrypt(password, eKey) });
                 }
             }
 

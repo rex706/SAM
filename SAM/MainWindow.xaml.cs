@@ -1026,7 +1026,7 @@ namespace SAM
             {
                 if (settings.User.RememberPassword == true)
                 {
-                    Utils.SetRememeberPassowrdKeyValue(1);
+                    Utils.SetRememeberPasswordKeyValue(1);
                 }
 
                 if (decryptedAccounts[index].SharedSecret != null && decryptedAccounts[index].SharedSecret.Length > 0)

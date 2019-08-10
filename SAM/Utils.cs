@@ -206,7 +206,7 @@ namespace SAM
             }
         }
 
-        public static void SetRememeberPassowrdKeyValue(int value)
+        public static void SetRememeberPasswordKeyValue(int value)
         {
             string registryValue = string.Empty;
             RegistryKey localKey = null;
