@@ -57,7 +57,7 @@ namespace SAM
                 if (info.Length > 2 && info[2] != null && info[2] != string.Empty)
                 {
                     string secret = Regex.Replace(info[2], @"\s+", string.Empty);
-                    accounts.Add(new Account { Name = info[0], Password = StringCipher.Encrypt(password, eKey), SharedSecret = StringCipher.Encrypt(secret, eKey) });
+                    accounts.Add(new Account { Name = username, Password = StringCipher.Encrypt(password, eKey), SharedSecret = StringCipher.Encrypt(secret, eKey) });
                 }
                 else
                 {

@@ -419,12 +419,12 @@ namespace SAM
 
         public static WindowHandle GetSteamLoginWindow()
         {
-            return TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().Contains("Steam Login") && !wh.GetWindowText().Contains("-") && !wh.GetWindowText().Contains("—"));
+            return TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().Contains("Steam") && !wh.GetWindowText().Contains("-") && !wh.GetWindowText().Contains("—"));
         }
 
         public static WindowHandle GetSteamGuardWindow()
         {
-            return TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard - ") || wh.GetWindowText().StartsWith("Steam Guard — "));
+            return TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard"));
         }
 
         public static WindowHandle GetSteamWarningWindow()
