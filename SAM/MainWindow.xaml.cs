@@ -810,7 +810,14 @@ namespace SAM
                 {
                     encryptedAccounts.Add(new Account() { Name = dialog.AccountText, Alias = dialog.AliasText, Password = StringCipher.Encrypt(password, eKey), SharedSecret = StringCipher.Encrypt(sharedSecret, eKey), ProfUrl = dialog.UrlText, AviUrl = aviUrl, SteamId = steamId, Description = dialog.DescriptionText });
 
-                    Utils.Serialize(encryptedAccounts);
+                    if (IsPasswordProtected())
+                    {
+                        Utils.PasswordSerialize(encryptedAccounts, ePassword);
+                    }
+                    else
+                    {
+                        Utils.Serialize(encryptedAccounts);
+                    }
 
                     RefreshWindow();
                 }
