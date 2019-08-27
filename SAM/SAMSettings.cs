@@ -4,6 +4,8 @@ namespace SAM
 {
     class SAMSettings
     {
+        public const string fileName = "SAMSettings.ini";
+
         public const string SECTION_GENERAL = "Settings";
         public const string SECTION_AUTOLOG = "AutoLog";
         public const string SECTION_CUSTOMIZE = "Customize";
@@ -11,7 +13,7 @@ namespace SAM
         public const string SECTION_PARAMETERS = "Parameters";
         public const string SECTION_LOCATION = "Location";
 
-        public IniFile File = new IniFile("SAMSettings.ini");
+        public IniFile File = new IniFile(fileName);
         public UserSettings User = new UserSettings();
         public readonly UserSettings Default = new UserSettings();
 

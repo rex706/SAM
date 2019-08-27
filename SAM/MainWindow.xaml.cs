@@ -63,6 +63,8 @@ namespace SAM
 
         private static bool isLoadingSettings = true;
 
+        private static string dataFile = "info.dat";
+
         // Keys are changed before releases/updates
         private static readonly string eKey = "PRIVATE_KEY";
         private static string ePassword = "";
@@ -119,7 +121,7 @@ namespace SAM
             newExistMenuItem.Items.Add(ver);
 
             // If no settings file exists, create one and initialize values.
-            if (!File.Exists("SAMSettings.ini"))
+            if (!File.Exists(SAMSettings.fileName))
             {
                 GenerateSettings();
             }
@@ -197,7 +199,7 @@ namespace SAM
                 {
                     try
                     {
-                        encryptedAccounts = Utils.PasswordDeserialize("info.dat", passwordDialog.PasswordText);
+                        encryptedAccounts = Utils.PasswordDeserialize(dataFile, passwordDialog.PasswordText);
                         messageBoxResult = MessageBoxResult.None;
                     }
                     catch (Exception e)
@@ -379,7 +381,7 @@ namespace SAM
             AddButtonGrid.Width = settings.User.ButtonSize;
 
             // Check if info.dat exists
-            if (File.Exists("info.dat"))
+            if (File.Exists(dataFile))
             {
                 // Deserialize file
                 if (ePassword.Length > 0)
@@ -390,7 +392,7 @@ namespace SAM
                     {
                         try
                         {
-                            encryptedAccounts = Utils.PasswordDeserialize("info.dat", ePassword);
+                            encryptedAccounts = Utils.PasswordDeserialize(dataFile, ePassword);
                             messageBoxResult = MessageBoxResult.None;
                         }
                         catch (Exception e)
@@ -411,7 +413,7 @@ namespace SAM
                 }
                 else
                 {
-                    encryptedAccounts = Utils.Deserialize("info.dat");
+                    encryptedAccounts = Utils.Deserialize(dataFile);
                 }
 
                 PostDeserializedRefresh(true);
@@ -1657,19 +1659,19 @@ namespace SAM
             {
                 try
                 {
-                    if (!File.Exists("info.dat"))
+                    if (!File.Exists(dataFile))
                     {
                         return false;
                     }
                     else
                     {
-                        string[] lines = File.ReadAllLines("info.dat");
+                        string[] lines = File.ReadAllLines(dataFile);
                         if (lines.Length < 3)
                         {
                             return false;
                         }
                     }
-                    Utils.Deserialize("info.dat");
+                    Utils.Deserialize(dataFile);
                 }
                 catch
                 {
@@ -1795,7 +1797,7 @@ namespace SAM
                     {
                         try
                         {
-                            File.Delete("info.dat");
+                            File.Delete(dataFile);
                         }
                         catch (Exception ex)
                         {
