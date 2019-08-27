@@ -828,8 +828,15 @@ namespace SAM
                     var itemToRemove = encryptedAccounts.Single(r => r.Name == dialog.AccountText);
                     encryptedAccounts.Remove(itemToRemove);
 
-                    Utils.Serialize(encryptedAccounts);
-
+                    if (IsPasswordProtected())
+                    {
+                        Utils.PasswordSerialize(encryptedAccounts, ePassword);
+                    }
+                    else
+                    {
+                        Utils.Serialize(encryptedAccounts);
+                    }
+                    
                     AddAccount();
                 }
             }
@@ -1650,6 +1657,18 @@ namespace SAM
             {
                 try
                 {
+                    if (!File.Exists("info.dat"))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        string[] lines = File.ReadAllLines("info.dat");
+                        if (lines.Length < 3)
+                        {
+                            return false;
+                        }
+                    }
                     Utils.Deserialize("info.dat");
                 }
                 catch
