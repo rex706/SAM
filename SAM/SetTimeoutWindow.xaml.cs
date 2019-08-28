@@ -15,7 +15,7 @@ namespace SAM
             InitializeComponent();
             this.timeout = timeout;
 
-            if (timeout != null && timeout != new DateTime())
+            if (timeout != null && timeout < new DateTime())
             {
                 var timeLeft = timeout - DateTime.Now;
 

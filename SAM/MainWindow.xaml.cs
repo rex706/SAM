@@ -63,7 +63,7 @@ namespace SAM
 
         private static bool isLoadingSettings = true;
 
-        private static string dataFile = "info.dat";
+        private static readonly string dataFile = "info.dat";
 
         // Keys are changed before releases/updates
         private static readonly string eKey = "PRIVATE_KEY";
