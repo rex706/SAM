@@ -16,6 +16,11 @@ namespace SAM
         /// </summary>
         public static string latestVersion { get; set; }
 
+        private static readonly string updaterFileName = "Updater.exe";
+        private static readonly string newUpdaterFileName = "Updater_new.exe";
+
+        private static readonly string gitHubUrlPrefix = "https://raw.githubusercontent.com/rex706/Updater/master/";
+
         /// <summary>
         /// Check program for updates with the given text url.
         /// Returns 1 if the user chose not to update or 0 if there is no update available.
@@ -26,49 +31,9 @@ namespace SAM
 
             // Check for version updates
             var client = new HttpClient();
-            client.Timeout = new TimeSpan(0, 0, 0, 10);
+            client.Timeout = new TimeSpan(0, 0, 1, 0);
 
-            // Check for new Updater past version 1.0.0.0.
-            // Old updater was hard coded to serve only one specific url and cannot be aquired automatically through itself like the new one.
-            if (!File.Exists("Updater.exe") || FileVersionInfo.GetVersionInfo("Updater.exe").FileVersion == "1.0.0.0")
-            {
-                // Show message box that an update is available.
-                MessageBoxResult answer = MessageBox.Show("A new version of the Updater is available!\n\n" +
-                    "This will be required for future SAM auto-updates\n" +
-                    "as the old updater used hard coded URLs,\n" + 
-                    "which obviously isn't ideal.\n" +
-                    "\n\nDownload now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
-
-                // Update is available, and user wants to update.
-                if (answer == MessageBoxResult.Yes)
-                {
-                    try
-                    {
-                        // Open the text file using a stream reader.
-                        using (Stream stream = await client.GetStreamAsync("https://raw.githubusercontent.com/rex706/Updater/master/latest.txt"))
-                        {
-                            StreamReader reader = new StreamReader(stream);
-
-                            string latestUpdaterUrl = await reader.ReadLineAsync();
-
-                            // Start downloading the file.
-                            await new WebClient().DownloadFileTaskAsync(latestUpdaterUrl, AppDomain.CurrentDomain.BaseDirectory + "Updater_new.exe");
-                            MessageBox.Show("Done!");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message);
-                    }
-                }
-            }
-
-            // If a new version of the updater was downloaded, replace the old one.
-            if (File.Exists("Updater_new.exe"))
-            {
-                File.Delete("Updater.exe");
-                File.Move("Updater_new.exe", "Updater.exe");
-            }
+            await UpdaterUpdateCheck(client);
 
             try
             {
@@ -97,13 +62,13 @@ namespace SAM
                         // Update is available, and user wants to update. Requires app to close.
                         if (answer == MessageBoxResult.Yes)
                         {
-                            if (File.Exists("Updater.exe"))
+                            if (File.Exists(updaterFileName))
                             {
                                 // Setup update process information.
                                 ProcessStartInfo startInfo = new ProcessStartInfo();
                                 startInfo.CreateNoWindow = false;
                                 startInfo.UseShellExecute = true;
-                                startInfo.FileName = "Updater.exe";
+                                startInfo.FileName = updaterFileName;
                                 startInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
                                 startInfo.WindowStyle = ProcessWindowStyle.Normal;
                                 startInfo.Arguments = updateUrl;
@@ -133,6 +98,59 @@ namespace SAM
             {
                 // Some error occured or there is no internet connection.
                 return -1;
+            }
+        }
+
+        private static async Task UpdaterUpdateCheck(HttpClient client)
+        {
+            Version latest;
+
+            try
+            {
+                using (Stream stream = await client.GetStreamAsync(gitHubUrlPrefix + "version.txt"))
+                {
+                    StreamReader reader = new StreamReader(stream);
+                    string latestVersionString = await reader.ReadLineAsync();
+                    latest = new Version(latestVersionString);
+                }
+
+                using (Stream stream = await client.GetStreamAsync(gitHubUrlPrefix + "latest.txt"))
+                {
+                    StreamReader reader = new StreamReader(stream);
+
+                    string latestUpdaterUrl = await reader.ReadLineAsync();
+
+                    if (!File.Exists(updaterFileName))
+                    {
+                        await UpdateUpdater(latestUpdaterUrl);
+                    }
+                    else
+                    {
+                        Version current = new Version(FileVersionInfo.GetVersionInfo(updaterFileName).FileVersion);
+
+                        if (latest > current)
+                        {
+                            await UpdateUpdater(latestUpdaterUrl);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show(ex.Message);
+            }
+        }
+
+        private static async Task UpdateUpdater(string url)
+        {
+            // Start downloading the file.
+            await new WebClient().DownloadFileTaskAsync(url, AppDomain.CurrentDomain.BaseDirectory + newUpdaterFileName);
+
+            // If a new version of the updater was downloaded, replace the old one.
+            if (File.Exists(newUpdaterFileName))
+            {
+                File.Delete(updaterFileName);
+                File.Move(newUpdaterFileName, updaterFileName);
             }
         }
     }
