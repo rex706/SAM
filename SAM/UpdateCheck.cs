@@ -19,7 +19,7 @@ namespace SAM
         private static readonly string updaterFileName = "Updater.exe";
         private static readonly string newUpdaterFileName = "Updater_new.exe";
 
-        private static readonly string gitHubUrlPrefix = "https://raw.githubusercontent.com/rex706/Updater/master/";
+        private static readonly string updaterUrlPrefix = "https://raw.githubusercontent.com/rex706/Updater/master/";
 
         /// <summary>
         /// Check program for updates with the given text url.
@@ -107,14 +107,14 @@ namespace SAM
 
             try
             {
-                using (Stream stream = await client.GetStreamAsync(gitHubUrlPrefix + "version.txt"))
+                using (Stream stream = await client.GetStreamAsync(updaterUrlPrefix + "version.txt"))
                 {
                     StreamReader reader = new StreamReader(stream);
                     string latestVersionString = await reader.ReadLineAsync();
                     latest = new Version(latestVersionString);
                 }
 
-                using (Stream stream = await client.GetStreamAsync(gitHubUrlPrefix + "latest.txt"))
+                using (Stream stream = await client.GetStreamAsync(updaterUrlPrefix + "latest.txt"))
                 {
                     StreamReader reader = new StreamReader(stream);
 

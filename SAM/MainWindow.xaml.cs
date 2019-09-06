@@ -1077,7 +1077,7 @@ namespace SAM
 
             Thread.Sleep(settings.User.SleepTime);
 
-            SetForegroundWindow(steamLoginWindow.RawPtr);
+            SetForegroundWindow(steamLoginProcess.MainWindowHandle);
             
             Thread.Sleep(100);
             System.Windows.Forms.SendKeys.SendWait(decryptedAccounts[index].Name);
@@ -1087,7 +1087,9 @@ namespace SAM
 
             foreach (char c in decryptedAccounts[index].Password.ToCharArray())
             {
-                SetForegroundWindow(steamLoginWindow.RawPtr);
+                SetForegroundWindow(steamLoginProcess.MainWindowHandle);
+
+                Thread.Sleep(10);
 
                 if (Utils.IsSpecialCharacter(c))
                 {
@@ -1097,13 +1099,11 @@ namespace SAM
                 {
                     System.Windows.Forms.SendKeys.SendWait(c.ToString());
                 }
-
-                Thread.Sleep(10);
             }
 
             if (settings.User.RememberPassword)
             {
-                SetForegroundWindow(steamLoginWindow.RawPtr);
+                SetForegroundWindow(steamLoginProcess.MainWindowHandle);
 
                 Thread.Sleep(100);
                 System.Windows.Forms.SendKeys.SendWait("{TAB}");
@@ -1111,7 +1111,7 @@ namespace SAM
                 System.Windows.Forms.SendKeys.SendWait(" ");
             }
 
-            SetForegroundWindow(steamLoginWindow.RawPtr);
+            SetForegroundWindow(steamLoginProcess.MainWindowHandle);
 
             Thread.Sleep(100);
             System.Windows.Forms.SendKeys.SendWait("{ENTER}");
