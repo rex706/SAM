@@ -4,7 +4,7 @@ namespace SAM
 {
     class SAMSettings
     {
-        public const string fileName = "SAMSettings.ini";
+        public const string FILE_NAME = "SAMSettings.ini";
 
         public const string SECTION_GENERAL = "Settings";
         public const string SECTION_AUTOLOG = "AutoLog";
@@ -13,7 +13,7 @@ namespace SAM
         public const string SECTION_PARAMETERS = "Parameters";
         public const string SECTION_LOCATION = "Location";
 
-        public IniFile File = new IniFile(fileName);
+        public IniFile File = new IniFile(FILE_NAME);
         public UserSettings User = new UserSettings();
         public readonly UserSettings Default = new UserSettings();
 
@@ -56,7 +56,9 @@ namespace SAM
             { "silent", SECTION_PARAMETERS },
             { "single_core", SECTION_PARAMETERS },
             { "tcp", SECTION_PARAMETERS },
-            { "tenfoot", SECTION_PARAMETERS }
+            { "tenfoot", SECTION_PARAMETERS },
+            { "customParameters", SECTION_PARAMETERS },
+            { "customParametersValue", SECTION_PARAMETERS }
         };
 
         public void HandleDeprecatedSettings()

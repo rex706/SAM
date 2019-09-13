@@ -60,6 +60,8 @@ namespace SAM
         public bool SingleCore { get { return (bool)KeyValuePairs["single_core"]; } set { KeyValuePairs["single_core"] = value; } }
         public bool TCP { get { return (bool)KeyValuePairs["tcp"]; } set { KeyValuePairs["tcp"] = value; } }
         public bool TenFoot { get { return (bool)KeyValuePairs["tenfoot"]; } set { KeyValuePairs["tenfoot"] = value; } }
+        public bool CustomParameters { get { return (bool)KeyValuePairs["customParameters"]; } set { KeyValuePairs["customParameters"] = value; } }
+        public string CustomParametersValue { get { return (string)KeyValuePairs["customParametersValue"]; } set { KeyValuePairs["customParametersValue"] = value; } }
 
         #endregion
 
@@ -109,7 +111,9 @@ namespace SAM
             { "silent", false },
             { "single_core", false },
             { "tcp", false },
-            { "tenfoot", false }
+            { "tenfoot", false },
+            { "customParameters", false },
+            { "customParametersValue", string.Empty }
         };
     }
 }

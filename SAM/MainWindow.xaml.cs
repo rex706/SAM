@@ -121,7 +121,7 @@ namespace SAM
             newExistMenuItem.Items.Add(ver);
 
             // If no settings file exists, create one and initialize values.
-            if (!File.Exists(SAMSettings.fileName))
+            if (!File.Exists(SAMSettings.FILE_NAME))
             {
                 GenerateSettings();
             }
@@ -333,7 +333,7 @@ namespace SAM
                             {
                                 case TypeCode.Boolean:
                                     settings.User.KeyValuePairs[entry.Key] = Convert.ToBoolean(settings.File.Read(entry.Key, entry.Value));
-                                    if (entry.Value.Equals(SAMSettings.SECTION_PARAMETERS) && (bool)settings.User.KeyValuePairs[entry.Key] == true)
+                                    if (entry.Value.Equals(SAMSettings.SECTION_PARAMETERS) && (bool)settings.User.KeyValuePairs[entry.Key] == true && !entry.Key.StartsWith("custom"))
                                     {
                                         launchParameters.Add("-" + entry.Key);
                                     }
@@ -993,6 +993,11 @@ namespace SAM
 
             StringBuilder parametersBuilder = new StringBuilder();
 
+            if (settings.User.CustomParameters)
+            {
+                parametersBuilder.Append(settings.User.CustomParametersValue).Append(" ");
+            }
+            
             foreach (string parameter in launchParameters)
             {
                 parametersBuilder.Append(parameter).Append(" ");
