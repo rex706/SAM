@@ -1077,12 +1077,16 @@ namespace SAM
                 steamLoginWindow = Utils.GetSteamLoginWindow();
             }
 
+            // Debug
+            //StringBuilder windowTitleBuilder = new StringBuilder(Utils.GetWindowTextLength(steamLoginWindow.RawPtr) + 1);
+            //Utils.GetWindowText(steamLoginWindow.RawPtr, windowTitleBuilder, windowTitleBuilder.Capacity);
+
             Process steamLoginProcess = Utils.WaitForSteamProcess(steamLoginWindow);
             steamLoginProcess.WaitForInputIdle();
 
             Thread.Sleep(settings.User.SleepTime);
 
-            SetForegroundWindow(steamLoginProcess.MainWindowHandle);
+            SetForegroundWindow(steamLoginWindow.RawPtr);
             
             Thread.Sleep(100);
             System.Windows.Forms.SendKeys.SendWait(decryptedAccounts[index].Name);
@@ -1092,7 +1096,7 @@ namespace SAM
 
             foreach (char c in decryptedAccounts[index].Password.ToCharArray())
             {
-                SetForegroundWindow(steamLoginProcess.MainWindowHandle);
+                SetForegroundWindow(steamLoginWindow.RawPtr);
 
                 Thread.Sleep(10);
 
@@ -1108,7 +1112,7 @@ namespace SAM
 
             if (settings.User.RememberPassword)
             {
-                SetForegroundWindow(steamLoginProcess.MainWindowHandle);
+                SetForegroundWindow(steamLoginWindow.RawPtr);
 
                 Thread.Sleep(100);
                 System.Windows.Forms.SendKeys.SendWait("{TAB}");
@@ -1116,7 +1120,7 @@ namespace SAM
                 System.Windows.Forms.SendKeys.SendWait(" ");
             }
 
-            SetForegroundWindow(steamLoginProcess.MainWindowHandle);
+            SetForegroundWindow(steamLoginWindow.RawPtr);
 
             Thread.Sleep(100);
             System.Windows.Forms.SendKeys.SendWait("{ENTER}");

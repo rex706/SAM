@@ -23,6 +23,11 @@ namespace SAM
     {
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern int GetWindowThreadProcessId(IntPtr handle, out int processId);
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern int GetWindowTextLength(IntPtr hWnd);
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
 
         readonly static char[] specialChars = { '{', '}', '(', ')', '[', ']', '+', '^', '%', '~' };
 
@@ -419,7 +424,7 @@ namespace SAM
 
         public static WindowHandle GetSteamLoginWindow()
         {
-            return TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().Contains("Steam") && !wh.GetWindowText().Contains("-") && !wh.GetWindowText().Contains("—"));
+            return TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().Contains("Steam") && !wh.GetWindowText().Contains("-") && !wh.GetWindowText().Contains("—") && wh.GetWindowText().Length > 5);
         }
 
         public static WindowHandle GetSteamGuardWindow()
