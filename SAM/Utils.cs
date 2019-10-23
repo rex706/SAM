@@ -31,8 +31,6 @@ namespace SAM
 
         readonly static char[] specialChars = { '{', '}', '(', ')', '[', ']', '+', '^', '%', '~' };
 
-        private static string apiKey = "API_KEY";
-
         public static void Serialize(List<Account> accounts)
         {
             var serializer = new XmlSerializer(accounts.GetType());
@@ -333,6 +331,8 @@ namespace SAM
             {
                 Console.WriteLine(ex.Message);
 
+                // Vanity checking is very unreliable.
+
                 // Attempt to find Steam Id from web api.
                 //Uri vanityUri = new Uri("http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + apiKey + "&vanityurl=" + userName);
 
@@ -355,20 +355,27 @@ namespace SAM
 
         public static async Task<dynamic> GetUserInfoFromWebApiBySteamId(string steamId)
         {
-            dynamic userJson = null;
-            try
-            {
-                Uri userUri = new Uri("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + apiKey + "&steamids=" + steamId);
+            var settingsFile = new IniFile("SAMSettings.ini");
+            string apiKey = settingsFile.Read("ApiKey", "Steam");
 
-                using (WebClient client = new WebClient())
-                {
-                    string userJsonString = await client.DownloadStringTaskAsync(userUri);
-                    userJson = JValue.Parse(userJsonString);
-                }
-            }
-            catch(Exception m)
+            dynamic userJson = null;
+
+            if (apiKey != null && apiKey.Length > 0)
             {
-                //MessageBox.Show(m.Message);
+                try
+                {
+                    Uri userUri = new Uri("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + apiKey + "&steamids=" + steamId);
+
+                    using (WebClient client = new WebClient())
+                    {
+                        string userJsonString = await client.DownloadStringTaskAsync(userUri);
+                        userJson = JValue.Parse(userJsonString);
+                    }
+                }
+                catch (Exception m)
+                {
+                    //MessageBox.Show(m.Message);
+                }
             }
 
             return userJson;

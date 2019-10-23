@@ -59,10 +59,13 @@
             </TabItem>
             <TabItem Header="Steam">
                 <Grid>
-                    <TextBox x:Name="SteamPathTextBox" Height="23" Text="" Margin="10,34,36,57" IsReadOnly="True"/>
-                    <Button x:Name="ChangePathButton" Content="..." Margin="0,34,6,57" Click="ChangePathButton_Click" HorizontalAlignment="Right" Width="25" Height="23"/>
-                    <Button x:Name="AutoPathButton" Content="Auto" Width="75" Margin="103,69,104,17" Click="AutoPathButton_Click" Height="23"/>
+                    <TextBox x:Name="SteamPathTextBox" Height="23" Text="" Margin="10,38,68,111" IsReadOnly="True"/>
+                    <Button x:Name="ChangePathButton" Content="..." Margin="0,38,38,111" Click="ChangePathButton_Click" HorizontalAlignment="Right" Width="25" Height="23" RenderTransformOrigin="-0.146,0.512"/>
+                    <Button x:Name="AutoPathButton" Content="A" Margin="0,38,8,111" Click="AutoPathButton_Click" Height="23" Width="25" HorizontalAlignment="Right" ToolTip="Auto"/>
                     <TextBlock Text="Steam File Path" HorizontalAlignment="Center" Margin="0,13,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <TextBlock Text="API Key" HorizontalAlignment="Center" Margin="119,79,118,0" VerticalAlignment="Top" Foreground="#FFD1D1D1"/>
+                    <TextBox x:Name="ApiKeyTextBox" Height="23" Text="" Margin="10,105,38,44"/>
+                    <Button x:Name="ApiKeyHelpButton" Content="?" Margin="0,105,8,44" Click="ApiKeyHelpButton_Click" Height="23" Width="25" HorizontalAlignment="Right" ToolTip="Used for gathering additional account information for certain functionalities"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Parameters">

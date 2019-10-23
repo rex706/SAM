@@ -44,6 +44,7 @@ namespace SAM
             { "ButtonBannerFontColor", SECTION_CUSTOMIZE },
 
             { "Path", SECTION_STEAM },
+            { "ApiKey", SECTION_STEAM },
 
             { "cafeapplaunch", SECTION_PARAMETERS },
             { "clearbeta", SECTION_PARAMETERS },

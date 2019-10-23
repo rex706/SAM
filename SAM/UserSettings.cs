@@ -43,6 +43,7 @@ namespace SAM
         #region Steam
 
         public string SteamPath { get { return (string)KeyValuePairs["Path"]; } set { KeyValuePairs["Path"] = value; } }
+        public string ApiKey { get { return (string)KeyValuePairs["ApiKey"]; } set { KeyValuePairs["ApiKey"] = value; } }
 
         #endregion
 
@@ -91,6 +92,7 @@ namespace SAM
             { "SelectedAccountIndex", -1 },
 
             { "Path", string.Empty },
+            { "ApiKey", string.Empty },
 
             { "ButtonSize", 100 },
             { "ButtonColor", "#FFDDDDDD" },

@@ -1,5 +1,6 @@
 ﻿using IWshRuntimeLibrary;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -87,6 +88,7 @@ namespace SAM
 
                 // Steam
                 SteamPathTextBox.Text = settings.File.Read("Path", SAMSettings.SECTION_STEAM);
+                ApiKeyTextBox.Text = settings.File.Read("ApiKey", SAMSettings.SECTION_STEAM);
 
                 // Parameters
                 CafeAppLaunchCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read("cafeapplaunch", SAMSettings.SECTION_PARAMETERS));
@@ -223,6 +225,7 @@ namespace SAM
 
             // Steam
             settings.File.Write("Path", SteamPathTextBox.Text, SAMSettings.SECTION_STEAM);
+            settings.File.Write("ApiKey", ApiKeyTextBox.Text, SAMSettings.SECTION_STEAM);
 
             // Parameters
             settings.File.Write("cafeapplaunch", CafeAppLaunchCheckBox.IsChecked.ToString(), SAMSettings.SECTION_PARAMETERS);
@@ -376,6 +379,7 @@ namespace SAM
             selectedAccountCheckBox.IsChecked = settings.Default.LoginSelectedAccount;
 
             SteamPathTextBox.Text = Utils.CheckSteamPath();
+            ApiKeyTextBox.Text = settings.Default.ApiKey;
 
             buttonSizeSpinBox.Text = settings.Default.ButtonSize.ToString();
             ButtonColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.Default.ButtonColor);
@@ -409,6 +413,11 @@ namespace SAM
         private void CustomParametersCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             CustomParametersTextBox.IsEnabled = false;
+        }
+
+        private void ApiKeyHelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://steamcommunity.com/dev/apikey");
         }
     }
 }
