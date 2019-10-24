@@ -258,7 +258,7 @@ namespace SAM
         {
             try
             {
-                int idx = Int32.Parse(settings.File.Read("LoginRecentAccount", SAMSettings.SECTION_AUTOLOG));
+                int idx = Int32.Parse(settings.File.Read("RecentAccountIndex", SAMSettings.SECTION_AUTOLOG));
 
                 // If index is invalid, uncheck box.
                 if (idx < 0)
@@ -289,9 +289,10 @@ namespace SAM
         {
             try
             {
-                int idx = Int32.Parse(settings.File.Read("LoginSelectedAccount", SAMSettings.SECTION_AUTOLOG));
+                bool selectedEnabled = Convert.ToBoolean(settings.File.Read("LoginSelectedAccount", SAMSettings.SECTION_AUTOLOG));
+                int idx = Int32.Parse(settings.File.Read("SelectedAccountIndex", SAMSettings.SECTION_AUTOLOG));
 
-                if (idx < 0)
+                if (selectedEnabled == false || idx < 0)
                 {
                     selectedAccountCheckBox.IsChecked = false;
                 }
