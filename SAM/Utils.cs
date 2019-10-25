@@ -236,9 +236,9 @@ namespace SAM
 
         public static string CheckSteamPath()
         {
-            var settingsFile = new IniFile("SAMSettings.ini");
+            var settingsFile = new IniFile(SAMSettings.FILE_NAME);
 
-            string steamPath = settingsFile.Read("Path", "Steam");
+            string steamPath = settingsFile.Read(SAMSettings.STEAM_PATH, SAMSettings.SECTION_STEAM);
 
             int tryCount = 0;
 
@@ -300,7 +300,7 @@ namespace SAM
             }
 
             // Save path to settings file.
-            settingsFile.Write("Path", steamPath, "Steam");
+            settingsFile.Write(SAMSettings.STEAM_PATH, steamPath, SAMSettings.SECTION_STEAM);
 
             return steamPath;
         }
@@ -312,7 +312,7 @@ namespace SAM
 
             try
             {
-                string steamPath = new IniFile("SAMSettings.ini").Read("Steam", "Settings");
+                string steamPath = new IniFile(SAMSettings.FILE_NAME).Read(SAMSettings.STEAM_PATH, SAMSettings.SECTION_STEAM);
 
                 // Attempt to find Steam Id from steam config.
                 dynamic config = VdfConvert.Deserialize(File.ReadAllText(steamPath + "config\\config.vdf"));
@@ -355,8 +355,8 @@ namespace SAM
 
         public static async Task<dynamic> GetUserInfoFromWebApiBySteamId(string steamId)
         {
-            var settingsFile = new IniFile("SAMSettings.ini");
-            string apiKey = settingsFile.Read("ApiKey", "Steam");
+            var settingsFile = new IniFile(SAMSettings.FILE_NAME);
+            string apiKey = settingsFile.Read(SAMSettings.STEAM_API_KEY, SAMSettings.SECTION_STEAM);
 
             dynamic userJson = null;
 

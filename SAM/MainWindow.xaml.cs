@@ -176,7 +176,7 @@ namespace SAM
                 {
                     ePassword = passwordDialog.PasswordText;
 
-                    return "true";
+                    return true.ToString();
                 }
                 else if (passwordDialog.PasswordText == "")
                 {
@@ -184,7 +184,7 @@ namespace SAM
                 }
             }
 
-            return "false";
+            return false.ToString();
         }
 
         private bool VerifyPassword()
@@ -243,11 +243,11 @@ namespace SAM
 
             if (messageBoxResult == MessageBoxResult.Yes)
             {
-                settings.File.Write("PasswordProtect", VerifyAndSetPassword(), "Settings");
+                settings.File.Write(SAMSettings.PASSWORD_PROTECT, VerifyAndSetPassword(), SAMSettings.SECTION_GENERAL);
             }
             else
             {
-                settings.File.Write("PasswordProtect", "false", "Settings");
+                settings.File.Write(SAMSettings.PASSWORD_PROTECT, false.ToString(), SAMSettings.SECTION_GENERAL);
             }
         }
 
@@ -270,25 +270,25 @@ namespace SAM
                 {
                     switch (entry.Key)
                     {
-                        case "AccountsPerRow":
-                            string accountsPerRowString = settings.File.Read("AccountsPerRow", "Settings");
+                        case SAMSettings.ACCOUNTS_PER_ROW:
+                            string accountsPerRowString = settings.File.Read(SAMSettings.ACCOUNTS_PER_ROW, SAMSettings.SECTION_GENERAL);
 
                             if (!Regex.IsMatch(accountsPerRowString, @"^\d+$") || Int32.Parse(accountsPerRowString) < 1)
                             {
-                                settings.File.Write("AccountsPerRow", settings.Default.AccountsPerRow.ToString(), "Settings");
+                                settings.File.Write(SAMSettings.ACCOUNTS_PER_ROW, settings.Default.AccountsPerRow.ToString(), SAMSettings.SECTION_GENERAL);
                                 settings.User.AccountsPerRow = settings.Default.AccountsPerRow;
                             }
 
                             settings.User.AccountsPerRow = Int32.Parse(accountsPerRowString);
                             break;
 
-                        case "SleepTime":
-                            string sleepTimeString = settings.File.Read("SleepTime", "Settings");
+                        case SAMSettings.SLEEP_TIME:
+                            string sleepTimeString = settings.File.Read(SAMSettings.SLEEP_TIME, SAMSettings.SECTION_GENERAL);
                             int sleepTime = 0;
 
                             if (!Regex.IsMatch(sleepTimeString, @"^\d+$") || !Int32.TryParse(sleepTimeString, out sleepTime) || sleepTime < 0 || sleepTime > 100)
                             {
-                                settings.File.Write("SleepTime", settings.Default.SleepTime.ToString(), "Settings");
+                                settings.File.Write(SAMSettings.SLEEP_TIME, settings.Default.SleepTime.ToString(), SAMSettings.SECTION_GENERAL);
                                 settings.User.SleepTime = settings.Default.SleepTime * 1000;
                             }
                             else
@@ -297,29 +297,29 @@ namespace SAM
                             }
                             break;
 
-                        case "StartMinimized":
-                            settings.User.StartMinimized = Convert.ToBoolean(settings.File.Read("StartMinimized", "Settings"));
+                        case SAMSettings.START_MINIMIZED:
+                            settings.User.StartMinimized = Convert.ToBoolean(settings.File.Read(SAMSettings.START_MINIMIZED, SAMSettings.SECTION_GENERAL));
                             if (settings.User.StartMinimized)
                             {
                                 WindowState = WindowState.Minimized;
                             }
                             break;
 
-                        case "PasswordProtect":
-                            settings.User.PasswordProtect = Convert.ToBoolean(settings.File.Read("PasswordProtect", "Settings"));
+                        case SAMSettings.PASSWORD_PROTECT:
+                            settings.User.PasswordProtect = Convert.ToBoolean(settings.File.Read(SAMSettings.PASSWORD_PROTECT, SAMSettings.SECTION_GENERAL));
                             if (settings.User.PasswordProtect && (encryptedAccounts == null || encryptedAccounts.Count == 0))
                             {
                                 VerifyAndSetPassword();
                             }
                             break;
 
-                        case "ButtonSize":
-                            string buttonSizeString = settings.File.Read("ButtonSize", "Customize");
+                        case SAMSettings.BUTTON_SIZE:
+                            string buttonSizeString = settings.File.Read(SAMSettings.BUTTON_SIZE, SAMSettings.SECTION_CUSTOMIZE);
                             int buttonSize = 0;
 
                             if (!Regex.IsMatch(buttonSizeString, @"^\d+$") || !Int32.TryParse(buttonSizeString, out buttonSize) || buttonSize < 50 || buttonSize > 200)
                             {
-                                settings.File.Write("ButtonSize", "100", "Customize");
+                                settings.File.Write(SAMSettings.BUTTON_SIZE, "100", SAMSettings.SECTION_CUSTOMIZE);
                                 settings.User.ButtonSize = 100;
                             }
                             else
@@ -353,10 +353,10 @@ namespace SAM
             }
 
             // Load and validate saved window loaction.
-            if (settings.File.KeyExists("WindowLeft", "Location") && settings.File.KeyExists("WindowTop", "Location"))
+            if (settings.File.KeyExists(SAMSettings.WINDOW_LEFT, SAMSettings.SECTION_LOCATION) && settings.File.KeyExists(SAMSettings.WINDOW_TOP, SAMSettings.SECTION_LOCATION))
             {
-                this.Left = Double.Parse(settings.File.Read("WindowLeft", "Location"));
-                this.Top = Double.Parse(settings.File.Read("WindowTop", "Location"));
+                this.Left = Double.Parse(settings.File.Read(SAMSettings.WINDOW_LEFT, SAMSettings.SECTION_LOCATION));
+                this.Top = Double.Parse(settings.File.Read(SAMSettings.WINDOW_TOP, SAMSettings.SECTION_LOCATION));
             }
 
             SetWindowSettingsIntoScreenArea();
@@ -800,9 +800,9 @@ namespace SAM
                 // If the auto login checkbox was checked, update settings file and global variables. 
                 if (dialog.AutoLogAccountIndex == true)
                 {
-                    settings.File.Write("SelectedAcc", (encryptedAccounts.Count + 1).ToString(), "AutoLog");
-                    settings.File.Write("Selected", "true", "AutoLog");
-                    settings.File.Write("Recent", "false", "AutoLog");
+                    settings.File.Write(SAMSettings.SELECTED_ACCOUNT_INDEX, (encryptedAccounts.Count + 1).ToString(), SAMSettings.SECTION_AUTOLOG);
+                    settings.File.Write(SAMSettings.LOGIN_SELECTED_ACCOUNT, true.ToString(), SAMSettings.SECTION_AUTOLOG);
+                    settings.File.Write(SAMSettings.LOGIN_RECENT_ACCOUNT, false.ToString(), SAMSettings.SECTION_AUTOLOG);
                     settings.User.LoginSelectedAccount = true;
                     settings.User.LoginRecentAccount = false;
                     settings.User.SelectedAccountIndex = encryptedAccounts.Count + 1;
@@ -860,7 +860,7 @@ namespace SAM
             };
 
             // Reload slected boolean
-            settings.User.LoginSelectedAccount = settings.File.Read("Selected", "AutoLog") == "true" ? true : false;
+            settings.User.LoginSelectedAccount = settings.File.Read(SAMSettings.LOGIN_SELECTED_ACCOUNT, SAMSettings.SECTION_AUTOLOG) == true.ToString() ? true : false;
 
             if (settings.User.LoginSelectedAccount == true && settings.User.SelectedAccountIndex == index)
                 dialog.autoLogCheckBox.IsChecked = true;
@@ -882,17 +882,17 @@ namespace SAM
                 // If the auto login checkbox was checked, update settings file and global variables. 
                 if (dialog.AutoLogAccountIndex == true)
                 {
-                    settings.File.Write("SelectedAcc", button.Tag.ToString(), "AutoLog");
-                    settings.File.Write("Selected", "true", "AutoLog");
-                    settings.File.Write("Recent", "false", "AutoLog");
+                    settings.File.Write(SAMSettings.SELECTED_ACCOUNT_INDEX, button.Tag.ToString(), SAMSettings.SECTION_AUTOLOG);
+                    settings.File.Write(SAMSettings.LOGIN_SELECTED_ACCOUNT, true.ToString(), SAMSettings.SECTION_AUTOLOG);
+                    settings.File.Write(SAMSettings.LOGIN_RECENT_ACCOUNT, false.ToString(), SAMSettings.SECTION_AUTOLOG);
                     settings.User.LoginSelectedAccount = true;
                     settings.User.LoginRecentAccount = false;
                     settings.User.SelectedAccountIndex = index;
                 }
                 else
                 {
-                    settings.File.Write("SelectedAcc", "-1", "AutoLog");
-                    settings.File.Write("Selected", "false", "AutoLog");
+                    settings.File.Write(SAMSettings.SELECTED_ACCOUNT_INDEX, "-1", SAMSettings.SECTION_AUTOLOG);
+                    settings.File.Write(SAMSettings.LOGIN_SELECTED_ACCOUNT, false.ToString(), SAMSettings.SECTION_AUTOLOG);
                     settings.User.LoginSelectedAccount = false;
                     settings.User.SelectedAccountIndex = -1;
                 }
@@ -957,7 +957,7 @@ namespace SAM
 
             // Update the most recently used account index.
             settings.User.RecentAccountIndex = index;
-            settings.File.Write("RecentAcc", index.ToString(), "AutoLog");
+            settings.File.Write(SAMSettings.RECENT_ACCOUNT_INDEX, index.ToString(), SAMSettings.SECTION_AUTOLOG);
 
             settings.User.SteamPath = Utils.CheckSteamPath();
 
@@ -1624,7 +1624,7 @@ namespace SAM
                 case WindowState.Maximized:
                     break;
                 case WindowState.Minimized:
-                    if (settings.File.KeyExists("MinimizeToTray", "Settings") && settings.File.Read("MinimizeToTray", "Settings").ToLower().Equals("true"))
+                    if (settings.File.KeyExists(SAMSettings.MINIMIZE_TO_TRAY, SAMSettings.SECTION_GENERAL) && settings.File.Read(SAMSettings.MINIMIZE_TO_TRAY, SAMSettings.SECTION_GENERAL).ToLower().Equals(true.ToString()))
                     {
                         Visibility = Visibility.Hidden;
                         ShowInTaskbar = false;
@@ -1660,7 +1660,7 @@ namespace SAM
 
         private bool IsPasswordProtected()
         {
-            if (settings.File.KeyExists("PasswordProtect", "Settings") && settings.File.Read("PasswordProtect", "Settings").ToLower().Equals("true"))
+            if (settings.File.KeyExists(SAMSettings.PASSWORD_PROTECT, SAMSettings.SECTION_GENERAL) && settings.File.Read(SAMSettings.PASSWORD_PROTECT, SAMSettings.SECTION_GENERAL).ToLower().Equals(true.ToString()))
             {
                 return true;
             }
@@ -1714,8 +1714,8 @@ namespace SAM
         {
             if (!isLoadingSettings && settings.File != null)
             {
-                settings.File.Write("WindowLeft", Left.ToString(), "Location");
-                settings.File.Write("WindowTop", Top.ToString(), "Location");
+                settings.File.Write(SAMSettings.WINDOW_LEFT, Left.ToString(), SAMSettings.SECTION_LOCATION);
+                settings.File.Write(SAMSettings.WINDOW_TOP, Top.ToString(), SAMSettings.SECTION_LOCATION);
             }
         }
 

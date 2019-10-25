@@ -7,12 +7,9 @@ namespace SAM
     /// </summary>
     public partial class TextDialog : Window
     {
-        private IniFile settingsFile;
-
         public TextDialog()
         {
             InitializeComponent();
-            settingsFile = new IniFile("SAMSettings.ini");
         }
 
         public string AccountText

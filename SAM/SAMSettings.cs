@@ -17,87 +17,132 @@ namespace SAM
         public UserSettings User = new UserSettings();
         public readonly UserSettings Default = new UserSettings();
 
+        public const string CLEAR_USER_DATA = "ClearUserData";
+        public const string HIDE_ADD_BUTTON = "HideAddButton";
+        public const string PASSWORD_PROTECT = "PasswordProtect";
+        public const string MINIMIZE_TO_TRAY = "MinimizeToTray";
+        public const string REMEMBER_PASSWORD = "RememberPassword";
+        public const string START_MINIMIZED = "StartMinimized";
+        public const string START_WITH_WINDOWS = "StartWithWindows";
+        public const string ACCOUNTS_PER_ROW = "AccountsPerRow";
+        public const string SLEEP_TIME = "SleepTime";
+        public const string CHECK_FOR_UPDATES = "CheckForUpdates";
+
+        public const string LOGIN_RECENT_ACCOUNT = "LoginRecentAccount";
+        public const string RECENT_ACCOUNT_INDEX = "RecentAccountIndex";
+        public const string LOGIN_SELECTED_ACCOUNT = "LoginSelectedAccount";
+        public const string SELECTED_ACCOUNT_INDEX = "SelectedAccountIndex";
+
+        public const string BUTTON_SIZE = "ButtonSize";
+        public const string BUTTON_COLOR = "ButtonColor";
+        public const string BUTTON_FONT_SIZE = "ButtonFontSize";
+        public const string BUTTON_FONT_COLOR = "ButtonFontColor";
+        public const string BUTTON_BANNER_COLOR = "ButtonBannerColor";
+        public const string BUTTON_BANNER_FONT_SIZE = "ButtonBannerFontSize";
+        public const string BUTTON_BANNER_FONT_COLOR = "ButtonBannerFontColor";
+
+        public const string STEAM_PATH = "Path";
+        public const string STEAM_API_KEY = "ApiKey";
+
+        public const string CAFE_APP_LAUNCH_PARAMETER = "cafeapplaunch";
+        public const string CLEAR_BETA_PARAMETER = "clearbeta";
+        public const string CONSOLE_PARAMETER = "console";
+        public const string DEVELOPER_PARAMETER = "developer";
+        public const string FORCE_SERVICE_PARAMETER = "forceservice";
+        public const string LOGIN_PARAMETER = "login";
+        public const string NO_CACHE_PARAMETER = "nocache";
+        public const string NO_VERIFY_FILES_PARAMETER = "noverifyfiles";
+        public const string SILENT_PARAMETER = "silent";
+        public const string SINGLE_CORE_PARAMETER = "single_core";
+        public const string TCP_PARAMETER = "tcp";
+        public const string TEN_FOOT_PARAMETER = "tenfoot";
+        public const string CUSTOM_PARAMETERS = "customParameters";
+        public const string CUSTOM_PARAMETERS_VALUE = "customParametersValue";
+
+        public const string WINDOW_TOP = "WindowTop";
+        public const string WINDOW_LEFT = "WindowLeft";
+
         public Dictionary<string, string> KeyValuePairs = new Dictionary<string, string>()
         {
-            { "ClearUserData", SECTION_GENERAL },
-            { "HideAddButton",  SECTION_GENERAL },
-            { "PasswordProtect", SECTION_GENERAL },
-            { "MinimizeToTray", SECTION_GENERAL },
-            { "RememberPassword", SECTION_GENERAL },
-            { "StartMinimized", SECTION_GENERAL },
-            { "StartWithWindows", SECTION_GENERAL },
-            { "AccountsPerRow", SECTION_GENERAL },
-            { "SleepTime", SECTION_GENERAL },
-            { "CheckForUpdates", SECTION_GENERAL },
+            { CLEAR_USER_DATA, SECTION_GENERAL },
+            { HIDE_ADD_BUTTON,  SECTION_GENERAL },
+            { PASSWORD_PROTECT, SECTION_GENERAL },
+            { MINIMIZE_TO_TRAY, SECTION_GENERAL },
+            { REMEMBER_PASSWORD, SECTION_GENERAL },
+            { START_MINIMIZED, SECTION_GENERAL },
+            { START_WITH_WINDOWS, SECTION_GENERAL },
+            { ACCOUNTS_PER_ROW, SECTION_GENERAL },
+            { SLEEP_TIME, SECTION_GENERAL },
+            { CHECK_FOR_UPDATES, SECTION_GENERAL },
 
-            { "LoginRecentAccount", SECTION_AUTOLOG },
-            { "RecentAccountIndex", SECTION_AUTOLOG },
-            { "LoginSelectedAccount", SECTION_AUTOLOG },
-            { "SelectedAccountIndex", SECTION_AUTOLOG },
+            { LOGIN_RECENT_ACCOUNT, SECTION_AUTOLOG },
+            { RECENT_ACCOUNT_INDEX, SECTION_AUTOLOG },
+            { LOGIN_SELECTED_ACCOUNT, SECTION_AUTOLOG },
+            { SELECTED_ACCOUNT_INDEX, SECTION_AUTOLOG },
 
-            { "ButtonSize", SECTION_CUSTOMIZE },
-            { "ButtonColor", SECTION_CUSTOMIZE },
-            { "ButtonFontSize", SECTION_CUSTOMIZE },
-            { "ButtonFontColor", SECTION_CUSTOMIZE },
-            { "ButtonBannerColor", SECTION_CUSTOMIZE },
-            { "ButtonBannerFontSize", SECTION_CUSTOMIZE },
-            { "ButtonBannerFontColor", SECTION_CUSTOMIZE },
+            { BUTTON_SIZE, SECTION_CUSTOMIZE },
+            { BUTTON_COLOR, SECTION_CUSTOMIZE },
+            { BUTTON_FONT_SIZE, SECTION_CUSTOMIZE },
+            { BUTTON_FONT_COLOR, SECTION_CUSTOMIZE },
+            { BUTTON_BANNER_COLOR, SECTION_CUSTOMIZE },
+            { BUTTON_BANNER_FONT_SIZE, SECTION_CUSTOMIZE },
+            { BUTTON_BANNER_FONT_COLOR, SECTION_CUSTOMIZE },
 
-            { "Path", SECTION_STEAM },
-            { "ApiKey", SECTION_STEAM },
+            { STEAM_PATH, SECTION_STEAM },
+            { STEAM_API_KEY, SECTION_STEAM },
 
-            { "cafeapplaunch", SECTION_PARAMETERS },
-            { "clearbeta", SECTION_PARAMETERS },
-            { "console", SECTION_PARAMETERS },
-            { "developer", SECTION_PARAMETERS },
-            { "forceservice", SECTION_PARAMETERS },
-            { "login", SECTION_PARAMETERS },
-            { "nocache", SECTION_PARAMETERS },
-            { "noverifyfiles", SECTION_PARAMETERS },
-            { "silent", SECTION_PARAMETERS },
-            { "single_core", SECTION_PARAMETERS },
-            { "tcp", SECTION_PARAMETERS },
-            { "tenfoot", SECTION_PARAMETERS },
-            { "customParameters", SECTION_PARAMETERS },
-            { "customParametersValue", SECTION_PARAMETERS }
+            { CAFE_APP_LAUNCH_PARAMETER, SECTION_PARAMETERS },
+            { CLEAR_BETA_PARAMETER, SECTION_PARAMETERS },
+            { CONSOLE_PARAMETER, SECTION_PARAMETERS },
+            { DEVELOPER_PARAMETER, SECTION_PARAMETERS },
+            { FORCE_SERVICE_PARAMETER, SECTION_PARAMETERS },
+            { LOGIN_PARAMETER, SECTION_PARAMETERS },
+            { NO_CACHE_PARAMETER, SECTION_PARAMETERS },
+            { NO_VERIFY_FILES_PARAMETER, SECTION_PARAMETERS },
+            { SILENT_PARAMETER, SECTION_PARAMETERS },
+            { SINGLE_CORE_PARAMETER, SECTION_PARAMETERS },
+            { TCP_PARAMETER, SECTION_PARAMETERS },
+            { TEN_FOOT_PARAMETER, SECTION_PARAMETERS },
+            { CUSTOM_PARAMETERS, SECTION_PARAMETERS },
+            { CUSTOM_PARAMETERS_VALUE, SECTION_PARAMETERS },
         };
 
         public void HandleDeprecatedSettings()
         {
             // Update Recent and Selected login setting names.
-            if (File.KeyExists("Recent", "AutoLog"))
+            if (File.KeyExists("Recent", SECTION_AUTOLOG))
             {
-                File.Write("LoginRecentAccount", File.Read("Recent", "AutoLog"), "AutoLog");
-                File.DeleteKey("Recent", "AutoLog");
+                File.Write(LOGIN_RECENT_ACCOUNT, File.Read("Recent", SECTION_AUTOLOG), SECTION_AUTOLOG);
+                File.DeleteKey("Recent", SECTION_AUTOLOG);
             }
-            if (File.KeyExists("RecentAcc", "AutoLog"))
+            if (File.KeyExists("RecentAcc", SECTION_AUTOLOG))
             {
-                File.Write("RecentAccountIndex", File.Read("RecentAcc", "AutoLog"), "AutoLog");
-                File.DeleteKey("RecentAcc", "AutoLog");
+                File.Write(RECENT_ACCOUNT_INDEX, File.Read("RecentAcc", SECTION_AUTOLOG), SECTION_AUTOLOG);
+                File.DeleteKey("RecentAcc", SECTION_AUTOLOG);
             }
-            if (File.KeyExists("Selected", "AutoLog"))
+            if (File.KeyExists("Selected", SECTION_AUTOLOG))
             {
-                File.Write("LoginSelectedAccount", File.Read("Selected", "AutoLog"), "AutoLog");
-                File.DeleteKey("Selected", "AutoLog");
+                File.Write(LOGIN_SELECTED_ACCOUNT, File.Read("Selected", SECTION_AUTOLOG), SECTION_AUTOLOG);
+                File.DeleteKey("Selected", SECTION_AUTOLOG);
             }
-            if (File.KeyExists("SelectedAcc", "AutoLog"))
+            if (File.KeyExists("SelectedAcc", SECTION_AUTOLOG))
             {
-                File.Write("SelectedAccountIndex", File.Read("SelectedAcc", "AutoLog"), "AutoLog");
-                File.DeleteKey("SelectedAcc", "AutoLog");
+                File.Write(SELECTED_ACCOUNT_INDEX, File.Read("SelectedAcc", SECTION_AUTOLOG), SECTION_AUTOLOG);
+                File.DeleteKey("SelectedAcc", SECTION_AUTOLOG);
             }
 
             // Move Steam file path to it's own section.
-            if (File.KeyExists("Steam", "Settings"))
+            if (File.KeyExists(SECTION_STEAM, SECTION_GENERAL))
             {
-                File.Write("Path", File.Read("Steam", "Settings"), "Steam");
-                File.DeleteKey("Steam", "Settings");
+                File.Write(STEAM_PATH, File.Read(SECTION_STEAM, SECTION_GENERAL), SECTION_STEAM);
+                File.DeleteKey(SECTION_STEAM, SECTION_GENERAL);
             }
 
             // Move button size to 'Customize' section.
-            if (File.KeyExists("ButtonSize", "Settings"))
+            if (File.KeyExists(BUTTON_SIZE, SECTION_GENERAL))
             {
-                File.Write("ButtonSize", File.Read("ButtonSize", "Settings"), "Customize");
-                File.DeleteKey("ButtonSize", "Settings");
+                File.Write(BUTTON_SIZE, File.Read(BUTTON_SIZE, SECTION_GENERAL), SECTION_CUSTOMIZE);
+                File.DeleteKey(BUTTON_SIZE, SECTION_GENERAL);
             }
         }
     }
