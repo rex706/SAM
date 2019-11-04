@@ -360,11 +360,8 @@ namespace SAM
             }
 
             SetWindowSettingsIntoScreenArea();
-
             Utils.CheckSteamPath();
-
             settings.File.Write("Version", AssemblyVer, "System");
-
             isLoadingSettings = false;
         }
 
@@ -637,7 +634,27 @@ namespace SAM
                     MenuItem editItem = new MenuItem();
                     MenuItem exportItem = new MenuItem();
                     MenuItem reloadItem = new MenuItem();
+
                     MenuItem setTimeoutItem = new MenuItem();
+
+                    MenuItem thirtyMinuteTimeoutItem = new MenuItem();
+                    MenuItem twoHourTimeoutItem = new MenuItem();
+                    MenuItem twentyFourHourTimeoutItem = new MenuItem();
+                    MenuItem sevenDayTimeoutItem = new MenuItem();
+                    MenuItem customTimeoutItem = new MenuItem();
+
+                    thirtyMinuteTimeoutItem.Header = "30 Minutes";
+                    twoHourTimeoutItem.Header = "2 Hours";
+                    twentyFourHourTimeoutItem.Header = "24 Hours";
+                    sevenDayTimeoutItem.Header = "7 Days";
+                    customTimeoutItem.Header = "Custom";
+
+                    setTimeoutItem.Items.Add(thirtyMinuteTimeoutItem);
+                    setTimeoutItem.Items.Add(twoHourTimeoutItem);
+                    setTimeoutItem.Items.Add(twentyFourHourTimeoutItem);
+                    setTimeoutItem.Items.Add(sevenDayTimeoutItem);
+                    setTimeoutItem.Items.Add(customTimeoutItem);
+
                     MenuItem clearTimeoutItem = new MenuItem();
                     MenuItem copyPasswordItem = new MenuItem();
 
@@ -650,6 +667,8 @@ namespace SAM
                     copyPasswordItem.Header = "Copy Password";
 
                     accountButtonGrid.Children.Add(accountImage);
+
+                    int buttonIndex = Int32.Parse(accountButton.Tag.ToString());
 
                     if (!Utils.AccountHasActiveTimeout(account))
                     {
@@ -667,7 +686,7 @@ namespace SAM
                         {
                             this.Dispatcher.Invoke(() =>
                             {
-                                TimeoutTimer_Tick(Int32.Parse(accountButton.Tag.ToString()), timeoutTextBlock, timeoutTimer);
+                                TimeoutTimer_Tick(buttonIndex, timeoutTextBlock, timeoutTimer);
                             });
                         };
                         timeoutTimer.Interval = 1000;
@@ -694,11 +713,15 @@ namespace SAM
 
                     deleteItem.Click += delegate { DeleteEntry(accountButton); };
                     editItem.Click += delegate { EditEntry(accountButton); };
-                    exportItem.Click += delegate { ExportAccount(Int32.Parse(accountButton.Tag.ToString())); };
-                    reloadItem.Click += async delegate { await ReloadAccount_ClickAsync(Int32.Parse(accountButton.Tag.ToString())); };
-                    setTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(Int32.Parse(accountButton.Tag.ToString())); };
-                    clearTimeoutItem.Click += delegate { AccountButtonClearTimeout_Click(Int32.Parse(accountButton.Tag.ToString())); };
-                    copyPasswordItem.Click += delegate { CopyPasswordToClipboard(Int32.Parse(accountButton.Tag.ToString())); };
+                    exportItem.Click += delegate { ExportAccount(buttonIndex); };
+                    reloadItem.Click += async delegate { await ReloadAccount_ClickAsync(buttonIndex); };
+                    thirtyMinuteTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(buttonIndex, DateTime.Now.AddMinutes(30)); };
+                    twoHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(buttonIndex, DateTime.Now.AddHours(2)); };
+                    twentyFourHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(buttonIndex, DateTime.Now.AddDays(1)); };
+                    sevenDayTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(buttonIndex, DateTime.Now.AddDays(7)); };
+                    customTimeoutItem.Click += delegate { AccountButtonSetCustomTimeout_Click(buttonIndex); };
+                    clearTimeoutItem.Click += delegate { AccountButtonClearTimeout_Click(buttonIndex); };
+                    copyPasswordItem.Click += delegate { CopyPasswordToClipboard(buttonIndex); };
 
                     buttonGrid.Children.Add(accountButtonGrid);
 
@@ -1426,7 +1449,31 @@ namespace SAM
             }
         }
 
-        private void AccountButtonSetTimeout_Click(int index)
+        private void AccountButtonSetTimeout_Click(int index, DateTime timeout)
+        {
+            if (timeout != null && timeout != new DateTime())
+            {
+                encryptedAccounts[index].Timeout = timeout;
+            }
+            else
+            {
+                MessageBox.Show("Error setting account timeout.");
+                return;
+            }
+
+            if (IsPasswordProtected())
+            {
+                Utils.PasswordSerialize(encryptedAccounts, ePassword);
+            }
+            else
+            {
+                Utils.Serialize(encryptedAccounts);
+            }
+
+            RefreshWindow();
+        }
+
+        private void AccountButtonSetCustomTimeout_Click(int index)
         {
             var setTimeoutWindow = new SetTimeoutWindow(encryptedAccounts[index].Timeout);
             setTimeoutWindow.ShowDialog();
@@ -1437,7 +1484,8 @@ namespace SAM
             }
             else
             {
-
+                MessageBox.Show("Error setting account timeout.");
+                return;
             }
 
             if (IsPasswordProtected())
