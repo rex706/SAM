@@ -639,18 +639,21 @@ namespace SAM
 
                     MenuItem thirtyMinuteTimeoutItem = new MenuItem();
                     MenuItem twoHourTimeoutItem = new MenuItem();
+                    MenuItem twentyOneHourTimeoutItem = new MenuItem();
                     MenuItem twentyFourHourTimeoutItem = new MenuItem();
                     MenuItem sevenDayTimeoutItem = new MenuItem();
                     MenuItem customTimeoutItem = new MenuItem();
 
                     thirtyMinuteTimeoutItem.Header = "30 Minutes";
                     twoHourTimeoutItem.Header = "2 Hours";
+                    twentyOneHourTimeoutItem.Header = "21 Hours";
                     twentyFourHourTimeoutItem.Header = "24 Hours";
                     sevenDayTimeoutItem.Header = "7 Days";
                     customTimeoutItem.Header = "Custom";
 
                     setTimeoutItem.Items.Add(thirtyMinuteTimeoutItem);
                     setTimeoutItem.Items.Add(twoHourTimeoutItem);
+                    setTimeoutItem.Items.Add(twentyOneHourTimeoutItem);
                     setTimeoutItem.Items.Add(twentyFourHourTimeoutItem);
                     setTimeoutItem.Items.Add(sevenDayTimeoutItem);
                     setTimeoutItem.Items.Add(customTimeoutItem);
@@ -717,6 +720,7 @@ namespace SAM
                     reloadItem.Click += async delegate { await ReloadAccount_ClickAsync(buttonIndex); };
                     thirtyMinuteTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(buttonIndex, DateTime.Now.AddMinutes(30)); };
                     twoHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(buttonIndex, DateTime.Now.AddHours(2)); };
+                    twentyOneHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(buttonIndex, DateTime.Now.AddHours(21)); };
                     twentyFourHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(buttonIndex, DateTime.Now.AddDays(1)); };
                     sevenDayTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(buttonIndex, DateTime.Now.AddDays(7)); };
                     customTimeoutItem.Click += delegate { AccountButtonSetCustomTimeout_Click(buttonIndex); };
