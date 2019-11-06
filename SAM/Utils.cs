@@ -305,9 +305,26 @@ namespace SAM
             return steamPath;
         }
 
-        public static async Task<dynamic> GetUserInfoFromConfigAndWebApi(string userName)
+        public static List<string> GetSteamIdsFromConfig(List<Account> accounts)
         {
-            dynamic userJson = null;
+            List<string> steamIds = new List<string>();
+
+            foreach (Account account in accounts)
+            {
+                string steamId = GetSteamIdFromConfig(account.Name);
+                
+                if (steamId != null && steamId.Length > 0)
+                {
+                    account.SteamId = steamId;
+                    steamIds.Add(steamId);
+                }
+            }
+
+            return steamIds;
+        }
+
+        public static string GetSteamIdFromConfig(string userName)
+        {
             dynamic steamId = null;
 
             try
@@ -330,24 +347,19 @@ namespace SAM
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-
-                // Vanity checking is very unreliable.
-
-                // Attempt to find Steam Id from web api.
-                //Uri vanityUri = new Uri("http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + apiKey + "&vanityurl=" + userName);
-
-                //using (WebClient client = new WebClient())
-                //{
-                //    string vanityJson = await client.DownloadStringTaskAsync(vanityUri);
-                //    dynamic vanityValue = JValue.Parse(vanityJson);
-
-                //    steamId = vanityValue.response.steamid;
-                //}
             }
+
+            return Convert.ToString(steamId);
+        }
+
+        public static async Task<dynamic> GetUserInfoFromConfigAndWebApi(string userName)
+        {
+            dynamic userJson = null;
+            string steamId = GetSteamIdFromConfig(userName);
 
             if (steamId != null)
             {
-                userJson = await GetUserInfoFromWebApiBySteamId(Convert.ToString(steamId));
+                userJson = await GetUserInfoFromWebApiBySteamId(steamId);
             }
 
             return userJson;
@@ -374,11 +386,59 @@ namespace SAM
                 }
                 catch (Exception m)
                 {
-                    //MessageBox.Show(m.Message);
+                    MessageBox.Show(m.Message);
                 }
             }
 
             return userJson;
+        }
+
+        public static async Task<List<dynamic>> GetUserInfosFromWepApi(List<string> steamIds)
+        {
+            var settingsFile = new IniFile(SAMSettings.FILE_NAME);
+            string apiKey = settingsFile.Read(SAMSettings.STEAM_API_KEY, SAMSettings.SECTION_STEAM);
+
+            List<dynamic> userInfos = new List<dynamic>();
+
+            if (apiKey != null && apiKey.Length > 0)
+            {
+                while (steamIds.Count > 0)
+                {
+                    IEnumerable<string> currentChunk;
+
+                    // Api can only process 100 accounts at a time.
+                    if (steamIds.Count > 100)
+                    {
+                        currentChunk = steamIds.Take(100);
+                        steamIds = steamIds.Skip(100).ToList();
+                    }
+                    else
+                    {
+                        currentChunk = new List<string>(steamIds);
+                        steamIds.Clear();
+                    }
+
+                    string currentIds = String.Join(",", currentChunk);
+
+                    try
+                    {
+                        Uri userUri = new Uri("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + apiKey + "&steamids=" + currentIds);
+
+                        using (WebClient client = new WebClient())
+                        {
+                            string userJsonString = await client.DownloadStringTaskAsync(userUri);
+                            dynamic userInfoJson = JValue.Parse(userJsonString);
+                            userInfos.Add(userInfoJson);
+                        }
+                    }
+                    catch (Exception m)
+                    {
+                        MessageBox.Show(m.Message);
+                    }
+                }
+            }
+
+            return userInfos;
         }
 
         public static string HtmlAviScrape(string profUrl)

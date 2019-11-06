@@ -448,9 +448,21 @@ namespace SAM
 
         public async Task ReloadAccountsAsync()
         {
-            foreach (var account in encryptedAccounts)
+            List<string> steamIds = Utils.GetSteamIdsFromConfig(encryptedAccounts);
+            List<dynamic> userInfos = await Utils.GetUserInfosFromWepApi(steamIds);
+
+            foreach (dynamic userInfosJson in userInfos)
             {
-                await ReloadAccount(account);
+                foreach (dynamic userInfoJson in userInfosJson.response.players)
+                {
+                    Account account = encryptedAccounts.Find(a => a.SteamId == Convert.ToString(userInfoJson.steamid));
+
+                    if (account != null)
+                    {
+                        account.ProfUrl = userInfoJson.profileurl;
+                        account.AviUrl = userInfoJson.avatarfull;
+                    }
+                }
             }
 
             Utils.Serialize(encryptedAccounts);
