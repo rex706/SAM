@@ -441,6 +441,54 @@ namespace SAM
             return userInfos;
         }
 
+        public static async Task<List<dynamic>> GetPlayerBansFromWebApi(List<string> steamIds)
+        {
+            var settingsFile = new IniFile(SAMSettings.FILE_NAME);
+            string apiKey = settingsFile.Read(SAMSettings.STEAM_API_KEY, SAMSettings.SECTION_STEAM);
+
+            List<dynamic> userBans = new List<dynamic>();
+
+            if (apiKey != null && apiKey.Length > 0)
+            {
+                while (steamIds.Count > 0)
+                {
+                    IEnumerable<string> currentChunk;
+
+                    // Api can only process 100 accounts at a time.
+                    if (steamIds.Count > 100)
+                    {
+                        currentChunk = steamIds.Take(100);
+                        steamIds = steamIds.Skip(100).ToList();
+                    }
+                    else
+                    {
+                        currentChunk = new List<string>(steamIds);
+                        steamIds.Clear();
+                    }
+
+                    string currentIds = String.Join(",", currentChunk);
+
+                    try
+                    {
+                        Uri userUri = new Uri("http://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=" + apiKey + "&steamids=" + currentIds);
+
+                        using (WebClient client = new WebClient())
+                        {
+                            string userJsonString = await client.DownloadStringTaskAsync(userUri);
+                            dynamic userInfoJson = JValue.Parse(userJsonString);
+                            userBans.Add(userInfoJson);
+                        }
+                    }
+                    catch (Exception m)
+                    {
+                        MessageBox.Show(m.Message);
+                    }
+                }
+            }
+
+            return userBans;
+        }
+
         public static string HtmlAviScrape(string profUrl)
         {
             // If user entered profile url, get avatar jpg url

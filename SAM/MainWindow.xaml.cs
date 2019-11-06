@@ -448,8 +448,25 @@ namespace SAM
 
         public async Task ReloadAccountsAsync()
         {
-            List<string> steamIds = Utils.GetSteamIdsFromConfig(encryptedAccounts);
-            List<dynamic> userInfos = await Utils.GetUserInfosFromWepApi(steamIds);
+            List<string> steamIds = new List<string>();
+
+            foreach (Account account in encryptedAccounts)
+            {
+                if (account.SteamId != null && account.SteamId.Length > 0)
+                {
+                    steamIds.Add(account.SteamId);
+                }
+                else
+                {
+                    string steamId = Utils.GetSteamIdFromConfig(account.Name);
+                    if (steamId != null && steamId.Length > 0)
+                    {
+                        steamIds.Add(steamId);
+                    }
+                }
+            }
+
+            List<dynamic> userInfos = await Utils.GetUserInfosFromWepApi(new List<string>(steamIds));
 
             foreach (dynamic userInfosJson in userInfos)
             {
@@ -461,6 +478,25 @@ namespace SAM
                     {
                         account.ProfUrl = userInfoJson.profileurl;
                         account.AviUrl = userInfoJson.avatarfull;
+                    }
+                }
+            }
+
+            List<dynamic> userBans = await Utils.GetPlayerBansFromWebApi(new List<string>(steamIds));
+
+            foreach (dynamic userBansJson in userBans)
+            {
+                foreach (dynamic userBanJson in userBansJson.players)
+                {
+                    Account account = encryptedAccounts.Find(a => a.SteamId == Convert.ToString(userBanJson.SteamId));
+
+                    if (account != null)
+                    {
+                        account.CommunityBanned = Convert.ToBoolean(userBanJson.CommunityBanned);
+                        account.VACBanned = Convert.ToBoolean(userBanJson.VACBanned);
+                        account.NumberOfVACBans = Convert.ToInt32(userBanJson.NumberOfVACBans);
+                        account.DaysSinceLastBan = Convert.ToInt32(userBanJson.DaysSinceLastBan);
+                        account.EconomyBan = userBanJson.EconomyBan;
                     }
                 }
             }
