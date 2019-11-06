@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Windows;
 
@@ -35,37 +36,53 @@ namespace SAM
 
             char delimiter = DelimiterCharacterTextBox.Text[0];
             string delimitedAccountsText = DelimitedAccountsTextBox.Text;
+
             string[] lines = delimitedAccountsText.Split('\n');
 
             List<Account> accounts = new List<Account>();
 
-            foreach (string line in lines)
-            {
-                string[] info = line.Split(delimiter);
+            int sucessful = 0;
+            List<string> errors = new List<string>();
 
-                if (info.Length < 2)
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = Regex.Replace(lines[i], @"\s+", string.Empty);
+
+                // Skip empty lines.
+                if (line.Length == 0)
                 {
-                    MessageBox.Show("Invalid account format!");
-                    return;
+                    continue;
                 }
 
-                // Remove new lines and white space from info.
-                string username = Regex.Replace(info[0], @"\s+", string.Empty);
-                string password = Regex.Replace(info[1], @"\s+", string.Empty);
+                string[] info = line.Split(delimiter);
+
+                // Log account error.
+                if (info.Length < 2)
+                {
+                    errors.Add(line);
+                    continue;
+                }
 
                 // Shared secret.
                 if (info.Length > 2 && info[2] != null && info[2] != string.Empty)
                 {
                     string secret = Regex.Replace(info[2], @"\s+", string.Empty);
-                    accounts.Add(new Account { Name = username, Password = StringCipher.Encrypt(password, eKey), SharedSecret = StringCipher.Encrypt(secret, eKey) });
+                    accounts.Add(new Account { Name = info[0], Password = StringCipher.Encrypt(info[1], eKey), SharedSecret = StringCipher.Encrypt(info[2], eKey) });
                 }
                 else
                 {
-                    accounts.Add(new Account { Name = username, Password = StringCipher.Encrypt(password, eKey) });
+                    accounts.Add(new Account { Name = info[0], Password = StringCipher.Encrypt(info[1], eKey) });
                 }
+
+                sucessful++;
             }
 
             Utils.ImportAccountsFromList(accounts);
+
+            if (errors.Count > 0)
+            {
+                MessageBox.Show("There were " + errors.Count + " problems with import:\n" + String.Join("\n", errors.ToArray()));
+            }
 
             Close();
         }
