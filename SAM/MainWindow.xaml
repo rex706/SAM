@@ -137,6 +137,7 @@
                                 </MenuItem>
                                 <MenuItem Header="Delete" >
                                     <MenuItem Header="All" Click="DeleteAllAccountsMenuItem_Click" />
+                                    <MenuItem Header="Banned" Click="DeleteBannedAccounts_Click" />
                                     <MenuItem Header="Select" Click="DeleteSelectedMenuItem_Click" />
                                 </MenuItem>
                                 <MenuItem Header="Expose Credentials" Click="ExposeCredentialsMenuItem_Click"/>

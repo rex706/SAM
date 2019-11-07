@@ -1668,6 +1668,33 @@ namespace SAM
             RefreshWindow();
         }
 
+        private void DeleteBannedAccounts_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Are you sure you want to delete all banned accounts?" + 
+                "\nThis action is perminant and cannot be undone!", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                List<Account> accountsToDelete = new List<Account>();
+
+                foreach (Account account in encryptedAccounts)
+                {
+                    if (account.NumberOfVACBans > 0 || account.NumberOfGameBans > 0)
+                    {
+                        accountsToDelete.Add(account);
+                    }
+                }
+
+                foreach (Account account in accountsToDelete)
+                {
+                    encryptedAccounts.Remove(account);
+                }
+
+                Utils.Serialize(encryptedAccounts);
+                RefreshWindow();
+            }
+        }
+
         private void GitMenuItem_Click(object sender, RoutedEventArgs e)
         {
             Process.Start(repositoryUrl);
