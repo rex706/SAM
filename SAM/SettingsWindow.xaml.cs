@@ -227,7 +227,7 @@ namespace SAM
 
             // Steam
             settings.File.Write(SAMSettings.STEAM_PATH, SteamPathTextBox.Text, SAMSettings.SECTION_STEAM);
-            settings.File.Write(SAMSettings.STEAM_API_KEY, ApiKeyTextBox.Text, SAMSettings.SECTION_STEAM);
+            settings.File.Write(SAMSettings.STEAM_API_KEY, Regex.Replace(ApiKeyTextBox.Text, @"\s+", string.Empty), SAMSettings.SECTION_STEAM);
 
             // Parameters
             settings.File.Write(SAMSettings.CAFE_APP_LAUNCH_PARAMETER, CafeAppLaunchCheckBox.IsChecked.ToString(), SAMSettings.SECTION_PARAMETERS);

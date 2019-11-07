@@ -441,6 +441,20 @@ namespace SAM
             return userInfos;
         }
 
+        public static async Task<dynamic> GetPlayerBansFromWebApi(string steamId)
+        {
+            List<dynamic> userBansJson = await GetPlayerBansFromWebApi(new List<string>() { steamId });
+
+            if (userBansJson.Count > 0)
+            {
+                return userBansJson[0].players[0];
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public static async Task<List<dynamic>> GetPlayerBansFromWebApi(List<string> steamIds)
         {
             var settingsFile = new IniFile(SAMSettings.FILE_NAME);
@@ -604,6 +618,13 @@ namespace SAM
             {
                 MessageBox.Show(e.Message);
             }
+        }
+
+        public static bool ApiKeyExists()
+        {
+            var settingsFile = new IniFile(SAMSettings.FILE_NAME);
+            string apiKey = settingsFile.Read(SAMSettings.STEAM_API_KEY, SAMSettings.SECTION_STEAM);
+            return apiKey != null && apiKey.Length > 0;
         }
 
         public static bool IsSpecialCharacter(char c)

@@ -444,6 +444,20 @@ namespace SAM
             {
                 account.AviUrl = Utils.HtmlAviScrape(account.ProfUrl);
             }
+
+            if (account.SteamId != null && account.SteamId.Length > 0 && Utils.ApiKeyExists())
+            {
+                dynamic userBanJson = await Utils.GetPlayerBansFromWebApi(account.SteamId);
+
+                if (userBanJson != null)
+                {
+                    account.CommunityBanned = Convert.ToBoolean(userBanJson.CommunityBanned);
+                    account.VACBanned = Convert.ToBoolean(userBanJson.VACBanned);
+                    account.NumberOfVACBans = Convert.ToInt32(userBanJson.NumberOfVACBans);
+                    account.DaysSinceLastBan = Convert.ToInt32(userBanJson.DaysSinceLastBan);
+                    account.EconomyBan = userBanJson.EconomyBan;
+                }
+            }
         }
 
         public async Task ReloadAccountsAsync()
@@ -482,21 +496,24 @@ namespace SAM
                 }
             }
 
-            List<dynamic> userBans = await Utils.GetPlayerBansFromWebApi(new List<string>(steamIds));
-
-            foreach (dynamic userBansJson in userBans)
+            if (Utils.ApiKeyExists())
             {
-                foreach (dynamic userBanJson in userBansJson.players)
-                {
-                    Account account = encryptedAccounts.Find(a => a.SteamId == Convert.ToString(userBanJson.SteamId));
+                List<dynamic> userBans = await Utils.GetPlayerBansFromWebApi(new List<string>(steamIds));
 
-                    if (account != null)
+                foreach (dynamic userBansJson in userBans)
+                {
+                    foreach (dynamic userBanJson in userBansJson.players)
                     {
-                        account.CommunityBanned = Convert.ToBoolean(userBanJson.CommunityBanned);
-                        account.VACBanned = Convert.ToBoolean(userBanJson.VACBanned);
-                        account.NumberOfVACBans = Convert.ToInt32(userBanJson.NumberOfVACBans);
-                        account.DaysSinceLastBan = Convert.ToInt32(userBanJson.DaysSinceLastBan);
-                        account.EconomyBan = userBanJson.EconomyBan;
+                        Account account = encryptedAccounts.Find(a => a.SteamId == Convert.ToString(userBanJson.SteamId));
+
+                        if (account != null)
+                        {
+                            account.CommunityBanned = Convert.ToBoolean(userBanJson.CommunityBanned);
+                            account.VACBanned = Convert.ToBoolean(userBanJson.VACBanned);
+                            account.NumberOfVACBans = Convert.ToInt32(userBanJson.NumberOfVACBans);
+                            account.DaysSinceLastBan = Convert.ToInt32(userBanJson.DaysSinceLastBan);
+                            account.EconomyBan = userBanJson.EconomyBan;
+                        }
                     }
                 }
             }
@@ -559,6 +576,7 @@ namespace SAM
                     Button accountButton = new Button();
                     TextBlock accountText = new TextBlock();
                     TextBlock timeoutTextBlock = new TextBlock();
+                    Image banInfoImage = new Image();
                     Border accountImage = new Border();
 
                     accountButton.Style = (Style)Resources["SAMButtonStyle"];
@@ -617,6 +635,13 @@ namespace SAM
                     timeoutTextBlock.TextAlignment = TextAlignment.Center;
                     timeoutTextBlock.Foreground = new SolidColorBrush(Colors.White);
                     timeoutTextBlock.Background = new SolidColorBrush(new Color { A = 128, R = 255, G = 0, B = 0 });
+
+                    banInfoImage.HorizontalAlignment = HorizontalAlignment.Left;
+                    banInfoImage.VerticalAlignment = VerticalAlignment.Top;
+                    banInfoImage.Height = 12;
+                    banInfoImage.Width = 12;
+                    banInfoImage.Margin = new Thickness(10, 10, 10, 10);
+                    banInfoImage.Source = new BitmapImage(new Uri(@"error_red_18dp.png", UriKind.RelativeOrAbsolute));
 
                     accountImage.Height = settings.User.ButtonSize;
                     accountImage.Width = settings.User.ButtonSize;
@@ -750,7 +775,18 @@ namespace SAM
 
                     accountButtonGrid.Children.Add(accountText);
                     accountButtonGrid.Children.Add(accountButton);
-                    
+
+                    if (account.NumberOfVACBans > 0 || account.NumberOfGameBans > 0)
+                    {
+                        banInfoImage.ToolTip = "VAC Bans: " + account.NumberOfVACBans +
+                            "\nGame Bans: " + account.NumberOfGameBans +
+                            "\nCommunity Banned: " + account.CommunityBanned +
+                            "\nEconomy Ban: " + account.EconomyBan +
+                            "\nDays Since Last Ban:" + account.DaysSinceLastBan;
+
+                        accountButtonGrid.Children.Add(banInfoImage);
+                    }
+
                     accountContext.Items.Add(editItem);
                     accountContext.Items.Add(deleteItem);
                     accountContext.Items.Add(exportItem);
