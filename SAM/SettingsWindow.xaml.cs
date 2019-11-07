@@ -66,7 +66,8 @@ namespace SAM
                 clearUserDataCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.CLEAR_USER_DATA, SAMSettings.SECTION_GENERAL));
                 HideAddButtonCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.HIDE_ADD_BUTTON, SAMSettings.SECTION_GENERAL));
                 CheckForUpdatesCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.CHECK_FOR_UPDATES, SAMSettings.SECTION_GENERAL));
-               
+                CloseOnLoginCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.CLOSE_ON_LOGIN, SAMSettings.SECTION_GENERAL));
+
                 // AutoLog
                 if (Convert.ToBoolean(settings.File.Read(SAMSettings.LOGIN_RECENT_ACCOUNT, SAMSettings.SECTION_AUTOLOG)) == true)
                 {
@@ -211,6 +212,7 @@ namespace SAM
             settings.File.Write(SAMSettings.MINIMIZE_TO_TRAY, minimizeToTrayCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
             settings.File.Write(SAMSettings.HIDE_ADD_BUTTON, HideAddButtonCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
             settings.File.Write(SAMSettings.CHECK_FOR_UPDATES, CheckForUpdatesCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
+            settings.File.Write(SAMSettings.CLOSE_ON_LOGIN, CloseOnLoginCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
 
             // Customize
             settings.File.Write(SAMSettings.BUTTON_SIZE, buttonSizeSpinBox.Text, SAMSettings.SECTION_CUSTOMIZE);
@@ -374,13 +376,15 @@ namespace SAM
             minimizeToTrayCheckBox.IsChecked = settings.Default.MinimizeToTray;
             accountsPerRowSpinBox.Text = settings.Default.AccountsPerRow.ToString();
             sleepTimeSpinBox.Text = settings.Default.SleepTime.ToString();
+            CheckForUpdatesCheckBox.IsChecked = settings.Default.CheckForUpdates;
+            CloseOnLoginCheckBox.IsChecked = settings.Default.CloseOnLogin;
 
             // Ignore password protect checkbox.
             //passwordProtectCheckBox.IsChecked = settings.Default.PasswordProtect;
 
             mostRecentCheckBox.IsChecked = settings.Default.LoginRecentAccount;
             selectedAccountCheckBox.IsChecked = settings.Default.LoginSelectedAccount;
-
+            
             SteamPathTextBox.Text = Utils.CheckSteamPath();
             ApiKeyTextBox.Text = settings.Default.ApiKey;
 

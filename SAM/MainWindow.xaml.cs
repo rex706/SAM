@@ -1144,9 +1144,9 @@ namespace SAM
                 {
                     Task.Run(() => Type2FA(index, 0));
                 }
-                else if (settings.User.ClearUserData == true)
+                else 
                 {
-                    Utils.ClearSteamUserDataFolder(settings.User.SteamPath, settings.User.SleepTime, maxRetry);
+                    PostLogin();
                 }
             }
             else
@@ -1248,9 +1248,9 @@ namespace SAM
 
                 Type2FA(index, 0);
             }
-            else if (settings.User.ClearUserData == true)
+            else
             {
-                Utils.ClearSteamUserDataFolder(settings.User.SteamPath, settings.User.SleepTime, maxRetry);
+                PostLogin();
             }
         }
 
@@ -1321,6 +1321,7 @@ namespace SAM
             {
                 Console.WriteLine("2FA code failed, retrying...");
                 Type2FA(index, tryCount + 1);
+                return;
             }
             else if (tryCount == maxRetry && steamGuardWindow.IsValid)
             {
@@ -1336,9 +1337,18 @@ namespace SAM
                 MessageBox.Show("2FA Failed\nPlease verify your shared secret is correct!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
+            PostLogin();
+        }
+
+        private void PostLogin()
+        {
             if (settings.User.ClearUserData == true)
             {
                 Utils.ClearSteamUserDataFolder(settings.User.SteamPath, settings.User.SleepTime, maxRetry);
+            }
+            if (settings.User.CloseOnLogin == true)
+            {
+                Dispatcher.Invoke(delegate () { Close(); });
             }
         }
 

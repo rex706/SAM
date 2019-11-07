@@ -27,6 +27,7 @@ namespace SAM
         public const string ACCOUNTS_PER_ROW = "AccountsPerRow";
         public const string SLEEP_TIME = "SleepTime";
         public const string CHECK_FOR_UPDATES = "CheckForUpdates";
+        public const string CLOSE_ON_LOGIN = "CloseOnLogin";
 
         public const string LOGIN_RECENT_ACCOUNT = "LoginRecentAccount";
         public const string RECENT_ACCOUNT_INDEX = "RecentAccountIndex";
@@ -74,6 +75,7 @@ namespace SAM
             { ACCOUNTS_PER_ROW, SECTION_GENERAL },
             { SLEEP_TIME, SECTION_GENERAL },
             { CHECK_FOR_UPDATES, SECTION_GENERAL },
+            { CLOSE_ON_LOGIN, SECTION_GENERAL },
 
             { LOGIN_RECENT_ACCOUNT, SECTION_AUTOLOG },
             { RECENT_ACCOUNT_INDEX, SECTION_AUTOLOG },

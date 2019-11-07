@@ -16,6 +16,7 @@ namespace SAM
         public int AccountsPerRow { get { return (int)KeyValuePairs[SAMSettings.ACCOUNTS_PER_ROW]; } set { KeyValuePairs[SAMSettings.ACCOUNTS_PER_ROW] = value; } }
         public int SleepTime { get { return (int)KeyValuePairs[SAMSettings.SLEEP_TIME]; } set { KeyValuePairs[SAMSettings.SLEEP_TIME] = value; } }
         public bool CheckForUpdates { get { return (bool)KeyValuePairs[SAMSettings.CHECK_FOR_UPDATES]; } set { KeyValuePairs[SAMSettings.CHECK_FOR_UPDATES] = value;  } }
+        public bool CloseOnLogin { get { return (bool)KeyValuePairs[SAMSettings.CLOSE_ON_LOGIN]; } set { KeyValuePairs[SAMSettings.CHECK_FOR_UPDATES] = value; } }
 
         #endregion
 
@@ -85,6 +86,7 @@ namespace SAM
             { SAMSettings.ACCOUNTS_PER_ROW, 5 },
             { SAMSettings.SLEEP_TIME, 2 },
             { SAMSettings.CHECK_FOR_UPDATES, true },
+            { SAMSettings.CLOSE_ON_LOGIN, false },
 
             { SAMSettings.LOGIN_RECENT_ACCOUNT, false },
             { SAMSettings.RECENT_ACCOUNT_INDEX, -1 },

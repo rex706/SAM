@@ -26,6 +26,7 @@
                     <Label x:Name="sleepTimeLabel" Content="Sleep Time (sec)" HorizontalAlignment="Left" Margin="203,38,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" Width="104"/>
                     <CheckBox x:Name="HideAddButtonCheckBox" Content="Hide Add Button" HorizontalAlignment="Left" Margin="10,28,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Hide the Add account button in the button grid."/>
                     <CheckBox x:Name="CheckForUpdatesCheckBox" Content="Check For Updates" HorizontalAlignment="Left" Margin="158,128,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Check for updates on program startup."/>
+                    <CheckBox x:Name="CloseOnLoginCheckBox" Content="Close on Login" HorizontalAlignment="Left" Margin="158,108,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" ToolTip="Close SAM after every login."/>
                 </Grid>
             </TabItem>
             <TabItem Header="Auto-Login">
