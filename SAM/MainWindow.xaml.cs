@@ -518,9 +518,7 @@ namespace SAM
                 }
             }
 
-            Utils.Serialize(encryptedAccounts);
-
-            RefreshWindow();
+            SerializeAccounts();
 
             MessageBox.Show("Done!");
         }
@@ -923,16 +921,7 @@ namespace SAM
                 {
                     encryptedAccounts.Add(new Account() { Name = dialog.AccountText, Alias = dialog.AliasText, Password = StringCipher.Encrypt(password, eKey), SharedSecret = StringCipher.Encrypt(sharedSecret, eKey), ProfUrl = dialog.UrlText, AviUrl = aviUrl, SteamId = steamId, Description = dialog.DescriptionText });
 
-                    if (IsPasswordProtected())
-                    {
-                        Utils.PasswordSerialize(encryptedAccounts, ePassword);
-                    }
-                    else
-                    {
-                        Utils.Serialize(encryptedAccounts);
-                    }
-
-                    RefreshWindow();
+                    SerializeAccounts();
                 }
                 catch (Exception m)
                 {
@@ -941,15 +930,7 @@ namespace SAM
                     var itemToRemove = encryptedAccounts.Single(r => r.Name == dialog.AccountText);
                     encryptedAccounts.Remove(itemToRemove);
 
-                    if (IsPasswordProtected())
-                    {
-                        Utils.PasswordSerialize(encryptedAccounts, ePassword);
-                    }
-                    else
-                    {
-                        Utils.Serialize(encryptedAccounts);
-                    }
-                    
+                    SerializeAccounts();
                     AddAccount();
                 }
             }
@@ -1019,8 +1000,7 @@ namespace SAM
                     encryptedAccounts[index].SteamId = dialog.SteamId;
                     encryptedAccounts[index].Description = dialog.DescriptionText;
 
-                    Utils.Serialize(encryptedAccounts);
-                    RefreshWindow();
+                    SerializeAccounts();
                 }
                 catch (Exception m)
                 {
@@ -1038,8 +1018,7 @@ namespace SAM
             {
                 Button button = butt as Button;
                 encryptedAccounts.RemoveAt(Int32.Parse(button.Tag.ToString()));
-                Utils.Serialize(encryptedAccounts);
-                RefreshWindow();
+                SerializeAccounts();
             }
         }
 
@@ -1386,9 +1365,22 @@ namespace SAM
                     encryptedAccounts = encryptedAccounts.OrderBy(x => Guid.NewGuid()).ToList();
                 }
 
-                Utils.Serialize(encryptedAccounts);
-                RefreshWindow();
+                SerializeAccounts();
             }
+        }
+
+        private void SerializeAccounts()
+        {
+            if (IsPasswordProtected())
+            {
+                Utils.PasswordSerialize(encryptedAccounts, ePassword);
+            }
+            else
+            {
+                Utils.Serialize(encryptedAccounts);
+            }
+
+            RefreshWindow();
         }
 
         private void ExportAccount(int index)
@@ -1549,16 +1541,7 @@ namespace SAM
                 return;
             }
 
-            if (IsPasswordProtected())
-            {
-                Utils.PasswordSerialize(encryptedAccounts, ePassword);
-            }
-            else
-            {
-                Utils.Serialize(encryptedAccounts);
-            }
-
-            RefreshWindow();
+            SerializeAccounts();
         }
 
         private void AccountButtonSetCustomTimeout_Click(int index)
@@ -1576,32 +1559,13 @@ namespace SAM
                 return;
             }
 
-            if (IsPasswordProtected())
-            {
-                Utils.PasswordSerialize(encryptedAccounts, ePassword);
-            }
-            else
-            {
-                Utils.Serialize(encryptedAccounts);
-            }
-
-            RefreshWindow();
+            SerializeAccounts();
         }
 
         private void AccountButtonClearTimeout_Click(int index)
         {
             encryptedAccounts[index].Timeout = new DateTime();
-
-            if (IsPasswordProtected())
-            {
-                Utils.PasswordSerialize(encryptedAccounts, ePassword);
-            }
-            else
-            {
-                Utils.Serialize(encryptedAccounts);
-            }
-
-            RefreshWindow();
+            SerializeAccounts();
         }
 
         private void AccountButtonExport_Click(object sender, RoutedEventArgs e)
@@ -1628,11 +1592,7 @@ namespace SAM
         public async Task ReloadAccount_ClickAsync(int index)
         {
             await ReloadAccount(encryptedAccounts[index]);
-
-            Utils.Serialize(encryptedAccounts);
-
-            RefreshWindow();
-
+            SerializeAccounts();
             MessageBox.Show("Done!");
         }
 
@@ -1690,8 +1650,7 @@ namespace SAM
                     encryptedAccounts.Remove(account);
                 }
 
-                Utils.Serialize(encryptedAccounts);
-                RefreshWindow();
+                SerializeAccounts();
             }
         }
 
@@ -2043,8 +2002,7 @@ namespace SAM
                         encryptedAccounts.Remove(account);
                     }
 
-                    Utils.Serialize(encryptedAccounts);
-                    RefreshWindow();
+                    SerializeAccounts();
                 }
             }
             else
