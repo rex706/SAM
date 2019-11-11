@@ -42,7 +42,7 @@ namespace SAM
         {
             if (PreviewTextBlock != null && DelimiterCharacterTextBox.Text.Length > 0)
             {
-                PreviewTextBlock.Text = "account" + DelimiterCharacterTextBox.Text + "password" + DelimiterCharacterTextBox.Text + "sharedSecret";
+                PreviewTextBlock.Content = "account" + DelimiterCharacterTextBox.Text + "password" + DelimiterCharacterTextBox.Text + "sharedSecret";
                 RefreshAccountsList();
             }
         }

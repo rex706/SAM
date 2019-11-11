@@ -16,6 +16,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Win32Interop.WinHandles;
+using MahApps.Metro.Controls;
+using System.Windows.Controls.Primitives;
+using MahApps.Metro;
 
 namespace SAM
 {
@@ -24,7 +27,7 @@ namespace SAM
     /// </summary>
 
     [Serializable]
-    public partial class MainWindow : Window
+    public partial class MainWindow : MetroWindow
     {
         #region Globals
 
@@ -102,6 +105,17 @@ namespace SAM
         {
             InitializeComponent();
 
+            // If no settings file exists, create one and initialize values.
+            if (!File.Exists(SAMSettings.FILE_NAME))
+            {
+                GenerateSettings();
+            }
+            // Else load settings from existing file.
+            else
+            {
+                LoadSettings();
+            }
+
             this.Loaded += new RoutedEventHandler(MainWindow_Loaded);
             this.BackgroundBorder.PreviewMouseLeftButtonDown += (s, e) => { DragMove(); };
 
@@ -119,17 +133,6 @@ namespace SAM
             ver.Header = "v" + AssemblyVer;
             ver.IsEnabled = false;
             newExistMenuItem.Items.Add(ver);
-
-            // If no settings file exists, create one and initialize values.
-            if (!File.Exists(SAMSettings.FILE_NAME))
-            {
-                GenerateSettings();
-            }
-            // Else load settings from existing file.
-            else
-            {
-                LoadSettings();
-            }
 
             // Check for a new version if enabled.
             if (settings.User.CheckForUpdates && await UpdateCheck.CheckForUpdate(updateCheckUrl, repositoryUrl) == 1)
@@ -343,6 +346,10 @@ namespace SAM
                                     settings.User.KeyValuePairs[entry.Key] = Convert.ToInt32(settings.File.Read(entry.Key, entry.Value));
                                     break;
 
+                                case TypeCode.Double:
+                                    settings.User.KeyValuePairs[entry.Key] = Convert.ToDouble(settings.File.Read(entry.Key, entry.Value));
+                                    break;
+
                                 default:
                                     settings.User.KeyValuePairs[entry.Key] = settings.File.Read(entry.Key, entry.Value);
                                     break;
@@ -357,6 +364,36 @@ namespace SAM
             {
                 this.Left = Double.Parse(settings.File.Read(SAMSettings.WINDOW_LEFT, SAMSettings.SECTION_LOCATION));
                 this.Top = Double.Parse(settings.File.Read(SAMSettings.WINDOW_TOP, SAMSettings.SECTION_LOCATION));
+            }
+
+            if (settings.User.ListView == true)
+            {
+                AddButtonGrid.Visibility = Visibility.Collapsed;
+
+                Height = settings.User.ListViewHeight;
+                Width = settings.User.ListViewWidth;
+
+                ResizeMode = ResizeMode.CanResize;
+
+                AccountsDataGrid.ItemsSource = encryptedAccounts;
+                AccountsDataGrid.Visibility = Visibility.Visible;
+            }
+
+            // Set user's theme settings.
+            ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent(settings.User.Accent), ThemeManager.GetAppTheme(settings.User.Theme));
+
+            // Apply theme settings for extended toolkit and tabItem brushes.
+            if (settings.User.Theme == SAMSettings.DARK_THEME)
+            {
+                Application.Current.Resources["xctkForegoundBrush"] = Brushes.White;
+                Application.Current.Resources["xctkColorPickerBackground"] = Brushes.Black;
+                Application.Current.Resources["GrayNormalBrush"] = Brushes.White;
+            }
+            else
+            {
+                Application.Current.Resources["xctkForegoundBrush"] = Brushes.Black;
+                Application.Current.Resources["xctkColorPickerBackground"] = Brushes.White;
+                Application.Current.Resources["GrayNormalBrush"] = Brushes.Black;
             }
 
             SetWindowSettingsIntoScreenArea();
@@ -412,13 +449,15 @@ namespace SAM
                 {
                     encryptedAccounts = Utils.Deserialize(dataFile);
                 }
-
+                
                 PostDeserializedRefresh(true);
             }
             else
             {
                 encryptedAccounts = new List<Account>();
             }
+
+            AccountsDataGrid.ItemsSource = encryptedAccounts;
         }
 
         private async Task ReloadAccount(Account account)
@@ -541,13 +580,6 @@ namespace SAM
 
             if (encryptedAccounts != null)
             {
-                int bCounter = 0;
-                int xCounter = 0;
-                int yCounter = 0;
-
-                int buttonOffset = settings.User.ButtonSize + 5;
-
-                // Create new button and textblock for each account
                 foreach (var account in encryptedAccounts)
                 {
                     string tempPass = StringCipher.Decrypt(account.Password, eKey);
@@ -568,114 +600,128 @@ namespace SAM
 
                         decryptedAccounts.Add(new Account() { Name = account.Name, Alias = account.Alias, Password = tempPass, SharedSecret = temp2fa, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, SteamId = steamId, Timeout = account.Timeout, Description = account.Description });
                     }
+                }
 
-                    Grid accountButtonGrid = new Grid();
+                if (settings.User.ListView == true)
+                {
+                    SetMainScrollViewerBarsVisibility(ScrollBarVisibility.Auto);
 
-                    Button accountButton = new Button();
-                    TextBlock accountText = new TextBlock();
-                    TextBlock timeoutTextBlock = new TextBlock();
-                    Image banInfoImage = new Image();
-                    Border accountImage = new Border();
-
-                    accountButton.Style = (Style)Resources["SAMButtonStyle"];
-                    accountButton.Tag = bCounter.ToString();
-
-                    if (account.Alias != null && account.Alias.Length > 0)
+                    for (int i = 0; i < encryptedAccounts.Count; i++)
                     {
-                        accountText.Text = account.Alias;
-                    }
-                    else
-                    {
-                        accountText.Text = account.Name;
-                    }
+                        Account account = encryptedAccounts[i];
 
-                    // If there is a description, set up tooltip.
-                    if (account.Description != null && account.Description.Length > 0)
-                    {
-                        accountButton.ToolTip = account.Description;
+                        int index = i;
+
+                        TaskBarIconLoginContextMenu.IsEnabled = true;
+                        TaskBarIconLoginContextMenu.Items.Add(GenerateTaskBarMenuItem(index, account));
+
+                        if (Utils.AccountHasActiveTimeout(account))
+                        {
+                            // Set up timer event to update timeout label
+                            var timeLeft = account.Timeout - DateTime.Now;
+
+                            System.Timers.Timer timeoutTimer = new System.Timers.Timer();
+                            timeoutTimers.Add(timeoutTimer);
+
+                            timeoutTimer.Elapsed += delegate
+                            {
+                                this.Dispatcher.Invoke(() =>
+                                {
+                                    TimeoutTimer_Tick(index, timeoutTimer);
+                                });
+                            };
+                            timeoutTimer.Interval = 1000;
+                            timeoutTimer.Enabled = true;
+                        }
                     }
+                }
+                else
+                {
+                    AccountsDataGrid.Visibility = Visibility.Collapsed;
+                    AddButtonGrid.Visibility = Visibility.Visible;
+
+                    int bCounter = 0;
+                    int xCounter = 0;
+                    int yCounter = 0;
+
+                    int buttonOffset = settings.User.ButtonSize + 5;
+
+                    // Create new button and textblock for each account
+                    foreach (var account in encryptedAccounts)
+                    {
+                        Grid accountButtonGrid = new Grid();
+
+                        Button accountButton = new Button();
+                        TextBlock accountText = new TextBlock();
+                        TextBlock timeoutTextBlock = new TextBlock();
                         
-                    accountButtonGrid.HorizontalAlignment = HorizontalAlignment.Left;
-                    accountButtonGrid.VerticalAlignment = VerticalAlignment.Top;
-                    accountButtonGrid.Margin = new Thickness(xCounter * buttonOffset, yCounter * buttonOffset, 0, 0);
+                        Border accountImage = new Border();
 
-                    accountButton.Height = settings.User.ButtonSize;
-                    accountButton.Width = settings.User.ButtonSize;
-                    accountButton.BorderBrush = null;
-                    accountButton.HorizontalAlignment = HorizontalAlignment.Center;
-                    accountButton.VerticalAlignment = VerticalAlignment.Center;
-                    accountButton.Background = Brushes.Transparent;
-
-                    accountText.Width = settings.User.ButtonSize;
-                    if (settings.User.ButtonFontSize > 0)
-                    {
-                        accountText.FontSize = settings.User.ButtonFontSize;
-                    }
-                    else
-                    {
-                        accountText.FontSize = settings.User.ButtonSize / 8;
-                    }
-                    
-                    accountText.HorizontalAlignment = HorizontalAlignment.Center;
-                    accountText.VerticalAlignment = VerticalAlignment.Bottom;
-                    accountText.Margin = new Thickness(0, 0, 0, 7);
-                    accountText.Padding = new Thickness(0, 0, 0, 1);
-                    accountText.TextAlignment = TextAlignment.Center;
-                    accountText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.BannerFontColor));
-                    accountText.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonBannerColor));
-                    accountText.Visibility = Visibility.Collapsed;
-
-                    timeoutTextBlock.Width = settings.User.ButtonSize;
-                    timeoutTextBlock.FontSize = settings.User.ButtonSize / 8;
-                    timeoutTextBlock.HorizontalAlignment = HorizontalAlignment.Center;
-                    timeoutTextBlock.VerticalAlignment = VerticalAlignment.Center;
-                    timeoutTextBlock.Padding = new Thickness(0, 0, 0, 1);
-                    timeoutTextBlock.TextAlignment = TextAlignment.Center;
-                    timeoutTextBlock.Foreground = new SolidColorBrush(Colors.White);
-                    timeoutTextBlock.Background = new SolidColorBrush(new Color { A = 128, R = 255, G = 0, B = 0 });
-
-                    banInfoImage.HorizontalAlignment = HorizontalAlignment.Left;
-                    banInfoImage.VerticalAlignment = VerticalAlignment.Top;
-                    banInfoImage.Height = 12;
-                    banInfoImage.Width = 12;
-                    banInfoImage.Margin = new Thickness(10, 10, 10, 10);
-                    banInfoImage.Source = new BitmapImage(new Uri(@"error_red_18dp.png", UriKind.RelativeOrAbsolute));
-
-                    accountImage.Height = settings.User.ButtonSize;
-                    accountImage.Width = settings.User.ButtonSize;
-                    accountImage.HorizontalAlignment = HorizontalAlignment.Center;
-                    accountImage.VerticalAlignment = VerticalAlignment.Center;
-                    accountImage.CornerRadius = new CornerRadius(3);
-
-                    if (account.ProfUrl == "" || account.AviUrl == null || account.AviUrl == "" || account.AviUrl == " ")
-                    {
-                        accountImage.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonColor));
-                        accountButton.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonFontColor));
-                        timeoutTextBlock.Margin = new Thickness(0, 0, 0, 50);
+                        accountButton.Style = (Style)Resources["SAMButtonStyle"];
+                        accountButton.Tag = bCounter.ToString();
 
                         if (account.Alias != null && account.Alias.Length > 0)
                         {
-                            accountButton.Content = account.Alias;
+                            accountText.Text = account.Alias;
                         }
                         else
                         {
-                            accountButton.Content = account.Name;
+                            accountText.Text = account.Name;
                         }
-                    }
-                    else
-                    {
-                        try
-                        {
-                            ImageBrush imageBrush = new ImageBrush();
-                            BitmapImage image1 = new BitmapImage(new Uri(account.AviUrl));
-                            imageBrush.ImageSource = image1;
-                            accountImage.Background = imageBrush;
-                        }
-                        catch (Exception m)
-                        {
-                            // Probably no internet connection or avatar url is bad.
-                            Console.WriteLine("Error: " + m.Message);
 
+                        // If there is a description, set up tooltip.
+                        if (account.Description != null && account.Description.Length > 0)
+                        {
+                            accountButton.ToolTip = account.Description;
+                        }
+
+                        accountButtonGrid.HorizontalAlignment = HorizontalAlignment.Left;
+                        accountButtonGrid.VerticalAlignment = VerticalAlignment.Top;
+                        accountButtonGrid.Margin = new Thickness(xCounter * buttonOffset, yCounter * buttonOffset, 0, 0);
+
+                        accountButton.Height = settings.User.ButtonSize;
+                        accountButton.Width = settings.User.ButtonSize;
+                        accountButton.BorderBrush = null;
+                        accountButton.HorizontalAlignment = HorizontalAlignment.Center;
+                        accountButton.VerticalAlignment = VerticalAlignment.Center;
+                        accountButton.Background = Brushes.Transparent;
+
+                        accountText.Width = settings.User.ButtonSize;
+                        if (settings.User.ButtonFontSize > 0)
+                        {
+                            accountText.FontSize = settings.User.ButtonFontSize;
+                        }
+                        else
+                        {
+                            accountText.FontSize = settings.User.ButtonSize / 8;
+                        }
+
+                        accountText.HorizontalAlignment = HorizontalAlignment.Center;
+                        accountText.VerticalAlignment = VerticalAlignment.Bottom;
+                        accountText.Margin = new Thickness(0, 0, 0, 7);
+                        accountText.Padding = new Thickness(0, 0, 0, 1);
+                        accountText.TextAlignment = TextAlignment.Center;
+                        accountText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.BannerFontColor));
+                        accountText.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonBannerColor));
+                        accountText.Visibility = Visibility.Collapsed;
+
+                        timeoutTextBlock.Width = settings.User.ButtonSize;
+                        timeoutTextBlock.FontSize = settings.User.ButtonSize / 8;
+                        timeoutTextBlock.HorizontalAlignment = HorizontalAlignment.Center;
+                        timeoutTextBlock.VerticalAlignment = VerticalAlignment.Center;
+                        timeoutTextBlock.Padding = new Thickness(0, 0, 0, 1);
+                        timeoutTextBlock.TextAlignment = TextAlignment.Center;
+                        timeoutTextBlock.Foreground = new SolidColorBrush(Colors.White);
+                        timeoutTextBlock.Background = new SolidColorBrush(new Color { A = 128, R = 255, G = 0, B = 0 });
+
+                        accountImage.Height = settings.User.ButtonSize;
+                        accountImage.Width = settings.User.ButtonSize;
+                        accountImage.HorizontalAlignment = HorizontalAlignment.Center;
+                        accountImage.VerticalAlignment = VerticalAlignment.Center;
+                        accountImage.CornerRadius = new CornerRadius(3);
+
+                        if (account.ProfUrl == "" || account.AviUrl == null || account.AviUrl == "" || account.AviUrl == " ")
+                        {
                             accountImage.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonColor));
                             accountButton.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonFontColor));
                             timeoutTextBlock.Margin = new Thickness(0, 0, 0, 50);
@@ -689,198 +735,245 @@ namespace SAM
                                 accountButton.Content = account.Name;
                             }
                         }
-                    }
-
-                    accountButton.Click += new RoutedEventHandler(AccountButton_Click);
-                    accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
-                    accountButton.PreviewMouseLeftButtonUp += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
-                    //accountButton.PreviewMouseMove += new System.Windows.Input.MouseEventHandler(AccountButton_MouseMove);
-                    accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
-                    accountButton.MouseEnter += delegate { AccountButton_MouseEnter(accountButton, accountText); };
-                    accountButton.MouseLeave += delegate { AccountButton_MouseLeave(accountButton, accountText); };
-
-                    ContextMenu accountContext = new ContextMenu();
-
-                    MenuItem deleteItem = new MenuItem();
-                    MenuItem editItem = new MenuItem();
-                    MenuItem exportItem = new MenuItem();
-                    MenuItem reloadItem = new MenuItem();
-
-                    MenuItem setTimeoutItem = new MenuItem();
-
-                    MenuItem thirtyMinuteTimeoutItem = new MenuItem();
-                    MenuItem twoHourTimeoutItem = new MenuItem();
-                    MenuItem twentyOneHourTimeoutItem = new MenuItem();
-                    MenuItem twentyFourHourTimeoutItem = new MenuItem();
-                    MenuItem sevenDayTimeoutItem = new MenuItem();
-                    MenuItem customTimeoutItem = new MenuItem();
-
-                    thirtyMinuteTimeoutItem.Header = "30 Minutes";
-                    twoHourTimeoutItem.Header = "2 Hours";
-                    twentyOneHourTimeoutItem.Header = "21 Hours";
-                    twentyFourHourTimeoutItem.Header = "24 Hours";
-                    sevenDayTimeoutItem.Header = "7 Days";
-                    customTimeoutItem.Header = "Custom";
-
-                    setTimeoutItem.Items.Add(thirtyMinuteTimeoutItem);
-                    setTimeoutItem.Items.Add(twoHourTimeoutItem);
-                    setTimeoutItem.Items.Add(twentyOneHourTimeoutItem);
-                    setTimeoutItem.Items.Add(twentyFourHourTimeoutItem);
-                    setTimeoutItem.Items.Add(sevenDayTimeoutItem);
-                    setTimeoutItem.Items.Add(customTimeoutItem);
-
-                    MenuItem clearTimeoutItem = new MenuItem();
-                    MenuItem copyPasswordItem = new MenuItem();
-
-                    deleteItem.Header = "Delete";
-                    editItem.Header = "Edit";
-                    exportItem.Header = "Export";
-                    reloadItem.Header = "Reload";
-                    setTimeoutItem.Header = "Set Timeout";
-                    clearTimeoutItem.Header = "Clear Timeout";
-                    copyPasswordItem.Header = "Copy Password";
-
-                    accountButtonGrid.Children.Add(accountImage);
-
-                    int buttonIndex = Int32.Parse(accountButton.Tag.ToString());
-
-                    if (!Utils.AccountHasActiveTimeout(account))
-                    {
-                        clearTimeoutItem.IsEnabled = false;
-                    }
-                    else
-                    {
-                        // Set up timer event to update timeout label
-                        var timeLeft = account.Timeout - DateTime.Now;
-
-                        System.Timers.Timer timeoutTimer = new System.Timers.Timer();
-                        timeoutTimers.Add(timeoutTimer);
-
-                        timeoutTimer.Elapsed += delegate
+                        else
                         {
-                            this.Dispatcher.Invoke(() =>
+                            try
                             {
-                                TimeoutTimer_Tick(buttonIndex, timeoutTextBlock, timeoutTimer);
-                            });
-                        };
-                        timeoutTimer.Interval = 1000;
-                        timeoutTimer.Enabled = true;
-                        timeoutTextBlock.Text = Utils.FormatTimespanString(timeLeft);
-                        timeoutTextBlock.Visibility = Visibility.Visible;
+                                ImageBrush imageBrush = new ImageBrush();
+                                BitmapImage image1 = new BitmapImage(new Uri(account.AviUrl));
+                                imageBrush.ImageSource = image1;
+                                accountImage.Background = imageBrush;
+                            }
+                            catch (Exception m)
+                            {
+                                // Probably no internet connection or avatar url is bad.
+                                Console.WriteLine("Error: " + m.Message);
 
-                        accountButtonGrid.Children.Add(timeoutTextBlock);
+                                accountImage.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonColor));
+                                accountButton.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(settings.User.ButtonFontColor));
+                                timeoutTextBlock.Margin = new Thickness(0, 0, 0, 50);
+
+                                if (account.Alias != null && account.Alias.Length > 0)
+                                {
+                                    accountButton.Content = account.Alias;
+                                }
+                                else
+                                {
+                                    accountButton.Content = account.Name;
+                                }
+                            }
+                        }
+
+                        accountButton.Click += new RoutedEventHandler(AccountButton_Click);
+                        accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
+                        accountButton.PreviewMouseLeftButtonUp += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
+                        //accountButton.PreviewMouseMove += new System.Windows.Input.MouseEventHandler(AccountButton_MouseMove);
+                        accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+                        accountButton.MouseEnter += delegate { AccountButton_MouseEnter(accountButton, accountText); };
+                        accountButton.MouseLeave += delegate { AccountButton_MouseLeave(accountButton, accountText); };
+
+                        accountButtonGrid.Children.Add(accountImage);
+
+                        int buttonIndex = Int32.Parse(accountButton.Tag.ToString());
+
+                        if (Utils.AccountHasActiveTimeout(account))
+                        {
+                            // Set up timer event to update timeout label
+                            var timeLeft = account.Timeout - DateTime.Now;
+
+                            System.Timers.Timer timeoutTimer = new System.Timers.Timer();
+                            timeoutTimers.Add(timeoutTimer);
+
+                            timeoutTimer.Elapsed += delegate
+                            {
+                                this.Dispatcher.Invoke(() =>
+                                {
+                                    TimeoutTimer_Tick(buttonIndex, timeoutTextBlock, timeoutTimer);
+                                });
+                            };
+                            timeoutTimer.Interval = 1000;
+                            timeoutTimer.Enabled = true;
+                            timeoutTextBlock.Text = Utils.FormatTimespanString(timeLeft.Value);
+                            timeoutTextBlock.Visibility = Visibility.Visible;
+
+                            accountButtonGrid.Children.Add(timeoutTextBlock);
+                        }
+
+                        accountButtonGrid.Children.Add(accountText);
+                        accountButtonGrid.Children.Add(accountButton);
+
+                        if (settings.User.HideBanIcons == false && (account.NumberOfVACBans > 0 || account.NumberOfGameBans > 0))
+                        {
+                            Image banInfoImage = new Image();
+
+                            banInfoImage.HorizontalAlignment = HorizontalAlignment.Left;
+                            banInfoImage.VerticalAlignment = VerticalAlignment.Top;
+                            banInfoImage.Height = 14;
+                            banInfoImage.Width = 14;
+                            banInfoImage.Margin = new Thickness(10, 10, 10, 10);
+                            banInfoImage.Source = new BitmapImage(new Uri(@"error_red_18dp.png", UriKind.RelativeOrAbsolute));
+
+                            banInfoImage.ToolTip = "VAC Bans: " + account.NumberOfVACBans +
+                                "\nGame Bans: " + account.NumberOfGameBans +
+                                "\nCommunity Banned: " + account.CommunityBanned +
+                                "\nEconomy Ban: " + account.EconomyBan +
+                                "\nDays Since Last Ban:" + account.DaysSinceLastBan;
+
+                            accountButtonGrid.Children.Add(banInfoImage);
+                        }
+
+                        accountButton.ContextMenu = GenerateAccountContextMenu(account, buttonIndex);
+                        accountButton.ContextMenuOpening += new ContextMenuEventHandler(ContextMenu_ContextMenuOpening);
+
+                        buttonGrid.Children.Add(accountButtonGrid);
+
+                        TaskBarIconLoginContextMenu.IsEnabled = true;
+                        TaskBarIconLoginContextMenu.Items.Add(GenerateTaskBarMenuItem(bCounter, account));
+
+                        bCounter++;
+                        xCounter++;
+
+                        if (bCounter % settings.User.AccountsPerRow == 0 && (!settings.User.HideAddButton || (settings.User.HideAddButton && bCounter != encryptedAccounts.Count)))
+                        {
+                            yCounter++;
+                            xCounter = 0;
+                        }
                     }
 
-                    accountButtonGrid.Children.Add(accountText);
-                    accountButtonGrid.Children.Add(accountButton);
-
-                    if (account.NumberOfVACBans > 0 || account.NumberOfGameBans > 0)
+                    if (bCounter > 0)
                     {
-                        banInfoImage.ToolTip = "VAC Bans: " + account.NumberOfVACBans +
-                            "\nGame Bans: " + account.NumberOfGameBans +
-                            "\nCommunity Banned: " + account.CommunityBanned +
-                            "\nEconomy Ban: " + account.EconomyBan +
-                            "\nDays Since Last Ban:" + account.DaysSinceLastBan;
+                        // Adjust window size and info positions
+                        int xVal = settings.User.AccountsPerRow;
 
-                        accountButtonGrid.Children.Add(banInfoImage);
-                    }
+                        if (settings.User.HideAddButton)
+                        {
+                            AddButtonGrid.Visibility = Visibility.Collapsed;
+                        }
+                        else
+                        {
+                            AddButtonGrid.Visibility = Visibility.Visible;
+                        }
 
-                    accountContext.Items.Add(editItem);
-                    accountContext.Items.Add(deleteItem);
-                    accountContext.Items.Add(exportItem);
-                    accountContext.Items.Add(reloadItem);
-                    accountContext.Items.Add(setTimeoutItem);
-                    accountContext.Items.Add(clearTimeoutItem);
-                    accountContext.Items.Add(copyPasswordItem);
+                        if (yCounter == 0 && !settings.User.HideAddButton)
+                        {
+                            xVal = xCounter + 1;
+                        }
+                        else if (yCounter == 0)
+                        {
+                            xVal = xCounter;
+                        }
 
-                    accountButton.ContextMenu = accountContext;
-                    accountButton.ContextMenuOpening += new ContextMenuEventHandler(ContextMenu_ContextMenuOpening);
+                        int newHeight = (buttonOffset * (yCounter + 1)) + 57;
+                        int newWidth = (buttonOffset * xVal) + 7;
 
-                    deleteItem.Click += delegate { DeleteEntry(accountButton); };
-                    editItem.Click += delegate { EditEntry(accountButton); };
-                    exportItem.Click += delegate { ExportAccount(buttonIndex); };
-                    reloadItem.Click += async delegate { await ReloadAccount_ClickAsync(buttonIndex); };
-                    thirtyMinuteTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(buttonIndex, DateTime.Now.AddMinutes(30)); };
-                    twoHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(buttonIndex, DateTime.Now.AddHours(2)); };
-                    twentyOneHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(buttonIndex, DateTime.Now.AddHours(21)); };
-                    twentyFourHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(buttonIndex, DateTime.Now.AddDays(1)); };
-                    sevenDayTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(buttonIndex, DateTime.Now.AddDays(7)); };
-                    customTimeoutItem.Click += delegate { AccountButtonSetCustomTimeout_Click(buttonIndex); };
-                    clearTimeoutItem.Click += delegate { AccountButtonClearTimeout_Click(buttonIndex); };
-                    copyPasswordItem.Click += delegate { CopyPasswordToClipboard(buttonIndex); };
+                        Resize(newHeight, newWidth);
 
-                    buttonGrid.Children.Add(accountButtonGrid);
-
-                    // TaskbarIcon Context Menu Item
-                    MenuItem taskBarIconLoginItem = new MenuItem();
-                    taskBarIconLoginItem.Tag = bCounter.ToString();
-                    taskBarIconLoginItem.Click += new RoutedEventHandler(TaskbarIconLoginItem_Click);
-
-                    if (account.Alias != null && account.Alias.Length > 0)
-                    {
-                        taskBarIconLoginItem.Header = account.Alias;
+                        // Adjust new account and export/delete buttons
+                        AddButtonGrid.HorizontalAlignment = HorizontalAlignment.Left;
+                        AddButtonGrid.VerticalAlignment = VerticalAlignment.Top;
+                        AddButtonGrid.Margin = new Thickness((xCounter * buttonOffset) + 5, (yCounter * buttonOffset) + 25, 0, 0);
                     }
                     else
                     {
-                        taskBarIconLoginItem.Header = account.Name;
+                        // Reset New Button position.
+                        Resize(originalHeight, originalWidth);
+
+                        AddButtonGrid.HorizontalAlignment = HorizontalAlignment.Center;
+                        AddButtonGrid.VerticalAlignment = VerticalAlignment.Center;
+                        AddButtonGrid.Margin = initialAddButtonGridMargin;
                     }
-
-                    TaskBarIconLoginContextMenu.IsEnabled = true;
-                    TaskBarIconLoginContextMenu.Items.Add(taskBarIconLoginItem);
-
-                    bCounter++;
-                    xCounter++;
-
-                    if (bCounter % settings.User.AccountsPerRow == 0 && (!settings.User.HideAddButton || (settings.User.HideAddButton && bCounter != encryptedAccounts.Count)))
-                    {
-                        yCounter++;
-                        xCounter = 0;
-                    }
-                }
-
-                if (bCounter > 0)
-                {
-                    // Adjust window size and info positions
-                    int xVal = settings.User.AccountsPerRow;
-
-                    if (settings.User.HideAddButton)
-                    {
-                        AddButtonGrid.Visibility = Visibility.Collapsed;
-                    }
-                    else
-                    {
-                        AddButtonGrid.Visibility = Visibility.Visible;
-                    }
-
-                    if (yCounter == 0 && !settings.User.HideAddButton)
-                    {
-                        xVal = xCounter + 1;
-                    }
-                    else if (yCounter == 0)
-                    {
-                        xVal = xCounter;
-                    }
-
-                    int newHeight = (buttonOffset * (yCounter + 1)) + 65;
-                    int newWidth = (buttonOffset * xVal) + 21;
-
-                    Resize(newHeight, newWidth);
-
-                    // Adjust new account and export/delete buttons
-                    AddButtonGrid.HorizontalAlignment = HorizontalAlignment.Left;
-                    AddButtonGrid.VerticalAlignment = VerticalAlignment.Top;
-                    AddButtonGrid.Margin = new Thickness((xCounter * buttonOffset) + 5, (yCounter * buttonOffset) + 25, 0, 0);
-                }
-                else
-                {
-                    // Reset New Button position.
-                    Resize(originalHeight, originalWidth);
-
-                    AddButtonGrid.HorizontalAlignment = HorizontalAlignment.Center;
-                    AddButtonGrid.VerticalAlignment = VerticalAlignment.Center;
-                    AddButtonGrid.Margin = initialAddButtonGridMargin;
                 }
             }
+        }
+
+        private MenuItem GenerateTaskBarMenuItem(int index, Account account)
+        {
+            MenuItem taskBarIconLoginItem = new MenuItem();
+            taskBarIconLoginItem.Tag = index;
+            taskBarIconLoginItem.Click += new RoutedEventHandler(TaskbarIconLoginItem_Click);
+
+            if (account.Alias != null && account.Alias.Length > 0)
+            {
+                taskBarIconLoginItem.Header = account.Alias;
+            }
+            else
+            {
+                taskBarIconLoginItem.Header = account.Name;
+            }
+
+            return taskBarIconLoginItem;
+        }
+
+        private ContextMenu GenerateAccountContextMenu(Account account, int index)
+        {
+            ContextMenu accountContext = new ContextMenu();
+
+            MenuItem deleteItem = new MenuItem();
+            MenuItem editItem = new MenuItem();
+            MenuItem exportItem = new MenuItem();
+            MenuItem reloadItem = new MenuItem();
+
+            MenuItem setTimeoutItem = new MenuItem();
+
+            MenuItem thirtyMinuteTimeoutItem = new MenuItem();
+            MenuItem twoHourTimeoutItem = new MenuItem();
+            MenuItem twentyOneHourTimeoutItem = new MenuItem();
+            MenuItem twentyFourHourTimeoutItem = new MenuItem();
+            MenuItem sevenDayTimeoutItem = new MenuItem();
+            MenuItem customTimeoutItem = new MenuItem();
+
+            thirtyMinuteTimeoutItem.Header = "30 Minutes";
+            twoHourTimeoutItem.Header = "2 Hours";
+            twentyOneHourTimeoutItem.Header = "21 Hours";
+            twentyFourHourTimeoutItem.Header = "24 Hours";
+            sevenDayTimeoutItem.Header = "7 Days";
+            customTimeoutItem.Header = "Custom";
+
+            setTimeoutItem.Items.Add(thirtyMinuteTimeoutItem);
+            setTimeoutItem.Items.Add(twoHourTimeoutItem);
+            setTimeoutItem.Items.Add(twentyOneHourTimeoutItem);
+            setTimeoutItem.Items.Add(twentyFourHourTimeoutItem);
+            setTimeoutItem.Items.Add(sevenDayTimeoutItem);
+            setTimeoutItem.Items.Add(customTimeoutItem);
+
+            MenuItem clearTimeoutItem = new MenuItem();
+            MenuItem copyPasswordItem = new MenuItem();
+
+            if (!Utils.AccountHasActiveTimeout(account))
+            {
+                clearTimeoutItem.IsEnabled = false;
+            }
+
+            deleteItem.Header = "Delete";
+            editItem.Header = "Edit";
+            exportItem.Header = "Export";
+            reloadItem.Header = "Reload";
+            setTimeoutItem.Header = "Set Timeout";
+            clearTimeoutItem.Header = "Clear Timeout";
+            copyPasswordItem.Header = "Copy Password";
+
+            deleteItem.Click += delegate { DeleteEntry(index); };
+            editItem.Click += delegate { EditEntry(index); };
+            exportItem.Click += delegate { ExportAccount(index); };
+            reloadItem.Click += async delegate { await ReloadAccount_ClickAsync(index); };
+            thirtyMinuteTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(index, DateTime.Now.AddMinutes(30)); };
+            twoHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(index, DateTime.Now.AddHours(2)); };
+            twentyOneHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(index, DateTime.Now.AddHours(21)); };
+            twentyFourHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(index, DateTime.Now.AddDays(1)); };
+            sevenDayTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(index, DateTime.Now.AddDays(7)); };
+            customTimeoutItem.Click += delegate { AccountButtonSetCustomTimeout_Click(index); };
+            clearTimeoutItem.Click += delegate { AccountButtonClearTimeout_Click(index); };
+            copyPasswordItem.Click += delegate { CopyPasswordToClipboard(index); };
+
+            accountContext.Items.Add(editItem);
+            accountContext.Items.Add(deleteItem);
+            accountContext.Items.Add(exportItem);
+            accountContext.Items.Add(reloadItem);
+            accountContext.Items.Add(setTimeoutItem);
+            accountContext.Items.Add(clearTimeoutItem);
+            accountContext.Items.Add(copyPasswordItem);
+
+            return accountContext;
         }
 
         private void AddAccount()
@@ -936,11 +1029,8 @@ namespace SAM
             }
         }
 
-        private void EditEntry(object butt)
+        private void EditEntry(int index)
         {
-            Button button = butt as Button;
-            int index = Int32.Parse(button.Tag.ToString());
-
             var dialog = new TextDialog
             {
                 AccountText = decryptedAccounts[index].Name,
@@ -974,7 +1064,7 @@ namespace SAM
                 // If the auto login checkbox was checked, update settings file and global variables. 
                 if (dialog.AutoLogAccountIndex == true)
                 {
-                    settings.File.Write(SAMSettings.SELECTED_ACCOUNT_INDEX, button.Tag.ToString(), SAMSettings.SECTION_AUTOLOG);
+                    settings.File.Write(SAMSettings.SELECTED_ACCOUNT_INDEX, index.ToString(), SAMSettings.SECTION_AUTOLOG);
                     settings.File.Write(SAMSettings.LOGIN_SELECTED_ACCOUNT, true.ToString(), SAMSettings.SECTION_AUTOLOG);
                     settings.File.Write(SAMSettings.LOGIN_RECENT_ACCOUNT, false.ToString(), SAMSettings.SECTION_AUTOLOG);
                     settings.User.LoginSelectedAccount = true;
@@ -1005,19 +1095,18 @@ namespace SAM
                 catch (Exception m)
                 {
                     MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    EditEntry(butt);
+                    EditEntry(index);
                 }
             }
         }
 
-        private void DeleteEntry(object butt)
+        private void DeleteEntry(int index)
         {
             MessageBoxResult result = MessageBox.Show("Are you sure you want to delete this entry?", "Delete", MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
 
             if (result == MessageBoxResult.Yes)
             {
-                Button button = butt as Button;
-                encryptedAccounts.RemoveAt(Int32.Parse(button.Tag.ToString()));
+                encryptedAccounts.RemoveAt(index);
                 SerializeAccounts();
             }
         }
@@ -1574,7 +1663,7 @@ namespace SAM
 
         private void AccountButtonClearTimeout_Click(int index)
         {
-            encryptedAccounts[index].Timeout = new DateTime();
+            encryptedAccounts[index].Timeout = null;
             SerializeAccounts();
         }
 
@@ -1827,7 +1916,7 @@ namespace SAM
         {
             var timeLeft = encryptedAccounts[index].Timeout - DateTime.Now;
 
-            if (timeLeft.CompareTo(TimeSpan.Zero) <= 0)
+            if (timeLeft.Value.CompareTo(TimeSpan.Zero) <= 0)
             {
                 timeoutTimer.Stop();
                 timeoutTimer.Dispose();
@@ -1837,8 +1926,26 @@ namespace SAM
             }
             else
             {
-                timeoutLabel.Text = Utils.FormatTimespanString(timeLeft);
+                timeoutLabel.Text = Utils.FormatTimespanString(timeLeft.Value);
                 timeoutLabel.Visibility = Visibility.Visible;
+            }
+        }
+
+        void TimeoutTimer_Tick(int index, System.Timers.Timer timeoutTimer)
+        {
+            var timeLeft = encryptedAccounts[index].Timeout - DateTime.Now;
+
+            if (timeLeft.Value.CompareTo(TimeSpan.Zero) <= 0)
+            {
+                timeoutTimer.Stop();
+                timeoutTimer.Dispose();
+
+                encryptedAccounts[index].TimeoutTimeLeft = null;
+                AccountButtonClearTimeout_Click(index);
+            }
+            else
+            {
+                encryptedAccounts[index].TimeoutTimeLeft = Utils.FormatTimespanString(timeLeft.Value);
             }
         }
 
@@ -1848,6 +1955,18 @@ namespace SAM
             {
                 settings.File.Write(SAMSettings.WINDOW_LEFT, Left.ToString(), SAMSettings.SECTION_LOCATION);
                 settings.File.Write(SAMSettings.WINDOW_TOP, Top.ToString(), SAMSettings.SECTION_LOCATION);
+            }
+        }
+
+        private void MetroWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (!isLoadingSettings && settings.File != null && settings.User.ListView == true)
+            {
+                settings.User.ListViewHeight = Height;
+                settings.User.ListViewWidth = Width;
+
+                settings.File.Write(SAMSettings.LIST_VIEW_HEIGHT, Height.ToString(), SAMSettings.SECTION_LOCATION);
+                settings.File.Write(SAMSettings.LIST_VIEW_WIDTH, Width.ToString(), SAMSettings.SECTION_LOCATION);
             }
         }
 
@@ -1954,27 +2073,34 @@ namespace SAM
         private void DeleteSelectedMenuItem_Click(object sender, RoutedEventArgs e)
         {
             deleting = true;
-
             deleteAccounts = new Dictionary<int, Account>();
 
-            AddButton.Visibility = Visibility.Hidden;
-            DeleteButton.Visibility = Visibility.Visible;
-            CancelExportButton.Visibility = Visibility.Visible;
             FileMenuItem.IsEnabled = false;
             EditMenuItem.IsEnabled = false;
 
-            IEnumerable<Grid> buttonGridCollection = buttonGrid.Children.OfType<Grid>();
-
-            foreach (Grid accountButtonGrid in buttonGridCollection)
+            if (settings.User.ListView == true)
             {
-                Button accountButton = accountButtonGrid.Children.OfType<Button>().FirstOrDefault();
+                AccountsDataGrid.SelectionMode = DataGridSelectionMode.Extended;
+            }
+            else
+            {
+                AddButton.Visibility = Visibility.Hidden;
+                DeleteButton.Visibility = Visibility.Visible;
+                CancelExportButton.Visibility = Visibility.Visible;
+                
+                IEnumerable<Grid> buttonGridCollection = buttonGrid.Children.OfType<Grid>();
 
-                accountButton.Style = (Style)Resources["DeleteButtonStyle"];
-                accountButton.Click -= new RoutedEventHandler(AccountButton_Click);
-                accountButton.Click += new RoutedEventHandler(AccountButtonDelete_Click);
-                accountButton.PreviewMouseLeftButtonDown -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
-                accountButton.PreviewMouseLeftButtonUp -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
-                accountButton.MouseLeave -= new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+                foreach (Grid accountButtonGrid in buttonGridCollection)
+                {
+                    Button accountButton = accountButtonGrid.Children.OfType<Button>().FirstOrDefault();
+
+                    accountButton.Style = (Style)Resources["DeleteButtonStyle"];
+                    accountButton.Click -= new RoutedEventHandler(AccountButton_Click);
+                    accountButton.Click += new RoutedEventHandler(AccountButtonDelete_Click);
+                    accountButton.PreviewMouseLeftButtonDown -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
+                    accountButton.PreviewMouseLeftButtonUp -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
+                    accountButton.MouseLeave -= new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+                }
             }
         }
 
@@ -2001,6 +2127,19 @@ namespace SAM
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
+            DeleteSelectedAccounts();
+        }
+
+        private void DeleteSelectedAccounts()
+        {
+            if (settings.User.ListView == true)
+            {
+                for (int i = 0; i < AccountsDataGrid.SelectedItems.Count; i++)
+                {
+                    deleteAccounts.Add(i, AccountsDataGrid.SelectedItems[i] as Account);
+                }
+            }
+
             if (deleteAccounts.Count > 0)
             {
                 MessageBoxResult messageBoxResult = MessageBox.Show("Are you sure you want to delete the selected accounts?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -2026,32 +2165,97 @@ namespace SAM
 
         private void ResetFromExportOrDelete()
         {
-            AddButton.Visibility = Visibility.Visible;
-            DeleteButton.Visibility = Visibility.Hidden;
-            ExportButton.Visibility = Visibility.Hidden;
-            CancelExportButton.Visibility = Visibility.Hidden;
             FileMenuItem.IsEnabled = true;
             EditMenuItem.IsEnabled = true;
 
-            IEnumerable<Grid> buttonGridCollection = buttonGrid.Children.OfType<Grid>();
-
-            foreach (Grid accountButtonGrid in buttonGridCollection)
+            if (settings.User.ListView == true)
             {
-                Button accountButton = accountButtonGrid.Children.OfType<Button>().FirstOrDefault();
+                AccountsDataGrid.SelectionMode = DataGridSelectionMode.Single;
+            }
+            else
+            {
+                if (settings.User.HideAddButton == true)
+                {
+                    AddButton.Visibility = Visibility.Visible;
+                }
+                
+                DeleteButton.Visibility = Visibility.Hidden;
+                ExportButton.Visibility = Visibility.Hidden;
+                CancelExportButton.Visibility = Visibility.Hidden;
+                
+                IEnumerable<Grid> buttonGridCollection = buttonGrid.Children.OfType<Grid>();
 
-                accountButton.Style = (Style)Resources["SAMButtonStyle"];
-                accountButton.Click -= new RoutedEventHandler(AccountButtonExport_Click);
-                accountButton.Click -= new RoutedEventHandler(AccountButtonDelete_Click);
-                accountButton.Click += new RoutedEventHandler(AccountButton_Click);
-                accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
-                accountButton.PreviewMouseLeftButtonUp += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
-                accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+                foreach (Grid accountButtonGrid in buttonGridCollection)
+                {
+                    Button accountButton = accountButtonGrid.Children.OfType<Button>().FirstOrDefault();
 
-                accountButton.Opacity = 1;
+                    accountButton.Style = (Style)Resources["SAMButtonStyle"];
+                    accountButton.Click -= new RoutedEventHandler(AccountButtonExport_Click);
+                    accountButton.Click -= new RoutedEventHandler(AccountButtonDelete_Click);
+                    accountButton.Click += new RoutedEventHandler(AccountButton_Click);
+                    accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
+                    accountButton.PreviewMouseLeftButtonUp += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
+                    accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+
+                    accountButton.Opacity = 1;
+                }
             }
 
             deleting = false;
             exporting = false;
+        }
+
+        private void AccountsDataGrid_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (AccountsDataGrid.SelectedItem != null && deleting == false)
+            {
+                Account account = AccountsDataGrid.SelectedItem as Account;
+                int index = encryptedAccounts.FindIndex(a => a.Name == account.Name);
+                Login(index, 0);
+            }
+        }
+
+        private void AccountsDataGrid_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if (deleting == true)
+            {
+                ContextMenu contextMenu = new ContextMenu();
+
+                MenuItem deleteSelectedMenuItem = new MenuItem();
+                deleteSelectedMenuItem.Header = "Delete Selected";
+                deleteSelectedMenuItem.Click += delegate { DeleteSelectedAccounts(); };
+
+                MenuItem cancelMenuItem = new MenuItem();
+                cancelMenuItem.Header = "Cancel";
+                cancelMenuItem.Click += delegate { ResetFromExportOrDelete(); };
+
+                contextMenu.Items.Add(deleteSelectedMenuItem);
+                contextMenu.Items.Add(cancelMenuItem);
+
+                AccountsDataGrid.ContextMenu = contextMenu;
+            }
+            else if (AccountsDataGrid.SelectedItem != null)
+            {
+                Account account = AccountsDataGrid.SelectedItem as Account;
+                int index = encryptedAccounts.FindIndex(a => a.Name == account.Name);
+                ContextMenu contextMenu = GenerateAccountContextMenu(account, index);
+                AccountsDataGrid.ContextMenu = contextMenu;
+            }
+        }
+
+        private void AccountsDataGrid_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            DependencyObject DepObject = (DependencyObject)e.OriginalSource;
+
+            while ((DepObject != null) && !(DepObject is DataGridColumnHeader) && !(DepObject is DataGridRow))
+            {
+                DepObject = VisualTreeHelper.GetParent(DepObject);
+            }
+
+            if (DepObject == null || DepObject is DataGridColumnHeader)
+            {
+                AccountsDataGrid.ContextMenu = null;
+            }
         }
 
         #endregion

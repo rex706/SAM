@@ -543,8 +543,10 @@ namespace SAM
 
         public static bool AccountHasActiveTimeout(Account account)
         {
-            if (account.Timeout == null || account.Timeout == new DateTime() || account.Timeout.CompareTo(DateTime.Now) <= 0)
+            if (account.Timeout == null || account.Timeout == new DateTime() || account.Timeout.Value.CompareTo(DateTime.Now) <= 0)
             {
+                account.Timeout = null;
+                account.TimeoutTimeLeft = null;
                 return false;
             }
 

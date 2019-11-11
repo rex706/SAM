@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace SAM
 {
@@ -28,12 +30,15 @@ namespace SAM
         public const string SLEEP_TIME = "SleepTime";
         public const string CHECK_FOR_UPDATES = "CheckForUpdates";
         public const string CLOSE_ON_LOGIN = "CloseOnLogin";
+        public const string LIST_VIEW = "ListView";
 
         public const string LOGIN_RECENT_ACCOUNT = "LoginRecentAccount";
         public const string RECENT_ACCOUNT_INDEX = "RecentAccountIndex";
         public const string LOGIN_SELECTED_ACCOUNT = "LoginSelectedAccount";
         public const string SELECTED_ACCOUNT_INDEX = "SelectedAccountIndex";
 
+        public const string THEME = "Theme";
+        public const string ACCENT = "Accent";
         public const string BUTTON_SIZE = "ButtonSize";
         public const string BUTTON_COLOR = "ButtonColor";
         public const string BUTTON_FONT_SIZE = "ButtonFontSize";
@@ -41,6 +46,7 @@ namespace SAM
         public const string BUTTON_BANNER_COLOR = "ButtonBannerColor";
         public const string BUTTON_BANNER_FONT_SIZE = "ButtonBannerFontSize";
         public const string BUTTON_BANNER_FONT_COLOR = "ButtonBannerFontColor";
+        public const string HIDE_BAN_ICONS = "HideBanIcons";
 
         public const string STEAM_PATH = "Path";
         public const string STEAM_API_KEY = "ApiKey";
@@ -62,6 +68,11 @@ namespace SAM
 
         public const string WINDOW_TOP = "WindowTop";
         public const string WINDOW_LEFT = "WindowLeft";
+        public const string LIST_VIEW_HEIGHT = "ListViewHeight";
+        public const string LIST_VIEW_WIDTH = "ListViewWidth";
+
+        public const string LIGHT_THEME = "BaseLight";
+        public const string DARK_THEME = "BaseDark";
 
         public Dictionary<string, string> KeyValuePairs = new Dictionary<string, string>()
         {
@@ -76,12 +87,15 @@ namespace SAM
             { SLEEP_TIME, SECTION_GENERAL },
             { CHECK_FOR_UPDATES, SECTION_GENERAL },
             { CLOSE_ON_LOGIN, SECTION_GENERAL },
+            { LIST_VIEW, SECTION_GENERAL },
 
             { LOGIN_RECENT_ACCOUNT, SECTION_AUTOLOG },
             { RECENT_ACCOUNT_INDEX, SECTION_AUTOLOG },
             { LOGIN_SELECTED_ACCOUNT, SECTION_AUTOLOG },
             { SELECTED_ACCOUNT_INDEX, SECTION_AUTOLOG },
 
+            { THEME, SECTION_CUSTOMIZE },
+            { ACCENT, SECTION_CUSTOMIZE },
             { BUTTON_SIZE, SECTION_CUSTOMIZE },
             { BUTTON_COLOR, SECTION_CUSTOMIZE },
             { BUTTON_FONT_SIZE, SECTION_CUSTOMIZE },
@@ -89,6 +103,7 @@ namespace SAM
             { BUTTON_BANNER_COLOR, SECTION_CUSTOMIZE },
             { BUTTON_BANNER_FONT_SIZE, SECTION_CUSTOMIZE },
             { BUTTON_BANNER_FONT_COLOR, SECTION_CUSTOMIZE },
+            { HIDE_BAN_ICONS, SECTION_CUSTOMIZE },
 
             { STEAM_PATH, SECTION_STEAM },
             { STEAM_API_KEY, SECTION_STEAM },
@@ -107,6 +122,9 @@ namespace SAM
             { TEN_FOOT_PARAMETER, SECTION_PARAMETERS },
             { CUSTOM_PARAMETERS, SECTION_PARAMETERS },
             { CUSTOM_PARAMETERS_VALUE, SECTION_PARAMETERS },
+
+            { LIST_VIEW_HEIGHT, SECTION_LOCATION },
+            { LIST_VIEW_WIDTH, SECTION_LOCATION }
         };
 
         public void HandleDeprecatedSettings()

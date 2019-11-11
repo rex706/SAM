@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace SAM
 {
@@ -17,6 +18,7 @@ namespace SAM
         public int SleepTime { get { return (int)KeyValuePairs[SAMSettings.SLEEP_TIME]; } set { KeyValuePairs[SAMSettings.SLEEP_TIME] = value; } }
         public bool CheckForUpdates { get { return (bool)KeyValuePairs[SAMSettings.CHECK_FOR_UPDATES]; } set { KeyValuePairs[SAMSettings.CHECK_FOR_UPDATES] = value;  } }
         public bool CloseOnLogin { get { return (bool)KeyValuePairs[SAMSettings.CLOSE_ON_LOGIN]; } set { KeyValuePairs[SAMSettings.CHECK_FOR_UPDATES] = value; } }
+        public bool ListView { get { return (bool)KeyValuePairs[SAMSettings.LIST_VIEW]; } set { KeyValuePairs[SAMSettings.LIST_VIEW] = value; } }
 
         #endregion
 
@@ -31,6 +33,8 @@ namespace SAM
 
         #region Customize
 
+        public string Theme { get { return (string)KeyValuePairs[SAMSettings.THEME]; } set { KeyValuePairs[SAMSettings.THEME] = value; } }
+        public string Accent { get { return (string)KeyValuePairs[SAMSettings.ACCENT]; } set { KeyValuePairs[SAMSettings.ACCENT] = value; } }
         public int ButtonSize { get { return (int)KeyValuePairs[SAMSettings.BUTTON_SIZE]; } set { KeyValuePairs[SAMSettings.BUTTON_SIZE] = value; } }
         public string ButtonColor { get { return (string)KeyValuePairs[SAMSettings.BUTTON_COLOR]; } set { KeyValuePairs[SAMSettings.BUTTON_COLOR] = value; } }
         public int ButtonFontSize { get { return (int)KeyValuePairs[SAMSettings.BUTTON_FONT_SIZE]; } set { KeyValuePairs[SAMSettings.BUTTON_FONT_SIZE] = value; } }
@@ -38,6 +42,7 @@ namespace SAM
         public string ButtonBannerColor { get { return (string)KeyValuePairs[SAMSettings.BUTTON_BANNER_COLOR]; } set { KeyValuePairs[SAMSettings.BUTTON_BANNER_COLOR] = value; } }
         public int BannerFontSize { get { return (int)KeyValuePairs[SAMSettings.BUTTON_BANNER_FONT_SIZE]; } set { KeyValuePairs[SAMSettings.BUTTON_BANNER_FONT_SIZE] = value; } }
         public string BannerFontColor { get { return (string)KeyValuePairs[SAMSettings.BUTTON_BANNER_FONT_COLOR]; } set { KeyValuePairs[SAMSettings.BUTTON_BANNER_FONT_COLOR] = value; } }
+        public bool HideBanIcons { get { return (bool)KeyValuePairs[SAMSettings.HIDE_BAN_ICONS]; } set { KeyValuePairs[SAMSettings.HIDE_BAN_ICONS] = value; } }
 
         #endregion
 
@@ -71,6 +76,8 @@ namespace SAM
 
         public double WindowTop { get; set; }
         public double WindowLeft { get; set; }
+        public double ListViewHeight { get { return Convert.ToDouble(KeyValuePairs[SAMSettings.LIST_VIEW_HEIGHT]); } set { KeyValuePairs[SAMSettings.LIST_VIEW_HEIGHT] = value; } }
+        public double ListViewWidth { get { return Convert.ToDouble(KeyValuePairs[SAMSettings.LIST_VIEW_WIDTH]); } set { KeyValuePairs[SAMSettings.LIST_VIEW_WIDTH] = value; } }
 
         #endregion
 
@@ -87,6 +94,7 @@ namespace SAM
             { SAMSettings.SLEEP_TIME, 2 },
             { SAMSettings.CHECK_FOR_UPDATES, true },
             { SAMSettings.CLOSE_ON_LOGIN, false },
+            { SAMSettings.LIST_VIEW, false },
 
             { SAMSettings.LOGIN_RECENT_ACCOUNT, false },
             { SAMSettings.RECENT_ACCOUNT_INDEX, -1 },
@@ -96,6 +104,8 @@ namespace SAM
             { SAMSettings.STEAM_PATH, string.Empty },
             { SAMSettings.STEAM_API_KEY, string.Empty },
 
+            { SAMSettings.THEME, "BaseDark" },
+            { SAMSettings.ACCENT, "Blue" },
             { SAMSettings.BUTTON_SIZE, 100 },
             { SAMSettings.BUTTON_COLOR, "#FFDDDDDD" },
             { SAMSettings.BUTTON_FONT_SIZE, 0 },
@@ -103,6 +113,7 @@ namespace SAM
             { SAMSettings.BUTTON_BANNER_COLOR, "#7F000000" },
             { SAMSettings.BUTTON_BANNER_FONT_SIZE, 0 },
             { SAMSettings.BUTTON_BANNER_FONT_COLOR, "#FFFFFF" },
+            { SAMSettings.HIDE_BAN_ICONS, false },
 
             { SAMSettings.CAFE_APP_LAUNCH_PARAMETER, false },
             { SAMSettings.CLEAR_BETA_PARAMETER, false },
@@ -118,6 +129,9 @@ namespace SAM
             { SAMSettings.TEN_FOOT_PARAMETER, false },
             { SAMSettings.CUSTOM_PARAMETERS, false },
             { SAMSettings.CUSTOM_PARAMETERS_VALUE, string.Empty },
+
+            { SAMSettings.LIST_VIEW_HEIGHT, 300 },
+            { SAMSettings.LIST_VIEW_WIDTH, 750 }
         };
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Media;
 
 namespace SAM
 {
@@ -9,6 +10,8 @@ namespace SAM
     {
         public TextDialog()
         {
+            SAMSettings settings = new SAMSettings();
+
             InitializeComponent();
         }
 

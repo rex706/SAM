@@ -43,9 +43,9 @@ namespace SAM
         private string SAMexe = @"\SAM.exe";
         public SettingsWindow()
         {
-            InitializeComponent();
-
             settings = new SAMSettings();
+
+            InitializeComponent();
 
             this.Loaded += new RoutedEventHandler(SettingsWindow_Loaded);
             this.Decrypt = false;
@@ -67,6 +67,7 @@ namespace SAM
                 HideAddButtonCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.HIDE_ADD_BUTTON, SAMSettings.SECTION_GENERAL));
                 CheckForUpdatesCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.CHECK_FOR_UPDATES, SAMSettings.SECTION_GENERAL));
                 CloseOnLoginCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.CLOSE_ON_LOGIN, SAMSettings.SECTION_GENERAL));
+                ListViewCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.LIST_VIEW, SAMSettings.SECTION_GENERAL));
 
                 // AutoLog
                 if (Convert.ToBoolean(settings.File.Read(SAMSettings.LOGIN_RECENT_ACCOUNT, SAMSettings.SECTION_AUTOLOG)) == true)
@@ -81,6 +82,8 @@ namespace SAM
                 }
 
                 // Customize
+                ThemeSelectBox.Text = settings.File.Read(SAMSettings.THEME, SAMSettings.SECTION_CUSTOMIZE);
+                AccentSelectBox.Text = settings.File.Read(SAMSettings.ACCENT, SAMSettings.SECTION_CUSTOMIZE);
                 buttonSizeSpinBox.Text = settings.File.Read(SAMSettings.BUTTON_SIZE, SAMSettings.SECTION_CUSTOMIZE);
                 ButtonColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.File.Read(SAMSettings.BUTTON_COLOR, SAMSettings.SECTION_CUSTOMIZE));
                 ButtonFontSizeSpinBox.Text = settings.File.Read(SAMSettings.BUTTON_FONT_SIZE, SAMSettings.SECTION_CUSTOMIZE);
@@ -88,6 +91,7 @@ namespace SAM
                 BannerColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.File.Read(SAMSettings.BUTTON_BANNER_COLOR, SAMSettings.SECTION_CUSTOMIZE));
                 BannerFontSizeSpinBox.Text = settings.File.Read(SAMSettings.BUTTON_BANNER_FONT_SIZE, SAMSettings.SECTION_CUSTOMIZE);
                 BannerFontColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.File.Read(SAMSettings.BUTTON_BANNER_FONT_COLOR, SAMSettings.SECTION_CUSTOMIZE));
+                HideBanIconsCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.HIDE_BAN_ICONS, SAMSettings.SECTION_CUSTOMIZE));
 
                 // Steam
                 SteamPathTextBox.Text = settings.File.Read(SAMSettings.STEAM_PATH, SAMSettings.SECTION_STEAM);
@@ -213,8 +217,11 @@ namespace SAM
             settings.File.Write(SAMSettings.HIDE_ADD_BUTTON, HideAddButtonCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
             settings.File.Write(SAMSettings.CHECK_FOR_UPDATES, CheckForUpdatesCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
             settings.File.Write(SAMSettings.CLOSE_ON_LOGIN, CloseOnLoginCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
+            settings.File.Write(SAMSettings.LIST_VIEW, ListViewCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
 
             // Customize
+            settings.File.Write(SAMSettings.THEME, ThemeSelectBox.Text, SAMSettings.SECTION_CUSTOMIZE);
+            settings.File.Write(SAMSettings.ACCENT, AccentSelectBox.Text, SAMSettings.SECTION_CUSTOMIZE);
             settings.File.Write(SAMSettings.BUTTON_SIZE, buttonSizeSpinBox.Text, SAMSettings.SECTION_CUSTOMIZE);
             settings.File.Write(SAMSettings.BUTTON_COLOR, new ColorConverter().ConvertToString(ButtonColorPicker.SelectedColor), SAMSettings.SECTION_CUSTOMIZE);
             settings.File.Write(SAMSettings.BUTTON_FONT_SIZE, ButtonFontSizeSpinBox.Text, SAMSettings.SECTION_CUSTOMIZE);
@@ -222,6 +229,7 @@ namespace SAM
             settings.File.Write(SAMSettings.BUTTON_BANNER_COLOR, new ColorConverter().ConvertToString(BannerColorPicker.SelectedColor), SAMSettings.SECTION_CUSTOMIZE);
             settings.File.Write(SAMSettings.BUTTON_BANNER_FONT_SIZE, BannerFontSizeSpinBox.Text, SAMSettings.SECTION_CUSTOMIZE);
             settings.File.Write(SAMSettings.BUTTON_BANNER_FONT_COLOR, new ColorConverter().ConvertToString(BannerFontColorPicker.SelectedColor), SAMSettings.SECTION_CUSTOMIZE);
+            settings.File.Write(SAMSettings.HIDE_BAN_ICONS, HideBanIconsCheckBox.IsChecked.ToString(), SAMSettings.SECTION_CUSTOMIZE);
 
             // AutoLog
             settings.File.Write(SAMSettings.LOGIN_RECENT_ACCOUNT, mostRecentCheckBox.IsChecked.ToString(), SAMSettings.SECTION_AUTOLOG);
@@ -378,6 +386,7 @@ namespace SAM
             sleepTimeSpinBox.Text = settings.Default.SleepTime.ToString();
             CheckForUpdatesCheckBox.IsChecked = settings.Default.CheckForUpdates;
             CloseOnLoginCheckBox.IsChecked = settings.Default.CloseOnLogin;
+            ListViewCheckBox.IsChecked = settings.Default.ListView;
 
             // Ignore password protect checkbox.
             //passwordProtectCheckBox.IsChecked = settings.Default.PasswordProtect;
@@ -388,6 +397,8 @@ namespace SAM
             SteamPathTextBox.Text = Utils.CheckSteamPath();
             ApiKeyTextBox.Text = settings.Default.ApiKey;
 
+            ThemeSelectBox.Text = settings.Default.Theme;
+            AccentSelectBox.Text = settings.Default.Accent;
             buttonSizeSpinBox.Text = settings.Default.ButtonSize.ToString();
             ButtonColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.Default.ButtonColor);
             ButtonFontSizeSpinBox.Text = settings.Default.ButtonFontSize.ToString();
@@ -395,6 +406,7 @@ namespace SAM
             BannerColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.Default.ButtonBannerColor);
             BannerFontSizeSpinBox.Text = settings.Default.BannerFontSize.ToString();
             BannerFontColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.Default.BannerFontColor);
+            HideBanIconsCheckBox.IsChecked = settings.Default.HideBanIcons;
 
             CafeAppLaunchCheckBox.IsChecked = settings.Default.CafeAppLaunch;
             ClearBetaCheckBox.IsChecked = settings.Default.ClearBeta;

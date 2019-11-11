@@ -8,9 +8,9 @@ namespace SAM
     /// </summary>
     public partial class SetTimeoutWindow : Window
     {
-        public DateTime timeout;
+        public DateTime? timeout;
 
-        public SetTimeoutWindow(DateTime timeout)
+        public SetTimeoutWindow(DateTime? timeout)
         {
             InitializeComponent();
             this.timeout = timeout;
@@ -19,19 +19,19 @@ namespace SAM
             {
                 var timeLeft = timeout - DateTime.Now;
 
-                int years = timeLeft.Days / 365;
-                int days = timeLeft.Days;
+                int years = timeLeft.Value.Days / 365;
+                int days = timeLeft.Value.Days;
 
                 if (years > 0)
                 {
-                    days = (timeLeft.Days / (years * 365));
+                    days = (timeLeft.Value.Days / (years * 365));
                 }
 
                 YearsSpinBox.Value = years;
                 DaysSpinBox.Value = days;
-                HoursSpinBox.Value = timeLeft.Hours;
-                MinutesSpinBox.Value = timeLeft.Minutes;
-                SecondsSpinBox.Value = timeLeft.Seconds;
+                HoursSpinBox.Value = timeLeft.Value.Hours;
+                MinutesSpinBox.Value = timeLeft.Value.Minutes;
+                SecondsSpinBox.Value = timeLeft.Value.Seconds;
             }
         }
 
