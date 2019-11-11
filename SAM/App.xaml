@@ -23,6 +23,7 @@
             <Color x:Key="ControlForeground">WhiteSmoke</Color>
             <SolidColorBrush x:Key="xctkForegoundBrush" Color="Black"/>
             <SolidColorBrush x:Key="xctkColorPickerBackground" Color="White"/>
+            <SolidColorBrush x:Key="AccountGridActionHighlightColor" Color="Red"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

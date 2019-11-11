@@ -108,8 +108,8 @@
                                     <Condition Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource Mode=Self}}" Value="True"/>
                                     <Condition Binding="{Binding ElementName=FileMenuItem, Path=IsEnabled}" Value="False" />
                                 </MultiDataTrigger.Conditions>
-                                <Setter Property="Background" Value="#FF0000" />
-                                <Setter Property="BorderBrush" Value="#FF0000" />
+                                <Setter Property="Background" Value="{DynamicResource AccountGridActionHighlightColor}" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource AccountGridActionHighlightColor}" />
                             </MultiDataTrigger>
                         </Style.Triggers>
                     </Style>

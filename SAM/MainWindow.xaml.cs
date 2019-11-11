@@ -976,6 +976,32 @@ namespace SAM
             return accountContext;
         }
 
+        private ContextMenu GenerateAltActionContextMenu(string altActionType)
+        {
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem actionMenuItem = new MenuItem();
+
+            if (altActionType == AltActionType.DELETING)
+            {
+                actionMenuItem.Header = "Delete Selected";
+                actionMenuItem.Click += delegate { DeleteSelectedAccounts(); };
+            }
+            else if (altActionType == AltActionType.EXPORTING)
+            {
+                actionMenuItem.Header = "Export Selected";
+                actionMenuItem.Click += delegate { ExportSelectedAccounts(); };
+            }
+
+            MenuItem cancelMenuItem = new MenuItem();
+            cancelMenuItem.Header = "Cancel";
+            cancelMenuItem.Click += delegate { ResetFromExportOrDelete(); };
+
+            contextMenu.Items.Add(actionMenuItem);
+            contextMenu.Items.Add(cancelMenuItem);
+
+            return contextMenu;
+        }
+
         private void AddAccount()
         {
             // User entered info
@@ -1832,8 +1858,14 @@ namespace SAM
 
         private void ContextMenu_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            if (exporting == true || deleting == true)
+            if (exporting == true)
             {
+                GenerateAltActionContextMenu(AltActionType.EXPORTING).IsOpen = true;
+                e.Handled = true;
+            }
+            else if (deleting == true)
+            {
+                GenerateAltActionContextMenu(AltActionType.DELETING).IsOpen = true;
                 e.Handled = true;
             }
         }
@@ -2003,41 +2035,63 @@ namespace SAM
         private void ExportSelectedMenuItem_Click(object sender, RoutedEventArgs e)
         {
             exporting = true;
-
-            exportAccounts = new Dictionary<int, Account>();
-
-            AddButton.Visibility = Visibility.Hidden;
-            ExportButton.Visibility = Visibility.Visible;
-            CancelExportButton.Visibility = Visibility.Visible;
             FileMenuItem.IsEnabled = false;
             EditMenuItem.IsEnabled = false;
 
-            IEnumerable<Grid> buttonGridCollection = buttonGrid.Children.OfType<Grid>();
+            exportAccounts = new Dictionary<int, Account>();
 
-            foreach (Grid accountButtonGrid in buttonGridCollection)
+            if (settings.User.ListView == true)
             {
-                Button accountButton = accountButtonGrid.Children.OfType<Button>().FirstOrDefault();
+                AccountsDataGrid.SelectionMode = DataGridSelectionMode.Extended;
+                Application.Current.Resources["AccountGridActionHighlightColor"] = Brushes.Green;
+            }
+            else
+            {
+                AddButton.Visibility = Visibility.Hidden;
+                ExportButton.Visibility = Visibility.Visible;
+                CancelExportButton.Visibility = Visibility.Visible;
 
-                accountButton.Style = (Style)Resources["ExportButtonStyle"];
-                accountButton.Click -= new RoutedEventHandler(AccountButton_Click);
-                accountButton.Click += new RoutedEventHandler(AccountButtonExport_Click);
-                accountButton.PreviewMouseLeftButtonDown -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
-                accountButton.PreviewMouseLeftButtonUp -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
-                accountButton.MouseLeave -= new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+                IEnumerable<Grid> buttonGridCollection = buttonGrid.Children.OfType<Grid>();
+
+                foreach (Grid accountButtonGrid in buttonGridCollection)
+                {
+                    Button accountButton = accountButtonGrid.Children.OfType<Button>().FirstOrDefault();
+
+                    accountButton.Style = (Style)Resources["ExportButtonStyle"];
+                    accountButton.Click -= new RoutedEventHandler(AccountButton_Click);
+                    accountButton.Click += new RoutedEventHandler(AccountButtonExport_Click);
+                    accountButton.PreviewMouseLeftButtonDown -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
+                    accountButton.PreviewMouseLeftButtonUp -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
+                    accountButton.MouseLeave -= new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+                }
             }
         }
 
         private void ExportButton_Click(object sender, RoutedEventArgs e)
         {
+            ExportSelectedAccounts();
+        }
+
+        private void ExportSelectedAccounts()
+        {
+            if (settings.User.ListView == true)
+            {
+                for (int i = 0; i < AccountsDataGrid.SelectedItems.Count; i++)
+                {
+                    exportAccounts.Add(i, AccountsDataGrid.SelectedItems[i] as Account);
+                }
+            }
+
             if (exportAccounts.Count > 0)
             {
                 Utils.ExportSelectedAccounts(exportAccounts.Values.ToList());
-                ResetFromExportOrDelete();
             }
             else
             {
                 MessageBox.Show("No accounts selected to export!");
             }
+
+            ResetFromExportOrDelete();
         }
 
         private void CancelExportButton_Click(object sender, RoutedEventArgs e)
@@ -2081,6 +2135,7 @@ namespace SAM
             if (settings.User.ListView == true)
             {
                 AccountsDataGrid.SelectionMode = DataGridSelectionMode.Extended;
+                Application.Current.Resources["AccountGridActionHighlightColor"] = Brushes.Red;
             }
             else
             {
@@ -2157,7 +2212,6 @@ namespace SAM
             else
             {
                 MessageBox.Show("No accounts selected!", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
             }
 
             ResetFromExportOrDelete();
@@ -2217,29 +2271,19 @@ namespace SAM
 
         private void AccountsDataGrid_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            if (deleting == true)
+            if (exporting == true)
             {
-                ContextMenu contextMenu = new ContextMenu();
-
-                MenuItem deleteSelectedMenuItem = new MenuItem();
-                deleteSelectedMenuItem.Header = "Delete Selected";
-                deleteSelectedMenuItem.Click += delegate { DeleteSelectedAccounts(); };
-
-                MenuItem cancelMenuItem = new MenuItem();
-                cancelMenuItem.Header = "Cancel";
-                cancelMenuItem.Click += delegate { ResetFromExportOrDelete(); };
-
-                contextMenu.Items.Add(deleteSelectedMenuItem);
-                contextMenu.Items.Add(cancelMenuItem);
-
-                AccountsDataGrid.ContextMenu = contextMenu;
+                AccountsDataGrid.ContextMenu = GenerateAltActionContextMenu(AltActionType.EXPORTING);
+            }
+            else if (deleting == true)
+            {
+                AccountsDataGrid.ContextMenu = GenerateAltActionContextMenu(AltActionType.DELETING);
             }
             else if (AccountsDataGrid.SelectedItem != null)
             {
                 Account account = AccountsDataGrid.SelectedItem as Account;
                 int index = encryptedAccounts.FindIndex(a => a.Name == account.Name);
-                ContextMenu contextMenu = GenerateAccountContextMenu(account, index);
-                AccountsDataGrid.ContextMenu = contextMenu;
+                AccountsDataGrid.ContextMenu = GenerateAccountContextMenu(account, index);
             }
         }
 
