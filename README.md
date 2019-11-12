@@ -3,13 +3,21 @@
 *Easily log in and switch between Steam accounts.*
 
 
-![alt tag](http://i.imgur.com/3qyK3jU.png)
+![alt tag](https://i.imgur.com/v4eJzzH.png) ![alt tag](https://i.imgur.com/laBORcJ.png)
 
-**Latest Version:** 1.3.1.4
+**Latest Version:** 1.4.0.0
 
 [**DOWNLOAD**](https://github.com/rex706/SAM/releases)
 
 **Features**
+
+*NEW*
+* List view.
+* Theme and Accent customization.
+* Track account bans.
+* Quick timeout selections.
+* Close on long toggle setting.
+
 
 * 1-click Steam logins for multiple accounts with 2FA support.
 	- Your 'Shared Secret' can be found in your decrypted .maFile generated from [SteamDesktopAuthenticator](https://github.com/Jessecar96/SteamDesktopAuthenticator)
@@ -26,4 +34,4 @@
 * Set/Clear account timeouts.
 * Delete userdata folder after every login toggle.
 * Set custom sleep time for waiting actions.
-* Toggle certain Steam client launch parameters.
+* Toggle Steam client launch parameters.
