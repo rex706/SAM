@@ -112,9 +112,8 @@ namespace SAM
             }
             // Else load settings from existing file.
             else
-            {
-                LoadSettings();
-            }
+            
+            LoadSettings();
 
             this.Loaded += new RoutedEventHandler(MainWindow_Loaded);
             this.BackgroundBorder.PreviewMouseLeftButtonDown += (s, e) => { DragMove(); };
