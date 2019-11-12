@@ -386,7 +386,7 @@ namespace SAM
             if (settings.User.Theme == SAMSettings.DARK_THEME)
             {
                 Application.Current.Resources["xctkForegoundBrush"] = Brushes.White;
-                Application.Current.Resources["xctkColorPickerBackground"] = Brushes.Black;
+                Application.Current.Resources["xctkColorPickerBackground"] = new BrushConverter().ConvertFromString("#303030");
                 Application.Current.Resources["GrayNormalBrush"] = Brushes.White;
             }
             else
