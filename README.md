@@ -9,7 +9,6 @@
 
 [**DOWNLOAD**](https://github.com/rex706/SAM/releases)
 
-**Features**
 
 *NEW*
 * List view.
@@ -17,8 +16,8 @@
 * Track account bans.
 * Quick timeout selections.
 * Close on long toggle setting.
-
-
+-----------------------------------------
+**Core Features**
 * 1-click Steam logins for multiple accounts with 2FA support.
 	- Your 'Shared Secret' can be found in your decrypted .maFile generated from [SteamDesktopAuthenticator](https://github.com/Jessecar96/SteamDesktopAuthenticator)
 * Auto login a selected or the most recently used account.
