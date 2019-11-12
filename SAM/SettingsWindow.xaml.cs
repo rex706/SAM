@@ -1,4 +1,5 @@
 ﻿using IWshRuntimeLibrary;
+using MahApps.Metro.Controls;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -12,7 +13,7 @@ namespace SAM
     /// <summary>
     /// Interaction logic for settings window. 
     /// </summary>
-    public partial class SettingsWindow : Window
+    public partial class SettingsWindow : MetroWindow
     {
         public int AutoAccIdx { get; set; }
 

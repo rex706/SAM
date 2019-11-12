@@ -1,12 +1,12 @@
-﻿using System.Windows;
-using System.Windows.Media;
+﻿using MahApps.Metro.Controls;
+using System.Windows;
 
 namespace SAM
 {
     /// <summary>
     /// Interaction logic for TextDialog.xaml
     /// </summary>
-    public partial class TextDialog : Window
+    public partial class TextDialog : MetroWindow
     {
         public TextDialog()
         {

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using MahApps.Metro.Controls;
+using System.Windows;
 using System.Windows.Input;
 
 namespace SAM
@@ -6,7 +7,7 @@ namespace SAM
     /// <summary>
     /// Interaction logic for Window2.xaml
     /// </summary>
-    public partial class PasswordWindow : Window
+    public partial class PasswordWindow : MetroWindow
     {
         public string PasswordText
         {

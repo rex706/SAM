@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using MahApps.Metro.Controls;
+using System.Collections.Generic;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,7 +9,7 @@ namespace SAM
     /// <summary>
     /// Interaction logic for ExposedInfoWindow.xaml
     /// </summary>
-    public partial class ExposedInfoWindow : Window
+    public partial class ExposedInfoWindow : MetroWindow
     {
         private List<Account> decryptedAccounts;
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MahApps.Metro.Controls;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -8,7 +9,7 @@ namespace SAM
     /// <summary>
     /// Interaction logic for Window1.xaml
     /// </summary>
-    public partial class ImportDelimited : Window
+    public partial class ImportDelimited : MetroWindow
     {
         private string eKey;
 

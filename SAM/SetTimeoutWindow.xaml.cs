@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MahApps.Metro.Controls;
+using System;
 using System.Windows;
 
 namespace SAM
@@ -6,7 +7,7 @@ namespace SAM
     /// <summary>
     /// Interaction logic for SetTimeoutWindow.xaml
     /// </summary>
-    public partial class SetTimeoutWindow : Window
+    public partial class SetTimeoutWindow : MetroWindow
     {
         public DateTime? timeout;
 

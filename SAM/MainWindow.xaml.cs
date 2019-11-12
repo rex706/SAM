@@ -1662,7 +1662,7 @@ namespace SAM
             }
             else
             {
-                MessageBox.Show("Error setting account timeout.");
+                //MessageBox.Show("Error setting account timeout.");
                 return;
             }
 
