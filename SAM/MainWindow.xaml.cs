@@ -110,8 +110,6 @@ namespace SAM
             {
                 GenerateSettings();
             }
-            // Else load settings from existing file.
-            else
             
             LoadSettings();
 
