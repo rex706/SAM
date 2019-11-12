@@ -13,9 +13,9 @@
 *NEW*
 * List view.
 * Theme and Accent customization.
-* Track account bans.
+* Track account bans with Steam API key.
 * Quick timeout selections.
-* Close on long toggle setting.
+* Close on login toggle setting.
 -----------------------------------------
 **Core Features**
 * 1-click Steam logins for multiple accounts with 2FA support.
