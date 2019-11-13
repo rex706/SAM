@@ -356,11 +356,16 @@ namespace SAM
                 }
             }
 
-            // Load and validate saved window loaction.
+            //Load and validate saved window loaction.
             if (settings.File.KeyExists(SAMSettings.WINDOW_LEFT, SAMSettings.SECTION_LOCATION) && settings.File.KeyExists(SAMSettings.WINDOW_TOP, SAMSettings.SECTION_LOCATION))
             {
-                this.Left = Double.Parse(settings.File.Read(SAMSettings.WINDOW_LEFT, SAMSettings.SECTION_LOCATION));
-                this.Top = Double.Parse(settings.File.Read(SAMSettings.WINDOW_TOP, SAMSettings.SECTION_LOCATION));
+                Left = Double.Parse(settings.File.Read(SAMSettings.WINDOW_LEFT, SAMSettings.SECTION_LOCATION));
+                Top = Double.Parse(settings.File.Read(SAMSettings.WINDOW_TOP, SAMSettings.SECTION_LOCATION));
+                SetWindowSettingsIntoScreenArea();
+            }
+            else
+            {
+                SetWindowToCenter();
             }
 
             if (settings.User.ListView == true)
@@ -393,7 +398,6 @@ namespace SAM
                 Application.Current.Resources["GrayNormalBrush"] = Brushes.Black;
             }
 
-            SetWindowSettingsIntoScreenArea();
             Utils.CheckSteamPath();
             settings.File.Write("Version", AssemblyVer, "System");
             isLoadingSettings = false;
@@ -2007,24 +2011,22 @@ namespace SAM
 
         private void SetWindowSettingsIntoScreenArea()
         {
-            // Get the screen to display the window.
-            var screen = System.Windows.Forms.Screen.FromPoint(new System.Drawing.Point((int)Left, (int)Top));
+            foreach (System.Windows.Forms.Screen scrn in System.Windows.Forms.Screen.AllScreens)
+            {
+                if (scrn.Bounds.Contains((int)Left, (int)Top))
+                {
+                    return;
+                }
+            }
+            SetWindowToCenter();
+        }
 
-            // Is bottom position out of screen for more than 1/3 Height of Window?
-            if (Top + (Height / 3) > screen.WorkingArea.Height)
-                Top = screen.WorkingArea.Height - Height;
-
-            // Is right position out of screen for more than 1/2 Width of Window?
-            if (Left + (Width / 2) > screen.WorkingArea.Width)
-                Left = screen.WorkingArea.Width - Width;
-
-            // Is top position out of screen?
-            if (Top < screen.WorkingArea.Top)
-                Top = screen.WorkingArea.Top;
-
-            // Is left position out of screen?
-            if (Left < screen.WorkingArea.Left)
-                Left = screen.WorkingArea.Left;
+        private void SetWindowToCenter()
+        {
+            double screenWidth = SystemParameters.PrimaryScreenWidth;
+            double screenHeight = SystemParameters.PrimaryScreenHeight;
+            Left = (screenWidth / 2) - (Width / 2);
+            Top = (screenHeight / 2) - (Height / 2);
         }
 
         #region Account Button State Handling

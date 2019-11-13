@@ -6,7 +6,7 @@
         xmlns:tb="http://www.hardcodet.net/taskbar" 
         xmlns:local="clr-namespace:SAM"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-        mc:Ignorable="d" Height="180" Width="138" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" Title="SAM" StateChanged="Window_StateChanged" TextOptions.TextFormattingMode="Display" LocationChanged="Window_LocationChanged" SizeChanged="MetroWindow_SizeChanged">
+        mc:Ignorable="d" Height="180" Width="138" WindowStartupLocation="Manual" ResizeMode="CanMinimize" Title="SAM" StateChanged="Window_StateChanged" TextOptions.TextFormattingMode="Display" LocationChanged="Window_LocationChanged" SizeChanged="MetroWindow_SizeChanged">
     <Controls:MetroWindow.IconTemplate>
         <DataTemplate>
             <Grid Width="20" Height="20" Background="Transparent" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality">
