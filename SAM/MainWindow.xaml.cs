@@ -1840,14 +1840,9 @@ namespace SAM
         
         private void ShowWindowButton_Click(object sender, RoutedEventArgs e)
         {
+            Show();
             WindowState = WindowState.Normal;
-            Visibility = Visibility.Visible;
             ShowInTaskbar = true;
-
-            Focusable = true;
-            IsEnabled = true;
-
-            Focus();
         }
 
         private void CopyPasswordToClipboard(int index)
