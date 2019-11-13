@@ -1874,7 +1874,7 @@ namespace SAM
                 case WindowState.Maximized:
                     break;
                 case WindowState.Minimized:
-                    if (settings.File.KeyExists(SAMSettings.MINIMIZE_TO_TRAY, SAMSettings.SECTION_GENERAL) && settings.File.Read(SAMSettings.MINIMIZE_TO_TRAY, SAMSettings.SECTION_GENERAL).ToLower().Equals(true.ToString()))
+                    if (settings.User.MinimizeToTray == true)
                     {
                         Visibility = Visibility.Hidden;
                         ShowInTaskbar = false;
