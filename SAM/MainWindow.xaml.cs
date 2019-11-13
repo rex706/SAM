@@ -377,6 +377,11 @@ namespace SAM
 
                 ResizeMode = ResizeMode.CanResize;
 
+                foreach (DataGridColumn column in AccountsDataGrid.Columns)
+                {
+                    column.DisplayIndex = (int)settings.User.KeyValuePairs[settings.ListViewColumns[column.Header.ToString()]];
+                }
+
                 AccountsDataGrid.ItemsSource = encryptedAccounts;
                 AccountsDataGrid.Visibility = Visibility.Visible;
             }
@@ -1842,7 +1847,6 @@ namespace SAM
         {
             Show();
             WindowState = WindowState.Normal;
-            ShowInTaskbar = true;
         }
 
         private void CopyPasswordToClipboard(int index)
@@ -2297,5 +2301,13 @@ namespace SAM
         }
 
         #endregion
+
+        private void AccountsDataGrid_ColumnReordered(object sender, DataGridColumnEventArgs e)
+        {
+            foreach (DataGridColumn column in AccountsDataGrid.Columns)
+            {
+                settings.File.Write(settings.ListViewColumns[column.Header.ToString()], column.DisplayIndex.ToString(), SAMSettings.SECTION_COLUMNS);
+            }
+        }
     }
 }

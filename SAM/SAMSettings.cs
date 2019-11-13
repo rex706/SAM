@@ -14,6 +14,7 @@ namespace SAM
         public const string SECTION_STEAM = "Steam";
         public const string SECTION_PARAMETERS = "Parameters";
         public const string SECTION_LOCATION = "Location";
+        public const string SECTION_COLUMNS = "Columns";
 
         public IniFile File = new IniFile(FILE_NAME);
         public UserSettings User = new UserSettings();
@@ -74,6 +75,14 @@ namespace SAM
         public const string LIGHT_THEME = "BaseLight";
         public const string DARK_THEME = "BaseDark";
 
+        public const string NAME_COLUMN_INDEX = "NameColumnIndex";
+        public const string DESCRIPTION_COLUMN_INDEX = "DescriptionColumnIndex";
+        public const string TIMEOUT_COLUMN_INDEX = "TimeoutColumnIndex";
+        public const string VAC_BANS_COLUMN_INDEX = "VacBansColumnIndex";
+        public const string GAME_BANS_COLUMN_INDEX = "GameBansColumnIndex";
+        public const string ECO_BAN_COLUMN_INDEX = "EcoBanColumnIndex";
+        public const string LAST_BAN_COLUMN_INDEX = "LastBanColumnIndex";
+
         public Dictionary<string, string> KeyValuePairs = new Dictionary<string, string>()
         {
             { CLEAR_USER_DATA, SECTION_GENERAL },
@@ -124,7 +133,26 @@ namespace SAM
             { CUSTOM_PARAMETERS_VALUE, SECTION_PARAMETERS },
 
             { LIST_VIEW_HEIGHT, SECTION_LOCATION },
-            { LIST_VIEW_WIDTH, SECTION_LOCATION }
+            { LIST_VIEW_WIDTH, SECTION_LOCATION },
+
+            { NAME_COLUMN_INDEX, SECTION_COLUMNS },
+            { DESCRIPTION_COLUMN_INDEX, SECTION_COLUMNS },
+            { TIMEOUT_COLUMN_INDEX, SECTION_COLUMNS },
+            { VAC_BANS_COLUMN_INDEX, SECTION_COLUMNS },
+            { GAME_BANS_COLUMN_INDEX, SECTION_COLUMNS },
+            { ECO_BAN_COLUMN_INDEX, SECTION_COLUMNS },
+            { LAST_BAN_COLUMN_INDEX, SECTION_COLUMNS }
+        };
+
+        public Dictionary<string, string> ListViewColumns = new Dictionary<string, string>
+        {
+            { "Name", NAME_COLUMN_INDEX },
+            { "Description", DESCRIPTION_COLUMN_INDEX },
+            { "Timeout", TIMEOUT_COLUMN_INDEX },
+            { "VAC Bans", VAC_BANS_COLUMN_INDEX },
+            { "Game Bans", GAME_BANS_COLUMN_INDEX},
+            { "Economy Ban", ECO_BAN_COLUMN_INDEX },
+            { "Last Ban (Days)", LAST_BAN_COLUMN_INDEX }
         };
 
         public void HandleDeprecatedSettings()

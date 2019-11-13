@@ -81,6 +81,18 @@ namespace SAM
 
         #endregion
 
+        #region Columns
+
+        public int NameColumnIndex { get { return (int)KeyValuePairs[SAMSettings.NAME_COLUMN_INDEX]; } set { KeyValuePairs[SAMSettings.NAME_COLUMN_INDEX] = value; } }
+        public int DescriptionColumnIndex { get { return (int)KeyValuePairs[SAMSettings.DESCRIPTION_COLUMN_INDEX]; } set { KeyValuePairs[SAMSettings.DESCRIPTION_COLUMN_INDEX] = value; } }
+        public int TimeoutColumnIndex { get { return (int)KeyValuePairs[SAMSettings.TIMEOUT_COLUMN_INDEX]; } set { KeyValuePairs[SAMSettings.TIMEOUT_COLUMN_INDEX] = value; } }
+        public int VacBansColumnIndex { get { return (int)KeyValuePairs[SAMSettings.VAC_BANS_COLUMN_INDEX]; } set { KeyValuePairs[SAMSettings.VAC_BANS_COLUMN_INDEX] = value; } }
+        public int GameBanColumnIndex { get { return (int)KeyValuePairs[SAMSettings.GAME_BANS_COLUMN_INDEX]; } set { KeyValuePairs[SAMSettings.GAME_BANS_COLUMN_INDEX] = value; } }
+        public int EconomyBanColumnIndex { get { return (int)KeyValuePairs[SAMSettings.ECO_BAN_COLUMN_INDEX]; } set { KeyValuePairs[SAMSettings.ECO_BAN_COLUMN_INDEX] = value; } }
+        public int LastBanColumnIndex { get { return (int)KeyValuePairs[SAMSettings.LAST_BAN_COLUMN_INDEX]; } set { KeyValuePairs[SAMSettings.LAST_BAN_COLUMN_INDEX] = value; } }
+
+        #endregion
+
         public Dictionary<string, object> KeyValuePairs = new Dictionary<string, object>()
         {
             { SAMSettings.CLEAR_USER_DATA, false },
@@ -131,7 +143,15 @@ namespace SAM
             { SAMSettings.CUSTOM_PARAMETERS_VALUE, string.Empty },
 
             { SAMSettings.LIST_VIEW_HEIGHT, 300 },
-            { SAMSettings.LIST_VIEW_WIDTH, 750 }
+            { SAMSettings.LIST_VIEW_WIDTH, 750 },
+
+            { SAMSettings.NAME_COLUMN_INDEX, 0},
+            { SAMSettings.DESCRIPTION_COLUMN_INDEX, 1 },
+            { SAMSettings.TIMEOUT_COLUMN_INDEX, 2 },
+            { SAMSettings.VAC_BANS_COLUMN_INDEX, 3 },
+            { SAMSettings.GAME_BANS_COLUMN_INDEX, 4 },
+            { SAMSettings.ECO_BAN_COLUMN_INDEX, 5 },
+            { SAMSettings.LAST_BAN_COLUMN_INDEX, 6 }
         };
     }
 }

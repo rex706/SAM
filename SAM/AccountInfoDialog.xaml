@@ -15,7 +15,7 @@
             </Grid>
         </DataTemplate>
     </Controls:MetroWindow.IconTemplate>
-    <StackPanel Margin="5,5,5,5">
+    <StackPanel Margin="5">
         <Label Name="TitleTextBox" Content="Username *" ToolTip="What you use to login to Steam. Could be an email address."/>
         <TextBox Name="UsernameBox" Padding="3,3,3,3" LostFocus="UsernameBox_LostFocus"  />
         <Label Name="AliasTitleBox" Content="Alias" ToolTip="Optional: Display a custom alias instead of username. Leave blank otherwise." />
@@ -27,7 +27,7 @@
         <Label x:Name="TitleTextBox3" Content="Profile URL" ToolTip="Enter steam profile url to get user avatar without an API key"/>
         <TextBox Name="UrlBox" Padding="3,3,3,3" />
         <Label x:Name="TitleTextBox4" Content="Description" ToolTip="Enter a description for this entry. Will display as a tooltip." />
-        <TextBox Name="DescriptionBox" Padding="3,3,3,3" Height="63" AcceptsReturn="True"/>
+        <TextBox Name="DescriptionBox" Padding="3,3,3,3" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Height="63"/>
         <Grid Margin="0,10,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>

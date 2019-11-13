@@ -115,7 +115,7 @@
                     </Style>
                 </Grid.Resources>
                 <Border x:Name="BackgroundBorder" Background="Transparent" Margin="0,20,0,0" Padding="0,20,0,0"/>
-                <DataGrid x:Name="AccountsDataGrid" Margin="0,20,0,0" AutoGenerateColumns="False" Visibility="Collapsed" IsReadOnly="True" MouseDoubleClick="AccountsDataGrid_MouseDoubleClick" ContextMenuOpening="AccountsDataGrid_ContextMenuOpening" GridLinesVisibility="Horizontal" PreviewMouseRightButtonDown="AccountsDataGrid_PreviewMouseRightButtonDown" SelectionMode="Single">
+                <DataGrid x:Name="AccountsDataGrid" Margin="0,20,0,0" AutoGenerateColumns="False" Visibility="Collapsed" IsReadOnly="True" MouseDoubleClick="AccountsDataGrid_MouseDoubleClick" ContextMenuOpening="AccountsDataGrid_ContextMenuOpening" GridLinesVisibility="Horizontal" PreviewMouseRightButtonDown="AccountsDataGrid_PreviewMouseRightButtonDown" SelectionMode="Single" ColumnReordered="AccountsDataGrid_ColumnReordered">
                     <DataGrid.ColumnHeaderStyle>
                         <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MetroDataGridColumnHeader}">
                             <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -129,6 +129,14 @@
                                     <Binding Path="Name" />
                                 </MultiBinding>
                             </DataGridTextColumn.Binding>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Description" MaxWidth="250" Binding="{Binding Description}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style>
+                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    <Setter Property="TextBlock.TextAlignment" Value="Left" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
                         <DataGridTextColumn Header="Timeout" MinWidth="80" Binding="{Binding TimeoutTimeLeft}" />
                         <DataGridTextColumn Header="VAC Bans" Binding="{Binding NumberOfVACBans}" />
