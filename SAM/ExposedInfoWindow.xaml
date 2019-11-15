@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:SAM"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="Account Credentials" Height="400" Width="400" MinWidth="250" MinHeight="200" Topmost="True" WindowStartupLocation="CenterScreen" Icon="steam_alt-10.ico">
+        Title="Account Credentials" Height="400" Width="400" MinWidth="250" MinHeight="200" WindowStartupLocation="CenterScreen" Icon="steam_alt-10.ico">
     <Controls:MetroWindow.IconTemplate>
         <DataTemplate>
             <Grid Width="20" Height="20" Background="Transparent" RenderOptions.BitmapScalingMode="HighQuality">

@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:SAM"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="Account Timeout" Height="120" Width="520" Icon="steam_alt-10.ico" ResizeMode="NoResize" Topmost="True" WindowStartupLocation="CenterScreen">
+        Title="Account Timeout" Height="120" Width="520" Icon="steam_alt-10.ico" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <Controls:MetroWindow.IconTemplate>
         <DataTemplate>
             <Grid Width="20" Height="20" Background="Transparent" RenderOptions.BitmapScalingMode="HighQuality">

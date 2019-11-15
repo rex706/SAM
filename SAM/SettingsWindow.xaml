@@ -8,7 +8,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" x:Class="SAM.SettingsWindow"
         mc:Ignorable="d"
-        Title="Settings" Height="290" Width="350" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" Icon="steam_alt-10.ico">
+        Title="Settings" Height="290" Width="350" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Icon="steam_alt-10.ico">
     <Controls:MetroWindow.IconTemplate>
         <DataTemplate>
             <Grid Width="20" Height="20" Background="Transparent" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality">

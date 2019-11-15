@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:SAM"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="Import" Height="400" Width="400" Icon="steam_alt-10.ico" Topmost="True" WindowStartupLocation="CenterScreen" MinWidth="250" MinHeight="200">
+        Title="Import" Height="400" Width="400" Icon="steam_alt-10.ico" WindowStartupLocation="CenterScreen" MinWidth="250" MinHeight="200">
     <Controls:MetroWindow.IconTemplate>
         <DataTemplate>
             <Grid Width="20" Height="20" Background="Transparent" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality">
