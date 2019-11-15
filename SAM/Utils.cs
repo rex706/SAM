@@ -441,6 +441,34 @@ namespace SAM
             return userInfos;
         }
 
+        public static async Task<dynamic> GetSteamIdFromVanityUrl(string vanity)
+        {
+            var settingsFile = new IniFile(SAMSettings.FILE_NAME);
+            string apiKey = settingsFile.Read(SAMSettings.STEAM_API_KEY, SAMSettings.SECTION_STEAM);
+
+            dynamic userInfoJson = null;
+
+            if (apiKey != null && apiKey.Length > 0)
+            {
+                try
+                {
+                    Uri userUri = new Uri("http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + apiKey + "&vanityurl=" + vanity);
+
+                    using (WebClient client = new WebClient())
+                    {
+                        string userJsonString = await client.DownloadStringTaskAsync(userUri);
+                        userInfoJson = JValue.Parse(userJsonString);
+                    }
+                }
+                catch (Exception m)
+                {
+                    MessageBox.Show(m.Message);
+                }
+            }
+
+            return userInfoJson;
+        }
+
         public static async Task<dynamic> GetPlayerBansFromWebApi(string steamId)
         {
             List<dynamic> userBansJson = await GetPlayerBansFromWebApi(new List<string>() { steamId });

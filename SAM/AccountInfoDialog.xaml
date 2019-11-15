@@ -25,7 +25,7 @@
         <Label x:Name="SharedSecretLabel" Content="2FA Shared Secret" ToolTip="Can be found in your .maFile from Steam Desktop Authenticator" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,117,0,0" />
         <PasswordBox Name="SharedSecretBox" PasswordChar="•" Padding="3,3,3,3" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="120,114,0,0" Width="314" />
         <Label x:Name="UrlLabel" Content="Profile URL" ToolTip="Enter steam profile url to get user avatar without an API key" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="47,151,0,0"/>
-        <TextBox Name="UrlBox" Padding="3,3,3,3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,149,0,0" Width="314" />
+        <TextBox Name="UrlTextBox" Padding="3,3,3,3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,149,0,0" Width="314" LostFocus="UrlBox_LostFocus" GotFocus="UrlBox_GotFocus" />
         <Label x:Name="DescriptionLabel" Content="Description" ToolTip="Enter a description for this entry. Will display as a tooltip." HorizontalAlignment="Left" VerticalAlignment="Top" Height="28" Margin="45,185,0,0" />
         <TextBox Name="DescriptionBox" Padding="3,3,3,3" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Height="63" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="120,184,0,0" Width="314"/>
         <Button Name="OKButton" Content="OK" Grid.Column="0" Margin="120,286,0,0" Click="OKButton_Click" VerticalAlignment="Top" Width="100" HorizontalAlignment="Left" />

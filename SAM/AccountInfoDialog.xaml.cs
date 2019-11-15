@@ -1,4 +1,5 @@
 ﻿using MahApps.Metro.Controls;
+using System.Linq;
 using System.Windows;
 
 namespace SAM
@@ -10,8 +11,6 @@ namespace SAM
     {
         public TextDialog()
         {
-            SAMSettings settings = new SAMSettings();
-
             InitializeComponent();
         }
 
@@ -41,9 +40,11 @@ namespace SAM
 
         public string UrlText
         {
-            get { return UrlBox.Text; }
-            set { UrlBox.Text = value; }
+            get { return UrlTextBox.Text; }
+            set { UrlTextBox.Text = value; }
         }
+
+        private string OriginalUrlText { get; set; }
 
         public string DescriptionText
         {
@@ -99,14 +100,21 @@ namespace SAM
 
             if (userJson != null)
             {
-                dynamic profileUrl = userJson.response.players[0].profileurl;
-                dynamic avatarUrl = userJson.response.players[0].avatarfull;
-                dynamic steamId = userJson.response.players[0].steamid;
+                try
+                {
+                    dynamic profileUrl = userJson.response.players[0].profileurl;
+                    dynamic avatarUrl = userJson.response.players[0].avatarfull;
+                    dynamic steamId = userJson.response.players[0].steamid;
 
-                UrlBox.Text = profileUrl;
+                    UrlTextBox.Text = profileUrl;
 
-                SteamId = steamId;
-                AviText = avatarUrl;
+                    SteamId = steamId;
+                    AviText = avatarUrl;
+                }
+                catch
+                {
+
+                }
             }
             else
             {
@@ -115,6 +123,70 @@ namespace SAM
             }
 
             OKButton.IsEnabled = true;
+        }
+
+        private void UrlBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            OriginalUrlText = UrlTextBox.Text;
+        }
+
+        private async void UrlBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (UrlTextBox.Text != OriginalUrlText && SteamId == null)
+            {
+                string urlText = UrlTextBox.Text;
+
+                OKButton.IsEnabled = false;
+
+                // Perform lookup to get SteamId for either getUserSummaries (if in ID64 format) or vanity URL if (/id/) format.
+
+                if (urlText.Contains("/id/"))
+                {
+                    // Vanity URL API call.
+
+                    urlText = urlText.TrimEnd('/');
+                    urlText = urlText.Split('/').Last();
+
+                    if (urlText.Length > 0)
+                    {
+                        dynamic userJson = await Utils.GetSteamIdFromVanityUrl(urlText);
+
+                        if (userJson != null)
+                        {
+                            try
+                            {
+                                dynamic steamId = userJson.response.steamid;
+                                SteamId = steamId;
+                            }
+                            catch
+                            {
+
+                            }
+                        }
+                    }
+                }
+                else if (urlText.Contains("/profiles/"))
+                {
+                    // Standard user summaries API call.
+
+                    dynamic userJson = await Utils.GetUserInfoFromWebApiBySteamId(UrlTextBox.Text);
+
+                    if (userJson != null)
+                    {
+                        try
+                        {
+                            dynamic steamId = userJson.response.players[0].steamid;
+                            SteamId = steamId;
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                }
+
+                OKButton.IsEnabled = true;
+            }
         }
     }
 }
