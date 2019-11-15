@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:SAM"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="Login Info" Height="490" Width="300" ResizeMode="NoResize" Icon="steam_alt-10.ico" WindowStartupLocation="CenterScreen" Topmost="True">
+        Title="Account Info" Height="360" Width="450" ResizeMode="NoResize" Icon="steam_alt-10.ico" WindowStartupLocation="CenterScreen" Topmost="True">
     <Controls:MetroWindow.IconTemplate>
         <DataTemplate>
             <Grid Width="20" Height="20" Background="Transparent" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality">
@@ -15,27 +15,21 @@
             </Grid>
         </DataTemplate>
     </Controls:MetroWindow.IconTemplate>
-    <StackPanel Margin="5">
-        <Label Name="TitleTextBox" Content="Username *" ToolTip="What you use to login to Steam. Could be an email address."/>
-        <TextBox Name="UsernameBox" Padding="3,3,3,3" LostFocus="UsernameBox_LostFocus"  />
-        <Label Name="AliasTitleBox" Content="Alias" ToolTip="Optional: Display a custom alias instead of username. Leave blank otherwise." />
-        <TextBox Name="AliasBox" Padding="3,3,3,3"/>
-        <Label x:Name="TitleTextBox1" Content="Password *"/>
-        <PasswordBox Name="PasswordBox" PasswordChar="•"  Padding="3,3,3,3" />
-        <Label x:Name="TitleTextBox2" Content="2FA Shared Secret" ToolTip="Can be found in your .maFile from Steam Desktop Authenticator" />
-        <PasswordBox Name="SharedSecretBox" PasswordChar="•" Padding="3,3,3,3" />
-        <Label x:Name="TitleTextBox3" Content="Profile URL" ToolTip="Enter steam profile url to get user avatar without an API key"/>
-        <TextBox Name="UrlBox" Padding="3,3,3,3" />
-        <Label x:Name="TitleTextBox4" Content="Description" ToolTip="Enter a description for this entry. Will display as a tooltip." />
-        <TextBox Name="DescriptionBox" Padding="3,3,3,3" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Height="63"/>
-        <Grid Margin="0,10,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Button Name="OKButton" Content="OK" Grid.Column="0" Margin="56,0,2,-35" Click="OKButton_Click" VerticalAlignment="Bottom" />
-            <Button Name="CancelButton" Content="Cancel" Grid.Column="1" Margin="3,0,53,-35" Click="CancelButton_Click" VerticalAlignment="Bottom" />
-            <CheckBox x:Name="autoLogCheckBox" Content="Auto Login" HorizontalAlignment="Left" Margin="0,3,0,0" VerticalAlignment="Top"/>
-        </Grid>
-    </StackPanel>
+    <Grid>
+        <Label Name="UsernameLabel" Content="Username *" ToolTip="What you use to login to Steam. Could be an email address." HorizontalAlignment="Left" VerticalAlignment="Top" Margin="43,10,0,0"/>
+        <TextBox Name="UsernameBox" Padding="3,3,3,3" LostFocus="UsernameBox_LostFocus" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="120,9,0,0" Width="314"  />
+        <Label Name="AliasLabel" Content="Alias" ToolTip="Optional: Display a custom alias instead of username. Leave blank otherwise." HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,46,0,0" />
+        <TextBox Name="AliasBox" Padding="3,3,3,3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,44,0,0" Width="314"/>
+        <Label x:Name="PasswordLabel" Content="Password *" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="47,81,0,0"/>
+        <PasswordBox Name="PasswordBox" PasswordChar="•"  Padding="3,3,3,3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,79,0,0" Width="314" />
+        <Label x:Name="SharedSecretLabel" Content="2FA Shared Secret" ToolTip="Can be found in your .maFile from Steam Desktop Authenticator" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,117,0,0" />
+        <PasswordBox Name="SharedSecretBox" PasswordChar="•" Padding="3,3,3,3" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="120,114,0,0" Width="314" />
+        <Label x:Name="UrlLabel" Content="Profile URL" ToolTip="Enter steam profile url to get user avatar without an API key" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="47,151,0,0"/>
+        <TextBox Name="UrlBox" Padding="3,3,3,3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,149,0,0" Width="314" />
+        <Label x:Name="DescriptionLabel" Content="Description" ToolTip="Enter a description for this entry. Will display as a tooltip." HorizontalAlignment="Left" VerticalAlignment="Top" Height="28" Margin="45,185,0,0" />
+        <TextBox Name="DescriptionBox" Padding="3,3,3,3" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Height="63" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="120,184,0,0" Width="314"/>
+        <Button Name="OKButton" Content="OK" Grid.Column="0" Margin="120,286,0,0" Click="OKButton_Click" VerticalAlignment="Top" Width="100" HorizontalAlignment="Left" />
+        <Button Name="CancelButton" Content="Cancel" Margin="225,286,0,0" Click="CancelButton_Click" VerticalAlignment="Top" Width="100" HorizontalAlignment="Left" />
+        <CheckBox x:Name="autoLogCheckBox" Content="Auto Login" HorizontalAlignment="Left" Margin="120,252,0,0" VerticalAlignment="Top"/>
+    </Grid>
 </Controls:MetroWindow>
