@@ -1008,7 +1008,7 @@ namespace SAM
             return contextMenu;
         }
 
-        private void AddAccount()
+        private async void AddAccount()
         {
             // User entered info
             var dialog = new TextDialog();
@@ -1044,8 +1044,11 @@ namespace SAM
 
                 try
                 {
-                    encryptedAccounts.Add(new Account() { Name = dialog.AccountText, Alias = dialog.AliasText, Password = StringCipher.Encrypt(password, eKey), SharedSecret = StringCipher.Encrypt(sharedSecret, eKey), ProfUrl = dialog.UrlText, AviUrl = aviUrl, SteamId = steamId, Description = dialog.DescriptionText });
+                    Account newAccount = new Account() { Name = dialog.AccountText, Alias = dialog.AliasText, Password = StringCipher.Encrypt(password, eKey), SharedSecret = StringCipher.Encrypt(sharedSecret, eKey), ProfUrl = dialog.UrlText, AviUrl = aviUrl, SteamId = steamId, Description = dialog.DescriptionText };
 
+                    await ReloadAccount(newAccount);
+
+                    encryptedAccounts.Add(newAccount);
                     SerializeAccounts();
                 }
                 catch (Exception m)
@@ -1983,7 +1986,7 @@ namespace SAM
 
         private void Window_LocationChanged(object sender, EventArgs e)
         {
-            if (!isLoadingSettings && settings.File != null)
+            if (!isLoadingSettings && settings.File != null && IsInBounds() == true)
             {
                 settings.File.Write(SAMSettings.WINDOW_LEFT, Left.ToString(), SAMSettings.SECTION_LOCATION);
                 settings.File.Write(SAMSettings.WINDOW_TOP, Top.ToString(), SAMSettings.SECTION_LOCATION);
@@ -2010,14 +2013,23 @@ namespace SAM
 
         private void SetWindowSettingsIntoScreenArea()
         {
+            if (IsInBounds() == false)
+            {
+                SetWindowToCenter();
+            }
+        }
+
+        private bool IsInBounds()
+        {
             foreach (System.Windows.Forms.Screen scrn in System.Windows.Forms.Screen.AllScreens)
             {
                 if (scrn.Bounds.Contains((int)Left, (int)Top))
                 {
-                    return;
+                    return true;
                 }
             }
-            SetWindowToCenter();
+
+            return false;
         }
 
         private void SetWindowToCenter()
