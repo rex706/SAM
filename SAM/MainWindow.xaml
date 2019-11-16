@@ -97,7 +97,7 @@
         </Style>
     </Window.Resources>
     <Grid x:Name="MainGrid">
-        <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
+        <ScrollViewer x:Name="MainScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" CanContentScroll="True" PreviewMouseWheel="MainScrollViewer_PreviewMouseWheel">
             <Grid x:Name="ScrollViewerGrid">
                 <Grid.Resources>
                     <Style TargetType="DataGridCell">
