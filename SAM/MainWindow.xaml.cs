@@ -89,6 +89,8 @@ namespace SAM
         private static bool dragging = false;
         private static System.Timers.Timer mouseHoldTimer;
 
+        private static System.Timers.Timer autoReloadApiTimer;
+
         private static int maxRetry = 2;
 
         // Resize animation variables
@@ -386,6 +388,22 @@ namespace SAM
                 AccountsDataGrid.Visibility = Visibility.Visible;
             }
 
+            if (settings.User.AutoReloadEnabled)
+            {
+                autoReloadApiTimer = new System.Timers.Timer();
+                autoReloadApiTimer.Elapsed += AutoReloadApiTimer_Elapsed;
+                autoReloadApiTimer.Interval = 60000 * settings.User.AutoReloadInterval;
+                autoReloadApiTimer.Start();
+            }
+            else
+            {
+                if (autoReloadApiTimer != null)
+                {
+                    autoReloadApiTimer.Stop();
+                    autoReloadApiTimer.Dispose();
+                }
+            }
+
             // Set user's theme settings.
             ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent(settings.User.Accent), ThemeManager.GetAppTheme(settings.User.Theme));
 
@@ -408,7 +426,15 @@ namespace SAM
             isLoadingSettings = false;
         }
 
-        public void RefreshWindow()
+        private void AutoReloadApiTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                ReloadAccountsAsync();
+            });
+        }
+
+        public async void RefreshWindow()
         {
             decryptedAccounts = new List<Account>();
 
@@ -507,6 +533,8 @@ namespace SAM
 
         public async Task ReloadAccountsAsync()
         {
+            Title = "SAM Loading...";
+
             List<string> steamIds = new List<string>();
 
             foreach (Account account in encryptedAccounts)
@@ -565,7 +593,7 @@ namespace SAM
 
             SerializeAccounts();
 
-            MessageBox.Show("Done!");
+            Title = "SAM";
         }
 
         private void PostDeserializedRefresh(bool seedAcc)

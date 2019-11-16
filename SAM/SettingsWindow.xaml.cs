@@ -97,6 +97,8 @@ namespace SAM
                 // Steam
                 SteamPathTextBox.Text = settings.File.Read(SAMSettings.STEAM_PATH, SAMSettings.SECTION_STEAM);
                 ApiKeyTextBox.Text = settings.File.Read(SAMSettings.STEAM_API_KEY, SAMSettings.SECTION_STEAM);
+                AutoReloadCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.AUTO_RELOAD_ENABLED, SAMSettings.SECTION_STEAM));
+                AutoReloadIntervalSpinBox.Text = settings.File.Read(SAMSettings.AUTO_RELOAD_INTERVAL, SAMSettings.SECTION_STEAM);
 
                 // Parameters
                 CafeAppLaunchCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.CAFE_APP_LAUNCH_PARAMETER, SAMSettings.SECTION_PARAMETERS));
@@ -239,6 +241,8 @@ namespace SAM
             // Steam
             settings.File.Write(SAMSettings.STEAM_PATH, SteamPathTextBox.Text, SAMSettings.SECTION_STEAM);
             settings.File.Write(SAMSettings.STEAM_API_KEY, Regex.Replace(ApiKeyTextBox.Text, @"\s+", string.Empty), SAMSettings.SECTION_STEAM);
+            settings.File.Write(SAMSettings.AUTO_RELOAD_ENABLED, AutoReloadCheckBox.IsChecked.ToString(), SAMSettings.SECTION_STEAM);
+            settings.File.Write(SAMSettings.AUTO_RELOAD_INTERVAL, AutoReloadIntervalSpinBox.Text, SAMSettings.SECTION_STEAM);
 
             // Parameters
             settings.File.Write(SAMSettings.CAFE_APP_LAUNCH_PARAMETER, CafeAppLaunchCheckBox.IsChecked.ToString(), SAMSettings.SECTION_PARAMETERS);
@@ -397,6 +401,8 @@ namespace SAM
             
             SteamPathTextBox.Text = Utils.CheckSteamPath();
             ApiKeyTextBox.Text = settings.Default.ApiKey;
+            AutoReloadCheckBox.IsChecked = settings.Default.AutoReloadEnabled;
+            AutoReloadIntervalSpinBox.Text = settings.Default.AutoReloadInterval.ToString();
 
             ThemeSelectBox.Text = settings.Default.Theme;
             AccentSelectBox.Text = settings.Default.Accent;
@@ -438,6 +444,29 @@ namespace SAM
         private void ApiKeyHelpButton_Click(object sender, RoutedEventArgs e)
         {
             Process.Start("https://steamcommunity.com/dev/apikey");
+        }
+
+        private void ApiKeyTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (ApiKeyTextBox.Text.Length == 32)
+            {
+                AutoReloadCheckBox.IsEnabled = true;
+            }
+            else
+            {
+                AutoReloadCheckBox.IsEnabled = false;
+                AutoReloadCheckBox.IsChecked = false;
+            }
+        }
+
+        private void AutoReloadCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            AutoReloadIntervalSpinBox.IsEnabled = true;
+        }
+
+        private void AutoReloadCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            AutoReloadIntervalSpinBox.IsEnabled = false;
         }
     }
 }

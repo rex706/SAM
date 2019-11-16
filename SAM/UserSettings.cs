@@ -50,7 +50,9 @@ namespace SAM
 
         public string SteamPath { get { return (string)KeyValuePairs[SAMSettings.STEAM_PATH]; } set { KeyValuePairs[SAMSettings.STEAM_PATH] = value; } }
         public string ApiKey { get { return (string)KeyValuePairs[SAMSettings.STEAM_API_KEY]; } set { KeyValuePairs[SAMSettings.STEAM_API_KEY] = value; } }
-
+        public bool AutoReloadEnabled { get { return (bool)KeyValuePairs[SAMSettings.AUTO_RELOAD_ENABLED]; } set { KeyValuePairs[SAMSettings.AUTO_RELOAD_ENABLED] = value; } }
+        public int AutoReloadInterval { get { return (int)KeyValuePairs[SAMSettings.AUTO_RELOAD_INTERVAL]; } set { KeyValuePairs[SAMSettings.AUTO_RELOAD_INTERVAL] = value; } }
+         
         #endregion
 
         #region Parameters
@@ -115,6 +117,8 @@ namespace SAM
 
             { SAMSettings.STEAM_PATH, string.Empty },
             { SAMSettings.STEAM_API_KEY, string.Empty },
+            { SAMSettings.AUTO_RELOAD_ENABLED, false },
+            { SAMSettings.AUTO_RELOAD_INTERVAL, 30 },
 
             { SAMSettings.THEME, "BaseDark" },
             { SAMSettings.ACCENT, "Blue" },

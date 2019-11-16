@@ -112,8 +112,12 @@
                     <Button x:Name="AutoPathButton" Content="A" Margin="0,38,8,111" Click="AutoPathButton_Click" Height="23" Width="25" HorizontalAlignment="Right" ToolTip="Auto"/>
                     <TextBlock Text="Steam File Path" Margin="0,13,0,0" VerticalAlignment="Top" TextAlignment="Center"/>
                     <TextBlock Text="API Key" Margin="128,83,126,85" VerticalAlignment="Top" TextAlignment="Center"/>
-                    <TextBox x:Name="ApiKeyTextBox" Height="23" Text="" Margin="10,105,38,43"/>
+                    <TextBox x:Name="ApiKeyTextBox" Height="23" Text="" Margin="10,105,38,43" TextChanged="ApiKeyTextBox_TextChanged"/>
                     <Button x:Name="ApiKeyHelpButton" Content="?" Margin="0,105,8,44" Click="ApiKeyHelpButton_Click" Height="23" Width="25" HorizontalAlignment="Right" ToolTip="(Optional) Used for gathering additional account information for certain functionalities"/>
+                    <CheckBox x:Name="AutoReloadCheckBox" Content="Auto Reload" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="46,154,0,0" ToolTip="Enable/Disable automatically reloading account web API data (like bans) for all accounts on a set interval." IsEnabled="False" Checked="AutoReloadCheckBox_Checked" Unchecked="AutoReloadCheckBox_Unchecked"/>
+                    <xctk:IntegerUpDown x:Name="AutoReloadIntervalSpinBox" Minimum="5" Value="30" Increment="5" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="154,151,0,0" Width="45" Foreground="{DynamicResource xctkForegoundBrush}" Height="23" IsEnabled="False"/>
+                    <Label Content="Interval (minutes)" HorizontalAlignment="Left" Margin="200,149,0,0" VerticalAlignment="Top" Width="121"/>
+
                 </Grid>
             </TabItem>
             <TabItem Header="Parameters">

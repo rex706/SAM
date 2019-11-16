@@ -372,7 +372,7 @@ namespace SAM
 
             dynamic userJson = null;
 
-            if (apiKey != null && apiKey.Length > 0)
+            if (apiKey != null && apiKey.Length == 32)
             {
                 try
                 {
@@ -400,7 +400,7 @@ namespace SAM
 
             List<dynamic> userInfos = new List<dynamic>();
 
-            if (apiKey != null && apiKey.Length > 0)
+            if (apiKey != null && apiKey.Length == 32)
             {
                 while (steamIds.Count > 0)
                 {
@@ -448,7 +448,7 @@ namespace SAM
 
             dynamic userInfoJson = null;
 
-            if (apiKey != null && apiKey.Length > 0)
+            if (apiKey != null && apiKey.Length == 32)
             {
                 try
                 {
@@ -490,7 +490,7 @@ namespace SAM
 
             List<dynamic> userBans = new List<dynamic>();
 
-            if (apiKey != null && apiKey.Length > 0)
+            if (apiKey != null && apiKey.Length == 32)
             {
                 while (steamIds.Count > 0)
                 {
@@ -654,7 +654,7 @@ namespace SAM
         {
             var settingsFile = new IniFile(SAMSettings.FILE_NAME);
             string apiKey = settingsFile.Read(SAMSettings.STEAM_API_KEY, SAMSettings.SECTION_STEAM);
-            return apiKey != null && apiKey.Length > 0;
+            return apiKey != null && apiKey.Length == 32;
         }
 
         public static bool IsSpecialCharacter(char c)
