@@ -391,9 +391,21 @@ namespace SAM
 
             if (settings.User.AutoReloadEnabled)
             {
+                int interval = settings.User.AutoReloadInterval;
+
+                if (settings.User.LastAutoReload.HasValue == true)
+                {
+                    double minutesSince = (DateTime.Now - settings.User.LastAutoReload.Value).TotalMinutes;
+
+                    if (minutesSince < interval)
+                    {
+                        interval -= Convert.ToInt32(minutesSince);
+                    }
+                }
+
                 autoReloadApiTimer = new System.Timers.Timer();
                 autoReloadApiTimer.Elapsed += AutoReloadApiTimer_Elapsed;
-                autoReloadApiTimer.Interval = 60000 * settings.User.AutoReloadInterval;
+                autoReloadApiTimer.Interval = 60000 * interval;
                 autoReloadApiTimer.Start();
             }
             else
@@ -433,9 +445,11 @@ namespace SAM
             {
                 ReloadAccountsAsync();
             });
+
+            autoReloadApiTimer.Interval = settings.User.AutoReloadInterval;
         }
 
-        public async void RefreshWindow()
+        public void RefreshWindow()
         {
             decryptedAccounts = new List<Account>();
 
@@ -492,7 +506,7 @@ namespace SAM
 
             AccountsDataGrid.ItemsSource = encryptedAccounts;
 
-            if (firstLoad == true && settings.User.AutoReloadEnabled == true)
+            if (firstLoad == true && settings.User.AutoReloadEnabled == true && Utils.ShouldAutoReload(settings.User.LastAutoReload, settings.User.AutoReloadInterval))
             {
                 firstLoad = false;
                 ReloadAccountsAsync();
@@ -609,6 +623,9 @@ namespace SAM
                     }
                 }
             }
+
+            settings.File.Write(SAMSettings.LAST_AUTO_RELOAD, DateTime.Now.ToString(), SAMSettings.SECTION_STEAM);
+            settings.User.LastAutoReload = DateTime.Now;
 
             SerializeAccounts();
 

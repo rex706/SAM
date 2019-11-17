@@ -51,6 +51,7 @@ namespace SAM
         public const string STEAM_API_KEY = "ApiKey";
         public const string AUTO_RELOAD_ENABLED = "AutoReloadEnabled";
         public const string AUTO_RELOAD_INTERVAL = "AutoReloadInterval";
+        public const string LAST_AUTO_RELOAD = "LastAutoReload";
 
         public const string CAFE_APP_LAUNCH_PARAMETER = "cafeapplaunch";
         public const string CLEAR_BETA_PARAMETER = "clearbeta";
@@ -118,6 +119,7 @@ namespace SAM
             { STEAM_API_KEY, SECTION_STEAM },
             { AUTO_RELOAD_ENABLED, SECTION_STEAM},
             { AUTO_RELOAD_INTERVAL, SECTION_STEAM },
+            { LAST_AUTO_RELOAD, SECTION_STEAM },
 
             { CAFE_APP_LAUNCH_PARAMETER, SECTION_PARAMETERS },
             { CLEAR_BETA_PARAMETER, SECTION_PARAMETERS },

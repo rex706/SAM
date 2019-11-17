@@ -52,6 +52,20 @@ namespace SAM
         public string ApiKey { get { return (string)KeyValuePairs[SAMSettings.STEAM_API_KEY]; } set { KeyValuePairs[SAMSettings.STEAM_API_KEY] = value; } }
         public bool AutoReloadEnabled { get { return (bool)KeyValuePairs[SAMSettings.AUTO_RELOAD_ENABLED]; } set { KeyValuePairs[SAMSettings.AUTO_RELOAD_ENABLED] = value; } }
         public int AutoReloadInterval { get { return (int)KeyValuePairs[SAMSettings.AUTO_RELOAD_INTERVAL]; } set { KeyValuePairs[SAMSettings.AUTO_RELOAD_INTERVAL] = value; } }
+        public DateTime? LastAutoReload { 
+
+            get {
+                try
+                {
+                    return Convert.ToDateTime(KeyValuePairs[SAMSettings.LAST_AUTO_RELOAD]);
+                }
+                catch
+                {
+                    return null;
+                }
+            } 
+            set { KeyValuePairs[SAMSettings.LAST_AUTO_RELOAD] = value; } 
+        }
          
         #endregion
 
@@ -119,6 +133,7 @@ namespace SAM
             { SAMSettings.STEAM_API_KEY, string.Empty },
             { SAMSettings.AUTO_RELOAD_ENABLED, false },
             { SAMSettings.AUTO_RELOAD_INTERVAL, 30 },
+            { SAMSettings.LAST_AUTO_RELOAD, string.Empty },
 
             { SAMSettings.THEME, "BaseDark" },
             { SAMSettings.ACCENT, "Blue" },

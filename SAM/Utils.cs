@@ -712,6 +712,23 @@ namespace SAM
             return apiKey != null && apiKey.Length == API_KEY_LENGTH;
         }
 
+        public static bool ShouldAutoReload(DateTime? lastReload, int interval)
+        {
+            if (lastReload.HasValue == false)
+            {
+                return true;
+            }
+
+            DateTime offset = lastReload.Value.AddMinutes(interval);
+
+            if (offset.CompareTo(DateTime.Now) <= 0)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public static bool IsSpecialCharacter(char c)
         {
             foreach (char special in specialChars)
