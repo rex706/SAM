@@ -492,7 +492,7 @@ namespace SAM
 
             AccountsDataGrid.ItemsSource = encryptedAccounts;
 
-            if (firstLoad == true)
+            if (firstLoad == true && settings.User.AutoReloadEnabled == true)
             {
                 firstLoad = false;
                 ReloadAccountsAsync();
