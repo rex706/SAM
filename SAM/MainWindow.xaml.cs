@@ -557,7 +557,7 @@ namespace SAM
                     {
                         steamIds.Add(steamId);
                     }
-                    else if (account.ProfUrl != null && account.ProfUrl.Length > 0) { }
+                    else if (account.ProfUrl != null && account.ProfUrl.Length > 0) 
                     {
                         // Try to get steamId from profile URL via web API.
 
