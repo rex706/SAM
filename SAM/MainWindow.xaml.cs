@@ -65,6 +65,7 @@ namespace SAM
         private static readonly string repositoryUrl = "https://github.com/rex706/SAM";
 
         private static bool isLoadingSettings = true;
+        private static bool firstLoad = true;
 
         private static readonly string dataFile = "info.dat";
 
@@ -490,6 +491,12 @@ namespace SAM
             }
 
             AccountsDataGrid.ItemsSource = encryptedAccounts;
+
+            if (firstLoad == true)
+            {
+                firstLoad = false;
+                ReloadAccountsAsync();
+            }
         }
 
         private async Task ReloadAccount(Account account)
@@ -549,6 +556,15 @@ namespace SAM
                     if (steamId != null && steamId.Length > 0)
                     {
                         steamIds.Add(steamId);
+                    }
+
+                        dynamic steamIdFromProfileUrl = await Utils.GetSteamIdFromProfileUrl(account.ProfUrl);
+
+                        if (steamIdFromProfileUrl != null)
+                        {
+                            account.SteamId = steamIdFromProfileUrl;
+                            steamIds.Add(steamIdFromProfileUrl);
+                        }
                     }
                 }
             }

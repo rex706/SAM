@@ -117,7 +117,6 @@
                     <CheckBox x:Name="AutoReloadCheckBox" Content="Auto Reload" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="46,154,0,0" ToolTip="Enable/Disable automatically reloading account web API data (like bans) for all accounts on a set interval." IsEnabled="False" Checked="AutoReloadCheckBox_Checked" Unchecked="AutoReloadCheckBox_Unchecked"/>
                     <xctk:IntegerUpDown x:Name="AutoReloadIntervalSpinBox" Minimum="5" Value="30" Increment="5" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="154,151,0,0" Width="45" Foreground="{DynamicResource xctkForegoundBrush}" Height="23" IsEnabled="False"/>
                     <Label Content="Interval (minutes)" HorizontalAlignment="Left" Margin="200,149,0,0" VerticalAlignment="Top" Width="121"/>
-
                 </Grid>
             </TabItem>
             <TabItem Header="Parameters">

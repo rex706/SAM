@@ -134,55 +134,13 @@ namespace SAM
         {
             if (UrlTextBox.Text != OriginalUrlText && SteamId == null)
             {
-                string urlText = UrlTextBox.Text;
+                OKButton.IsEnabled = false; 
 
-                OKButton.IsEnabled = false;
+                dynamic steamId = await Utils.GetSteamIdFromProfileUrl(UrlTextBox.Text);
 
-                // Perform lookup to get SteamId for either getUserSummaries (if in ID64 format) or vanity URL if (/id/) format.
-
-                if (urlText.Contains("/id/"))
+                if (steamId != null)
                 {
-                    // Vanity URL API call.
-
-                    urlText = urlText.TrimEnd('/');
-                    urlText = urlText.Split('/').Last();
-
-                    if (urlText.Length > 0)
-                    {
-                        dynamic userJson = await Utils.GetSteamIdFromVanityUrl(urlText);
-
-                        if (userJson != null)
-                        {
-                            try
-                            {
-                                dynamic steamId = userJson.response.steamid;
-                                SteamId = steamId;
-                            }
-                            catch
-                            {
-
-                            }
-                        }
-                    }
-                }
-                else if (urlText.Contains("/profiles/"))
-                {
-                    // Standard user summaries API call.
-
-                    dynamic userJson = await Utils.GetUserInfoFromWebApiBySteamId(UrlTextBox.Text);
-
-                    if (userJson != null)
-                    {
-                        try
-                        {
-                            dynamic steamId = userJson.response.players[0].steamid;
-                            SteamId = steamId;
-                        }
-                        catch
-                        {
-
-                        }
-                    }
+                    SteamId = steamId;
                 }
 
                 OKButton.IsEnabled = true;

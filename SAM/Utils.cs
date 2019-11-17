@@ -28,7 +28,7 @@ namespace SAM
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
-
+        public static int API_KEY_LENGTH = 32;
         readonly static char[] specialChars = { '{', '}', '(', ')', '[', ']', '+', '^', '%', '~' };
 
         public static void Serialize(List<Account> accounts)
@@ -323,6 +323,61 @@ namespace SAM
             return steamIds;
         }
 
+        public static async Task<string> GetSteamIdFromProfileUrl(string url)
+        {
+            dynamic steamId = null;
+
+            if (ApiKeyExists() == true)
+            {
+                // Get SteamId for either getUserSummaries (if in ID64 format) or vanity URL if (/id/) format.
+
+                if (url.Contains("/id/"))
+                {
+                    // Vanity URL API call.
+
+                    url = url.TrimEnd('/');
+                    url = url.Split('/').Last();
+
+                    if (url.Length > 0)
+                    {
+                        dynamic userJson = await Utils.GetSteamIdFromVanityUrl(url);
+
+                        if (userJson != null)
+                        {
+                            try
+                            {
+                                steamId = userJson.response.steamid;
+                            }
+                            catch
+                            {
+
+                            }
+                        }
+                    }
+                }
+                else if (url.Contains("/profiles/"))
+                {
+                    // Standard user summaries API call.
+
+                    dynamic userJson = await Utils.GetUserInfoFromWebApiBySteamId(url);
+
+                    if (userJson != null)
+                    {
+                        try
+                        {
+                            steamId = userJson.response.players[0].steamid;
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                }
+            }
+
+            return steamId;
+        }
+
         public static string GetSteamIdFromConfig(string userName)
         {
             dynamic steamId = null;
@@ -372,7 +427,7 @@ namespace SAM
 
             dynamic userJson = null;
 
-            if (apiKey != null && apiKey.Length == 32)
+            if (ApiKeyExists() == true)
             {
                 try
                 {
@@ -400,7 +455,7 @@ namespace SAM
 
             List<dynamic> userInfos = new List<dynamic>();
 
-            if (apiKey != null && apiKey.Length == 32)
+            if (ApiKeyExists() == true)
             {
                 while (steamIds.Count > 0)
                 {
@@ -490,7 +545,7 @@ namespace SAM
 
             List<dynamic> userBans = new List<dynamic>();
 
-            if (apiKey != null && apiKey.Length == 32)
+            if (ApiKeyExists() == true)
             {
                 while (steamIds.Count > 0)
                 {
@@ -654,7 +709,7 @@ namespace SAM
         {
             var settingsFile = new IniFile(SAMSettings.FILE_NAME);
             string apiKey = settingsFile.Read(SAMSettings.STEAM_API_KEY, SAMSettings.SECTION_STEAM);
-            return apiKey != null && apiKey.Length == 32;
+            return apiKey != null && apiKey.Length == API_KEY_LENGTH;
         }
 
         public static bool IsSpecialCharacter(char c)
