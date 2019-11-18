@@ -546,6 +546,7 @@ namespace SAM
                     account.CommunityBanned = Convert.ToBoolean(userBanJson.CommunityBanned);
                     account.VACBanned = Convert.ToBoolean(userBanJson.VACBanned);
                     account.NumberOfVACBans = Convert.ToInt32(userBanJson.NumberOfVACBans);
+                    account.NumberOfGameBans = Convert.ToInt32(userBanJson.NumberOfGameBans);
                     account.DaysSinceLastBan = Convert.ToInt32(userBanJson.DaysSinceLastBan);
                     account.EconomyBan = userBanJson.EconomyBan;
                 }
@@ -619,6 +620,7 @@ namespace SAM
                             account.CommunityBanned = Convert.ToBoolean(userBanJson.CommunityBanned);
                             account.VACBanned = Convert.ToBoolean(userBanJson.VACBanned);
                             account.NumberOfVACBans = Convert.ToInt32(userBanJson.NumberOfVACBans);
+                            account.NumberOfGameBans = Convert.ToInt32(userBanJson.NumberOfGameBans);
                             account.DaysSinceLastBan = Convert.ToInt32(userBanJson.DaysSinceLastBan);
                             account.EconomyBan = userBanJson.EconomyBan;
                         }
