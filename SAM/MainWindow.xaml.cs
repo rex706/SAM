@@ -582,6 +582,8 @@ namespace SAM
                             account.SteamId = steamIdFromProfileUrl;
                             steamIds.Add(steamIdFromProfileUrl);
                         }
+
+                        Thread.Sleep(new Random().Next(10,16));
                     }
                 }
             }
