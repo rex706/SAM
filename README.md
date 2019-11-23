@@ -13,7 +13,7 @@
 *NEW*
 * List view.
 * Theme and Accent customization.
-* Track account bans with Steam API key.
+* Track account bans with [Steam API key](https://steamcommunity.com/dev/apikey).
 * Quick timeout selections.
 * Close on login toggle setting.
 -----------------------------------------
