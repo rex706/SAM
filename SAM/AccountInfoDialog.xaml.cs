@@ -1,5 +1,5 @@
 ﻿using MahApps.Metro.Controls;
-using System.Linq;
+using System.Diagnostics;
 using System.Windows;
 
 namespace SAM
