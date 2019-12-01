@@ -56,9 +56,19 @@ namespace SAM
         public static List<Account> Deserialize(string file)
         {
             var stream = new StreamReader(file);
-            var ser = new XmlSerializer(typeof(List<Account>));
-            object obj = ser.Deserialize(stream);
-            stream.Close();
+            object obj = null;
+
+            try
+            {
+                var ser = new XmlSerializer(typeof(List<Account>));
+                obj = ser.Deserialize(stream);
+            }
+            catch
+            {
+                stream.Close();
+                throw new Exception("Error deserializing data file.");
+            }
+
             return (List<Account>)obj;
         }
 

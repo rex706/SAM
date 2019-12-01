@@ -1573,7 +1573,7 @@ namespace SAM
 
         private void SerializeAccounts()
         {
-            if (IsPasswordProtected())
+            if (IsPasswordProtected() == true)
             {
                 Utils.PasswordSerialize(encryptedAccounts, ePassword);
             }
@@ -1999,7 +1999,7 @@ namespace SAM
                     else
                     {
                         string[] lines = File.ReadAllLines(dataFile);
-                        if (lines.Length < 3)
+                        if (lines.Length == 0 || lines.Length > 1)
                         {
                             return false;
                         }
