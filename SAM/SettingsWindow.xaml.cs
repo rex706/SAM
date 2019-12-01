@@ -468,5 +468,10 @@ namespace SAM
         {
             AutoReloadIntervalSpinBox.IsEnabled = false;
         }
+
+        private void CustomParamsHelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://developer.valvesoftware.com/wiki/Command_Line_Options#Steam_.28Windows.29");
+        }
     }
 }

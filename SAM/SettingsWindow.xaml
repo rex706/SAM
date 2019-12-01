@@ -134,7 +134,8 @@
                     <CheckBox x:Name="TcpCheckBox" Content="-tcp" HorizontalAlignment="Left" Margin="203,98,0,0" VerticalAlignment="Top" ToolTip="Forces connection to Steam backend to be via TCP."/>
                     <CheckBox x:Name="TenFootCheckBox" Content="-tenfoot" HorizontalAlignment="Left" Margin="203,121,0,0" VerticalAlignment="Top" ToolTip="Start Steam in Big Picture Mode."/>
                     <CheckBox x:Name="CustomParametersCheckBox" Content="" HorizontalAlignment="Left" Margin="12,150,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" Checked="CustomParametersCheckBox_Checked" Unchecked="CustomParametersCheckBox_Unchecked" ToolTip="Toggle custom parameters"/>
-                    <TextBox x:Name="CustomParametersTextBox" HorizontalAlignment="Left" Height="19" Margin="34,146,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="294" IsEnabled="False"/>
+                    <TextBox x:Name="CustomParametersTextBox" HorizontalAlignment="Center" Height="19" Margin="33,146,35,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="266" IsEnabled="False"/>
+                    <Button x:Name="CustomParamsHelpButton" Content="?" Margin="0,146,8,13" Height="23" Width="25" HorizontalAlignment="Right" ToolTip="Online documentation" Click="CustomParamsHelpButton_Click"/>
                 </Grid>
             </TabItem>
         </TabControl>
