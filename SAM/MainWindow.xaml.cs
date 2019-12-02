@@ -310,7 +310,7 @@ namespace SAM
 
                         case SAMSettings.PASSWORD_PROTECT:
                             settings.User.PasswordProtect = Convert.ToBoolean(settings.File.Read(SAMSettings.PASSWORD_PROTECT, SAMSettings.SECTION_GENERAL));
-                            if (settings.User.PasswordProtect && (encryptedAccounts == null || encryptedAccounts.Count == 0))
+                            if (settings.User.PasswordProtect && ePassword.Length == 0)
                             {
                                 VerifyAndSetPassword();
                             }
@@ -502,6 +502,7 @@ namespace SAM
             else
             {
                 encryptedAccounts = new List<Account>();
+                SerializeAccounts();
             }
 
             AccountsDataGrid.ItemsSource = encryptedAccounts;
@@ -1809,18 +1810,14 @@ namespace SAM
 
             if (settingsDialog.Decrypt == true)
             {
-                if (encryptedAccounts.Count > 0)
-                {
-                    Utils.Serialize(encryptedAccounts);
-                }
-
+                Utils.Serialize(encryptedAccounts);
                 ePassword = "";
             }
             else if (settingsDialog.Password != null)
             {
                 ePassword = settingsDialog.Password;
 
-                if (encryptedAccounts.Count > 0 && previousPass != ePassword)
+                if (previousPass != ePassword)
                 {
                     Utils.PasswordSerialize(encryptedAccounts, ePassword);
                 }
@@ -1984,7 +1981,7 @@ namespace SAM
 
         private bool IsPasswordProtected()
         {
-            if (settings.File.KeyExists(SAMSettings.PASSWORD_PROTECT, SAMSettings.SECTION_GENERAL) && settings.File.Read(SAMSettings.PASSWORD_PROTECT, SAMSettings.SECTION_GENERAL).ToLower().Equals(true.ToString()))
+            if (settings.User.PasswordProtect == true)
             {
                 return true;
             }
