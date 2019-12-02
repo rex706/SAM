@@ -308,14 +308,6 @@ namespace SAM
                             }
                             break;
 
-                        case SAMSettings.PASSWORD_PROTECT:
-                            settings.User.PasswordProtect = Convert.ToBoolean(settings.File.Read(SAMSettings.PASSWORD_PROTECT, SAMSettings.SECTION_GENERAL));
-                            if (settings.User.PasswordProtect && ePassword.Length == 0)
-                            {
-                                VerifyAndSetPassword();
-                            }
-                            break;
-
                         case SAMSettings.BUTTON_SIZE:
                             string buttonSizeString = settings.File.Read(SAMSettings.BUTTON_SIZE, SAMSettings.SECTION_CUSTOMIZE);
                             int buttonSize = 0;
@@ -432,6 +424,11 @@ namespace SAM
                 Application.Current.Resources["xctkForegoundBrush"] = Brushes.Black;
                 Application.Current.Resources["xctkColorPickerBackground"] = Brushes.White;
                 Application.Current.Resources["GrayNormalBrush"] = Brushes.Black;
+            }
+
+            if (settings.User.PasswordProtect && ePassword.Length == 0)
+            {
+                VerifyAndSetPassword();
             }
 
             Utils.CheckSteamPath();
