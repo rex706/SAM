@@ -951,11 +951,12 @@ namespace SAM
                     else
                     {
                         // Reset New Button position.
-                        Resize(originalHeight, originalWidth);
+                        Resize(180, 138);
 
                         AddButtonGrid.HorizontalAlignment = HorizontalAlignment.Center;
                         AddButtonGrid.VerticalAlignment = VerticalAlignment.Center;
                         AddButtonGrid.Margin = initialAddButtonGridMargin;
+                        ResizeMode = ResizeMode.CanMinimize;
                     }
                 }
             }
