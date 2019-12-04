@@ -40,9 +40,10 @@
                     <xctk:IntegerUpDown x:Name="sleepTimeSpinBox" Minimum="1" Maximum="99" HorizontalAlignment="Left" Height="23" Margin="175,38,0,0" VerticalAlignment="Top" Width="45" TextAlignment="Center" ToolTip="Sleep time for waiting actions" Foreground="{DynamicResource xctkForegoundBrush}"/>
                     <Label x:Name="sleepTimeLabel" Content="Sleep Time (sec)" HorizontalAlignment="Left" Margin="220,35,0,0" VerticalAlignment="Top" Width="104"/>
                     <CheckBox x:Name="HideAddButtonCheckBox" Content="Hide Add Button" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" ToolTip="Hide the Add account button in the button grid."/>
-                    <CheckBox x:Name="CheckForUpdatesCheckBox" Content="Check For Updates" HorizontalAlignment="Left" Margin="175,146,0,0" VerticalAlignment="Top" ToolTip="Check for updates on program startup."/>
-                    <CheckBox x:Name="CloseOnLoginCheckBox" Content="Close on Login" HorizontalAlignment="Left" Margin="175,123,0,0" VerticalAlignment="Top" ToolTip="Close SAM after every login."/>
-                    <CheckBox x:Name="ListViewCheckBox" Content="List View" HorizontalAlignment="Left" Margin="175,100,0,0" VerticalAlignment="Top" ToolTip="Render accounts in list view instead of buttons."/>
+                    <CheckBox x:Name="CheckForUpdatesCheckBox" Content="Check For Updates" HorizontalAlignment="Left" Margin="175,123,0,0" VerticalAlignment="Top" ToolTip="Check for updates on program startup."/>
+                    <CheckBox x:Name="CloseOnLoginCheckBox" Content="Close on Login" HorizontalAlignment="Left" Margin="175,100,0,0" VerticalAlignment="Top" ToolTip="Close SAM after every login."/>
+                    <CheckBox x:Name="ListViewCheckBox" Content="List View" HorizontalAlignment="Left" Margin="175,77,0,0" VerticalAlignment="Top" ToolTip="Render accounts in list view instead of buttons."/>
+                    <CheckBox x:Name="SandboxModeCheckBox" Content="Sandbox Mode" HorizontalAlignment="Left" Margin="175,146,0,0" VerticalAlignment="Top" ToolTip="Prevent Steam shutdown before each login attempt."/>
                 </Grid>
             </TabItem>
             <TabItem Header="Auto-Login">

@@ -30,6 +30,7 @@ namespace SAM
         public const string CHECK_FOR_UPDATES = "CheckForUpdates";
         public const string CLOSE_ON_LOGIN = "CloseOnLogin";
         public const string LIST_VIEW = "ListView";
+        public const string SANDBOX_MODE = "SandboxMode";
 
         public const string LOGIN_RECENT_ACCOUNT = "LoginRecentAccount";
         public const string RECENT_ACCOUNT_INDEX = "RecentAccountIndex";
@@ -98,6 +99,7 @@ namespace SAM
             { CHECK_FOR_UPDATES, SECTION_GENERAL },
             { CLOSE_ON_LOGIN, SECTION_GENERAL },
             { LIST_VIEW, SECTION_GENERAL },
+            { SANDBOX_MODE, SECTION_GENERAL },
 
             { LOGIN_RECENT_ACCOUNT, SECTION_AUTOLOG },
             { RECENT_ACCOUNT_INDEX, SECTION_AUTOLOG },

@@ -69,6 +69,7 @@ namespace SAM
                 CheckForUpdatesCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.CHECK_FOR_UPDATES, SAMSettings.SECTION_GENERAL));
                 CloseOnLoginCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.CLOSE_ON_LOGIN, SAMSettings.SECTION_GENERAL));
                 ListViewCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.LIST_VIEW, SAMSettings.SECTION_GENERAL));
+                SandboxModeCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.SANDBOX_MODE, SAMSettings.SECTION_GENERAL));
 
                 // AutoLog
                 if (Convert.ToBoolean(settings.File.Read(SAMSettings.LOGIN_RECENT_ACCOUNT, SAMSettings.SECTION_AUTOLOG)) == true)
@@ -221,6 +222,7 @@ namespace SAM
             settings.File.Write(SAMSettings.CHECK_FOR_UPDATES, CheckForUpdatesCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
             settings.File.Write(SAMSettings.CLOSE_ON_LOGIN, CloseOnLoginCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
             settings.File.Write(SAMSettings.LIST_VIEW, ListViewCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
+            settings.File.Write(SAMSettings.SANDBOX_MODE, SandboxModeCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
 
             // Customize
             settings.File.Write(SAMSettings.THEME, ThemeSelectBox.Text, SAMSettings.SECTION_CUSTOMIZE);
@@ -392,6 +394,7 @@ namespace SAM
             CheckForUpdatesCheckBox.IsChecked = settings.Default.CheckForUpdates;
             CloseOnLoginCheckBox.IsChecked = settings.Default.CloseOnLogin;
             ListViewCheckBox.IsChecked = settings.Default.ListView;
+            SandboxModeCheckBox.IsChecked = settings.Default.SandboxMode;
 
             // Ignore password protect checkbox.
             //passwordProtectCheckBox.IsChecked = settings.Default.PasswordProtect;

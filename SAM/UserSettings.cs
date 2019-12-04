@@ -19,6 +19,7 @@ namespace SAM
         public bool CheckForUpdates { get { return (bool)KeyValuePairs[SAMSettings.CHECK_FOR_UPDATES]; } set { KeyValuePairs[SAMSettings.CHECK_FOR_UPDATES] = value;  } }
         public bool CloseOnLogin { get { return (bool)KeyValuePairs[SAMSettings.CLOSE_ON_LOGIN]; } set { KeyValuePairs[SAMSettings.CHECK_FOR_UPDATES] = value; } }
         public bool ListView { get { return (bool)KeyValuePairs[SAMSettings.LIST_VIEW]; } set { KeyValuePairs[SAMSettings.LIST_VIEW] = value; } }
+        public bool SandboxMode { get { return (bool)KeyValuePairs[SAMSettings.SANDBOX_MODE]; } set { KeyValuePairs[SAMSettings.SANDBOX_MODE] = value; } }
 
         #endregion
 
@@ -123,6 +124,7 @@ namespace SAM
             { SAMSettings.CHECK_FOR_UPDATES, true },
             { SAMSettings.CLOSE_ON_LOGIN, false },
             { SAMSettings.LIST_VIEW, false },
+            { SAMSettings.SANDBOX_MODE, false },
 
             { SAMSettings.LOGIN_RECENT_ACCOUNT, false },
             { SAMSettings.RECENT_ACCOUNT_INDEX, -1 },

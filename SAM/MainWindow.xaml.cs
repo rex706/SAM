@@ -1240,30 +1240,32 @@ namespace SAM
             settings.User.RecentAccountIndex = index;
             settings.File.Write(SAMSettings.RECENT_ACCOUNT_INDEX, index.ToString(), SAMSettings.SECTION_AUTOLOG);
 
+            // Verify Steam file path.
             settings.User.SteamPath = Utils.CheckSteamPath();
 
-            // Shutdown Steam process via command if it is already open.
-            ProcessStartInfo stopInfo = new ProcessStartInfo
+            if (!settings.User.SandboxMode)
             {
-                CreateNoWindow = false,
-                UseShellExecute = true,
-                FileName = settings.User.SteamPath + "steam.exe",
-                WorkingDirectory = settings.User.SteamPath,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                Arguments = "-shutdown"
-            };
+                // Shutdown Steam process via command if it is already open.
+                ProcessStartInfo stopInfo = new ProcessStartInfo
+                {
+                    CreateNoWindow = false,
+                    UseShellExecute = true,
+                    FileName = settings.User.SteamPath + "steam.exe",
+                    WorkingDirectory = settings.User.SteamPath,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    Arguments = "-shutdown"
+                };
 
-            try
-            {
-                Process SteamProc = Process.GetProcessesByName("Steam")[0];
-
-                Process.Start(stopInfo);
-
-                SteamProc.WaitForExit();
-            }
-            catch
-            {
-                Console.WriteLine("No steam process found or steam failed to shutdown.");
+                try
+                {
+                    Process SteamProc = Process.GetProcessesByName("Steam")[0];
+                    Process.Start(stopInfo);
+                    SteamProc.WaitForExit();
+                }
+                catch
+                {
+                    Console.WriteLine("No steam process found or steam failed to shutdown.");
+                }
             }
 
             // Make sure Username field is empty and Remember Password checkbox is unchecked.
