@@ -1574,7 +1574,7 @@ namespace SAM
 
         private void SerializeAccounts()
         {
-            if (IsPasswordProtected() == true)
+            if (IsPasswordProtected() == true && ePassword.Length > 0)
             {
                 Utils.PasswordSerialize(encryptedAccounts, ePassword);
             }
