@@ -17,23 +17,22 @@ namespace SAM
         public static string latestVersion { get; set; }
 
         private static readonly string updaterFileName = "Updater.exe";
-        private static readonly string newUpdaterFileName = "Updater_new.exe";
-
-        private static readonly string updaterUrlPrefix = "https://raw.githubusercontent.com/rex706/Updater/master/";
+        private static readonly string latestUpdaterVersionUrl = "https://raw.githubusercontent.com/rex706/Updater/master/latest.txt";
 
         /// <summary>
         /// Check program for updates with the given text url.
         /// Returns 1 if the user chose not to update or 0 if there is no update available.
         /// </summary>
-        public static async Task<int> CheckForUpdate(string updateUrl, string repoUrl)
+        public static async Task<int> CheckForUpdate(string updateUrl, string releasesUrl)
         {
+            // Allows downloading files directly from GitHub repositories. 
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
             // Nkosi Note: Always use asynchronous versions of network and IO methods.
 
             // Check for version updates
             var client = new HttpClient();
             client.Timeout = new TimeSpan(0, 0, 1, 0);
-
-            await UpdaterUpdateCheck(client);
 
             try
             {
@@ -62,23 +61,46 @@ namespace SAM
                         // Update is available, and user wants to update. Requires app to close.
                         if (answer == MessageBoxResult.Yes)
                         {
+                            // Delete updater if exists.
                             if (File.Exists(updaterFileName))
                             {
-                                // Setup update process information.
-                                ProcessStartInfo startInfo = new ProcessStartInfo();
-                                startInfo.CreateNoWindow = false;
-                                startInfo.UseShellExecute = true;
-                                startInfo.FileName = updaterFileName;
-                                startInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                                startInfo.WindowStyle = ProcessWindowStyle.Normal;
-                                startInfo.Arguments = updateUrl;
+                                File.Delete(updaterFileName);
+                            }
 
-                                // Launch updater and exit.
+                            // Download latest updater.
+                            using (Stream updaterStream = await client.GetStreamAsync(latestUpdaterVersionUrl))
+                            {
+                                reader = new StreamReader(updaterStream);
+                                string latestUpdaterUrl = await reader.ReadLineAsync();
+                                await DownloadUpdater(latestUpdaterUrl);
+                            }
+
+                            // Setup update process information.
+                            ProcessStartInfo startInfo = new ProcessStartInfo();
+                            startInfo.UseShellExecute = true;
+                            startInfo.FileName = updaterFileName;
+                            startInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                            startInfo.Arguments = updateUrl;
+
+                            // Launch updater and exit.
+                            try
+                            {
                                 Process.Start(startInfo);
                             }
-                            else
+                            catch
                             {
-                                Process.Start(repoUrl);
+                                // Updater might need administrator priveleges.
+                                startInfo.Verb = "runas";
+
+                                try
+                                {
+                                    Process.Start(startInfo);
+                                }
+                                catch
+                                {
+                                    // Open browser to releases page.
+                                    Process.Start(releasesUrl);
+                                }
                             }
                             
                             Environment.Exit(0);
@@ -101,57 +123,9 @@ namespace SAM
             }
         }
 
-        private static async Task UpdaterUpdateCheck(HttpClient client)
+        private static async Task DownloadUpdater(string url)
         {
-            Version latest;
-
-            try
-            {
-                using (Stream stream = await client.GetStreamAsync(updaterUrlPrefix + "version.txt"))
-                {
-                    StreamReader reader = new StreamReader(stream);
-                    string latestVersionString = await reader.ReadLineAsync();
-                    latest = new Version(latestVersionString);
-                }
-
-                using (Stream stream = await client.GetStreamAsync(updaterUrlPrefix + "latest.txt"))
-                {
-                    StreamReader reader = new StreamReader(stream);
-
-                    string latestUpdaterUrl = await reader.ReadLineAsync();
-
-                    if (!File.Exists(updaterFileName))
-                    {
-                        await UpdateUpdater(latestUpdaterUrl);
-                    }
-                    else
-                    {
-                        Version current = new Version(FileVersionInfo.GetVersionInfo(updaterFileName).FileVersion);
-
-                        if (latest > current)
-                        {
-                            await UpdateUpdater(latestUpdaterUrl);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                //MessageBox.Show(ex.Message);
-            }
-        }
-
-        private static async Task UpdateUpdater(string url)
-        {
-            // Start downloading the file.
-            await new WebClient().DownloadFileTaskAsync(url, AppDomain.CurrentDomain.BaseDirectory + newUpdaterFileName);
-
-            // If a new version of the updater was downloaded, replace the old one.
-            if (File.Exists(newUpdaterFileName))
-            {
-                File.Delete(updaterFileName);
-                File.Move(newUpdaterFileName, updaterFileName);
-            }
+            await new WebClient().DownloadFileTaskAsync(url, AppDomain.CurrentDomain.BaseDirectory + updaterFileName);
         }
     }
 }

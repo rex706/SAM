@@ -63,6 +63,7 @@ namespace SAM
 
         private static readonly string updateCheckUrl = "https://raw.githubusercontent.com/rex706/SAM/master/latest.txt";
         private static readonly string repositoryUrl = "https://github.com/rex706/SAM";
+        private static readonly string releasesUrl = repositoryUrl + "/releases";
 
         private static bool isLoadingSettings = true;
         private static bool firstLoad = true;
@@ -134,8 +135,14 @@ namespace SAM
             ver.IsEnabled = false;
             newExistMenuItem.Items.Add(ver);
 
+            // Delete updater if exists.
+            if (File.Exists("Updater.exe"))
+            {
+                File.Delete("Updater.exe");
+            }
+
             // Check for a new version if enabled.
-            if (settings.User.CheckForUpdates && await UpdateCheck.CheckForUpdate(updateCheckUrl, repositoryUrl) == 1)
+            if (settings.User.CheckForUpdates && await UpdateCheck.CheckForUpdate(updateCheckUrl, releasesUrl) == 1)
             {
                 // An update is available, but user has chosen not to update.
                 ver.Header = "Update Available!";
@@ -1248,11 +1255,9 @@ namespace SAM
                 // Shutdown Steam process via command if it is already open.
                 ProcessStartInfo stopInfo = new ProcessStartInfo
                 {
-                    CreateNoWindow = false,
                     UseShellExecute = true,
                     FileName = settings.User.SteamPath + "steam.exe",
                     WorkingDirectory = settings.User.SteamPath,
-                    WindowStyle = ProcessWindowStyle.Hidden,
                     Arguments = "-shutdown"
                 };
 
@@ -1308,11 +1313,9 @@ namespace SAM
             // Start Steam process with the selected path.
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
-                CreateNoWindow = false,
                 UseShellExecute = true,
                 FileName = settings.User.SteamPath + "steam.exe",
                 WorkingDirectory = settings.User.SteamPath,
-                WindowStyle = ProcessWindowStyle.Hidden,
                 Arguments = parametersBuilder.ToString()
             }; 
 
@@ -1548,9 +1551,7 @@ namespace SAM
         private string Generate2FACode(string shared_secret)
         {
             SteamGuardAccount authAccount = new SteamGuardAccount { SharedSecret = shared_secret };
-
             string code = authAccount.GenerateSteamGuardCode();
-
             return code;
         }
 
