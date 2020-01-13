@@ -1017,6 +1017,7 @@ namespace SAM
             setTimeoutItem.Items.Add(customTimeoutItem);
 
             MenuItem clearTimeoutItem = new MenuItem();
+            MenuItem copyUsernameItem = new MenuItem();
             MenuItem copyPasswordItem = new MenuItem();
 
             if (!Utils.AccountHasActiveTimeout(account))
@@ -1030,6 +1031,7 @@ namespace SAM
             reloadItem.Header = "Reload";
             setTimeoutItem.Header = "Set Timeout";
             clearTimeoutItem.Header = "Clear Timeout";
+            copyUsernameItem.Header = "Copy Username";
             copyPasswordItem.Header = "Copy Password";
 
             deleteItem.Click += delegate { DeleteEntry(index); };
@@ -1043,6 +1045,7 @@ namespace SAM
             sevenDayTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(index, DateTime.Now.AddDays(7)); };
             customTimeoutItem.Click += delegate { AccountButtonSetCustomTimeout_Click(index); };
             clearTimeoutItem.Click += delegate { AccountButtonClearTimeout_Click(index); };
+            copyUsernameItem.Click += delegate { CopyUsernameToClipboard(index); };
             copyPasswordItem.Click += delegate { CopyPasswordToClipboard(index); };
 
             accountContext.Items.Add(editItem);
@@ -1918,6 +1921,12 @@ namespace SAM
             WindowState = WindowState.Normal;
         }
 
+        private void CopyUsernameToClipboard(int index)
+        {
+            Clipboard.SetText(decryptedAccounts[index].Name);
+        }
+
+        
         private void CopyPasswordToClipboard(int index)
         {
             Clipboard.SetText(decryptedAccounts[index].Password);
