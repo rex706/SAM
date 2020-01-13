@@ -1054,6 +1054,7 @@ namespace SAM
             accountContext.Items.Add(reloadItem);
             accountContext.Items.Add(setTimeoutItem);
             accountContext.Items.Add(clearTimeoutItem);
+            accountContext.Items.Add(copyUsernameItem);
             accountContext.Items.Add(copyPasswordItem);
 
             return accountContext;
