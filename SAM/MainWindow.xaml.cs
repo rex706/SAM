@@ -449,8 +449,6 @@ namespace SAM
             {
                 ReloadAccountsAsync();
             });
-
-            autoReloadApiTimer.Interval = settings.User.AutoReloadInterval;
         }
 
         public void RefreshWindow()
