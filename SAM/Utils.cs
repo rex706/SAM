@@ -596,7 +596,7 @@ namespace SAM
             return userBans;
         }
 
-        public static string HtmlAviScrape(string profUrl)
+        public static async Task<string> HtmlAviScrapeAsync(string profUrl)
         {
             // If user entered profile url, get avatar jpg url
             if (profUrl != null && profUrl.Length > 2)
@@ -609,8 +609,12 @@ namespace SAM
 
                 try
                 {
-                    HtmlDocument document = new HtmlWeb().Load(new Uri(profUrl));
-                    return document.DocumentNode.Descendants().Where(n => n.HasClass("playerAvatarAutoSizeInner")).First().FirstChild.GetAttributeValue("src", null);
+                    HtmlWeb htmlWeb = new HtmlWeb();
+                    HtmlDocument document = await htmlWeb.LoadFromWebAsync(profUrl);
+                    IEnumerable<HtmlNode> enumerable = document.DocumentNode.Descendants().Where(n => n.HasClass("playerAvatarAutoSizeInner"));
+                    HtmlNode htmlNode = enumerable.First().SelectSingleNode("img");
+                    string url = htmlNode.GetAttributeValue("src", null);
+                    return url;
                 }
                 catch (Exception e)
                 {

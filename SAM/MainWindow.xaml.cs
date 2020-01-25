@@ -537,7 +537,7 @@ namespace SAM
             }
             else
             {
-                account.AviUrl = Utils.HtmlAviScrape(account.ProfUrl);
+                account.AviUrl = await Utils.HtmlAviScrapeAsync(account.ProfUrl);
             }
 
             if (account.SteamId != null && account.SteamId.Length > 0 && Utils.ApiKeyExists())
@@ -1033,7 +1033,7 @@ namespace SAM
             copyPasswordItem.Header = "Copy Password";
 
             deleteItem.Click += delegate { DeleteEntry(index); };
-            editItem.Click += delegate { EditEntry(index); };
+            editItem.Click += delegate { EditEntryAsync(index); };
             exportItem.Click += delegate { ExportAccount(index); };
             reloadItem.Click += async delegate { await ReloadAccount_ClickAsync(index); };
             thirtyMinuteTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(index, DateTime.Now.AddMinutes(30)); };
@@ -1102,7 +1102,7 @@ namespace SAM
                 }
                 else
                 {
-                    aviUrl = Utils.HtmlAviScrape(dialog.UrlText);
+                    aviUrl = await Utils.HtmlAviScrapeAsync(dialog.UrlText);
                 }
 
                 string steamId = dialog.SteamId;
@@ -1140,7 +1140,7 @@ namespace SAM
             }
         }
 
-        private void EditEntry(int index)
+        private async Task EditEntryAsync(int index)
         {
             var dialog = new TextDialog
             {
@@ -1167,7 +1167,7 @@ namespace SAM
                 }
                 else
                 {
-                    aviUrl = Utils.HtmlAviScrape(dialog.UrlText);
+                    aviUrl = await Utils.HtmlAviScrapeAsync(dialog.UrlText);
                 }
 
                 string steamId = dialog.SteamId;
@@ -1206,7 +1206,7 @@ namespace SAM
                 catch (Exception m)
                 {
                     MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    EditEntry(index);
+                    EditEntryAsync(index);
                 }
             }
         }

@@ -107,6 +107,7 @@ namespace SAM
                 ConsoleCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.CONSOLE_PARAMETER, SAMSettings.SECTION_PARAMETERS));
                 LoginCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.LOGIN_PARAMETER, SAMSettings.SECTION_PARAMETERS));
                 DeveloperCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.DEVELOPER_PARAMETER, SAMSettings.SECTION_PARAMETERS));
+                ForceServiceCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.FORCE_SERVICE_PARAMETER, SAMSettings.SECTION_PARAMETERS));
                 ConsoleCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.FORCE_SERVICE_PARAMETER, SAMSettings.SECTION_PARAMETERS));
                 NoCacheCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.FORCE_SERVICE_PARAMETER, SAMSettings.SECTION_PARAMETERS));
                 NoVerifyFilesCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.NO_VERIFY_FILES_PARAMETER, SAMSettings.SECTION_PARAMETERS));
