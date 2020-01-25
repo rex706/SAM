@@ -707,15 +707,17 @@ namespace SAM
                 waitCount++;
             }
 
-            try
+            string path = steamPath + "\\userdata";
+
+            if (Directory.Exists(path))
             {
                 Console.WriteLine("Deleting userdata files...");
-                Directory.Delete(steamPath + "\\userdata", true);
+                Directory.Delete(path, true);
                 Console.WriteLine("userdata files deleted!");
             }
-            catch (Exception e)
+            else
             {
-                MessageBox.Show(e.Message);
+                Console.WriteLine("userdata directory not found.");
             }
         }
 
