@@ -27,6 +27,8 @@ namespace SAM
         public static extern int GetWindowTextLength(IntPtr hWnd);
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, uint dwExtraInfo);
 
         public static int API_KEY_LENGTH = 32;
         readonly static char[] specialChars = { '{', '}', '(', ')', '[', ']', '+', '^', '%', '~' };
@@ -706,6 +708,24 @@ namespace SAM
             }
 
             return process;
+        }
+
+        /**
+         * Because CapsLock is handled by system directly, thus sending
+         * it to one particular window is invalid - a window could not
+         * respond to CapsLock, only the system can.
+         * 
+         * For this reason, I break into a low-level API, which may cause
+         * an inconsistency to the original `SendWait` method.
+         * 
+         * https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-keybd_event
+         */
+        public static void SendCapsLockGlobally()
+        {
+            // Press key down
+            keybd_event((byte)System.Windows.Forms.Keys.CapsLock, 0, 0, 0);
+            // Press key up
+            keybd_event((byte)System.Windows.Forms.Keys.CapsLock, 0, 0x2, 0);
         }
 
         public static void ClearSteamUserDataFolder(string steamPath, int sleepTime, int maxRetry)

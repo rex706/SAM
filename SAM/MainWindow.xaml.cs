@@ -1487,6 +1487,13 @@ namespace SAM
 
             SetForegroundWindow(steamGuardWindow.RawPtr);
 
+            // Enable Caps-Lock, to prevent IME problems
+            bool capsLockEnabled = System.Windows.Forms.Control.IsKeyLocked(System.Windows.Forms.Keys.CapsLock);
+            if (!capsLockEnabled)
+            {
+                Utils.SendCapsLockGlobally();
+            }
+
             Thread.Sleep(10);
 
             foreach (char c in Generate2FACode(decryptedAccounts[index].SharedSecret).ToCharArray())
@@ -1508,6 +1515,12 @@ namespace SAM
             System.Windows.Forms.SendKeys.SendWait("{ENTER}");
             //SendMessage(steamGuardWindow.RawPtr, WM_KEYDOWN, VK_RETURN, IntPtr.Zero);
             //PostMessage(steamGuardWindow.RawPtr, WM_KEYDOWN, (IntPtr)VK_RETURN, IntPtr.Zero);
+
+            // Restore CapsLock back if CapsLock is off before we start typing
+            if (!capsLockEnabled)
+            {
+                Utils.SendCapsLockGlobally();
+            }
 
             // Need a little pause here to more reliably check for popup later.
             Thread.Sleep(settings.User.SleepTime);
