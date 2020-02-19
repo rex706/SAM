@@ -652,17 +652,29 @@ namespace SAM
 
         public static WindowHandle GetSteamLoginWindow()
         {
-            return TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().Contains("Steam") && !wh.GetWindowText().Contains("-") && !wh.GetWindowText().Contains("—") && wh.GetWindowText().Length > 5);
+            return TopLevelWindowUtils.FindWindow(wh => 
+            wh.GetWindowText().Contains("Steam") && 
+            !wh.GetWindowText().Contains("-") && 
+            !wh.GetWindowText().Contains("—") && 
+            wh.GetWindowText().Length > 5);
         }
 
         public static WindowHandle GetSteamGuardWindow()
         {
-            return TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam Guard"));
+            // Also checking for vguiPopupWindow class name to avoid catching things like browser tabs.
+            WindowHandle windowHandle = TopLevelWindowUtils.FindWindow(wh =>
+            wh.GetClassName().Equals("vguiPopupWindow") &&
+            (wh.GetWindowText().StartsWith("Steam Guard") ||
+             wh.GetWindowText().StartsWith("Steam 令牌") ||
+             wh.GetWindowText().StartsWith("Steam ガード")));
+            return windowHandle;
         }
 
         public static WindowHandle GetSteamWarningWindow()
         {
-            return TopLevelWindowUtils.FindWindow(wh => wh.GetWindowText().StartsWith("Steam - ") || wh.GetWindowText().StartsWith("Steam — "));
+            return TopLevelWindowUtils.FindWindow(wh => 
+            wh.GetWindowText().StartsWith("Steam - ") || 
+            wh.GetWindowText().StartsWith("Steam — "));
         }
 
         public static Process WaitForSteamProcess(WindowHandle windowHandle)
