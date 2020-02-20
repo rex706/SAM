@@ -654,11 +654,12 @@ namespace SAM
 
         public static WindowHandle GetSteamLoginWindow()
         {
-            return TopLevelWindowUtils.FindWindow(wh => 
-            wh.GetWindowText().Contains("Steam") && 
+            return TopLevelWindowUtils.FindWindow(wh =>
+            wh.GetClassName().Equals("vguiPopupWindow") && 
+            (wh.GetWindowText().Contains("Steam") && 
             !wh.GetWindowText().Contains("-") && 
             !wh.GetWindowText().Contains("—") && 
-            wh.GetWindowText().Length > 5);
+             wh.GetWindowText().Length > 5));
         }
 
         public static WindowHandle GetSteamGuardWindow()
@@ -674,9 +675,10 @@ namespace SAM
 
         public static WindowHandle GetSteamWarningWindow()
         {
-            return TopLevelWindowUtils.FindWindow(wh => 
-            wh.GetWindowText().StartsWith("Steam - ") || 
-            wh.GetWindowText().StartsWith("Steam — "));
+            return TopLevelWindowUtils.FindWindow(wh =>
+            wh.GetClassName().Equals("vguiPopupWindow") && 
+            (wh.GetWindowText().StartsWith("Steam - ") || 
+             wh.GetWindowText().StartsWith("Steam — ")));
         }
 
         public static Process WaitForSteamProcess(WindowHandle windowHandle)

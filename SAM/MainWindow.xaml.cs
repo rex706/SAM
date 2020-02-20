@@ -401,11 +401,14 @@ namespace SAM
                         interval -= Convert.ToInt32(minutesSince);
                     }
                 }
-
-                autoReloadApiTimer = new System.Timers.Timer();
-                autoReloadApiTimer.Elapsed += AutoReloadApiTimer_Elapsed;
-                autoReloadApiTimer.Interval = 60000 * interval;
-                autoReloadApiTimer.Start();
+                
+                if (interval > 0)
+                {
+                    autoReloadApiTimer = new System.Timers.Timer();
+                    autoReloadApiTimer.Elapsed += AutoReloadApiTimer_Elapsed;
+                    autoReloadApiTimer.Interval = 60000 * interval;
+                    autoReloadApiTimer.Start();
+                }
             }
             else
             {
