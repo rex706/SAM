@@ -65,11 +65,11 @@ namespace SAM
                 var ser = new XmlSerializer(typeof(List<Account>));
                 obj = ser.Deserialize(stream);
             }
-            catch
+            catch (Exception e)
             {
-                stream.Close();
-                throw new Exception("Error deserializing data file.");
+                MessageBox.Show(e.Message);
             }
+            stream.Close();
 
             return (List<Account>)obj;
         }
@@ -80,8 +80,18 @@ namespace SAM
             contents = StringCipher.Decrypt(contents, password);
 
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(contents));
-            var ser = new XmlSerializer(typeof(List<Account>));
-            object obj = ser.Deserialize(stream);
+            object obj = null;
+
+            try
+            {
+                var ser = new XmlSerializer(typeof(List<Account>));
+                obj = ser.Deserialize(stream);
+            } 
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
+
             stream.Close();
             return (List<Account>)obj;
         }
