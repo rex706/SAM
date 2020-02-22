@@ -81,6 +81,7 @@ namespace SAM
                             startInfo.FileName = updaterFileName;
                             startInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
                             startInfo.Arguments = updateUrl;
+                            startInfo.Verb = "runas";
 
                             // Launch updater and exit.
                             try
@@ -89,18 +90,8 @@ namespace SAM
                             }
                             catch
                             {
-                                // Updater might need administrator priveleges.
-                                startInfo.Verb = "runas";
-
-                                try
-                                {
-                                    Process.Start(startInfo);
-                                }
-                                catch
-                                {
-                                    // Open browser to releases page.
-                                    Process.Start(releasesUrl);
-                                }
+                                // Open browser to releases page.
+                                Process.Start(releasesUrl);
                             }
                             
                             Environment.Exit(0);
