@@ -57,42 +57,44 @@ namespace SAM
 
         public static List<Account> Deserialize(string file)
         {
-            var stream = new StreamReader(file);
             object obj = null;
 
             try
             {
+                var stream = new StreamReader(file);
                 var ser = new XmlSerializer(typeof(List<Account>));
                 obj = ser.Deserialize(stream);
+                stream.Close();
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.Message);
             }
-            stream.Close();
 
             return (List<Account>)obj;
         }
 
         public static List<Account> PasswordDeserialize(string file, string password)
         {
-            string contents = File.ReadAllText(file);
-            contents = StringCipher.Decrypt(contents, password);
-
-            var stream = new MemoryStream(Encoding.UTF8.GetBytes(contents));
             object obj = null;
 
             try
             {
+                string contents = File.ReadAllText(file);
+                contents = StringCipher.Decrypt(contents, password);
+
+                var stream = new MemoryStream(Encoding.UTF8.GetBytes(contents));
+                
                 var ser = new XmlSerializer(typeof(List<Account>));
                 obj = ser.Deserialize(stream);
+
+                stream.Close();
             } 
             catch (Exception e)
             {
                 MessageBox.Show(e.Message);
             }
 
-            stream.Close();
             return (List<Account>)obj;
         }
 
