@@ -1946,7 +1946,14 @@ namespace SAM
         
         private void CopyPasswordToClipboard(int index)
         {
-            Clipboard.SetText(decryptedAccounts[index].Password);
+            try
+            {
+                Clipboard.SetText(decryptedAccounts[index].Password);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
         }
 
         #endregion
