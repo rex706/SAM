@@ -5,7 +5,7 @@
 
 ![alt tag](https://i.imgur.com/v4eJzzH.png) ![alt tag](https://i.imgur.com/laBORcJ.png)
 
-**Latest Version:** 1.4.0.5
+**Latest Version:** 1.4.1.0
 
 [**DOWNLOAD**](https://github.com/rex706/SAM/releases)
 
