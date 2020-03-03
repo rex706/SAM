@@ -34,22 +34,12 @@ namespace SAM
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, IntPtr lParam);
 
-        #region Send/Post Message
-
-        //[DllImport("user32.dll", CharSet = CharSet.Auto)]
-        //public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, IntPtr lParam);
-
-        //[return: MarshalAs(UnmanagedType.Bool)]
-        //[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        //static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-
-        //public const int WM_SETTEXT = 0x000C;
-        //public const int WM_KEYDOWN = 0x0100;
-        //public const int WM_CHAR = 0x0102;
-        //public const int VK_RETURN = 0x0D;
-
-        #endregion
+        public const int WM_KEYDOWN = 0x0100;
+        public const int WM_CHAR = 0x0102;
+        public const int VK_RETURN = 0x0D;
 
         public static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
@@ -1508,18 +1498,14 @@ namespace SAM
                 Thread.Sleep(10);
 
                 // Can also send keys to login window handle, but nothing works unless it is the foreground window.
-                System.Windows.Forms.SendKeys.SendWait(c.ToString());
-                //SendMessage(steamGuardWindow.RawPtr, WM_CHAR, c, IntPtr.Zero);
-                //PostMessage(steamGuardWindow.RawPtr, WM_CHAR, (IntPtr)c, IntPtr.Zero);
+                SendMessage(steamGuardWindow.RawPtr, WM_CHAR, c, IntPtr.Zero);
             }
 
             SetForegroundWindow(steamGuardWindow.RawPtr);
 
             Thread.Sleep(10);
 
-            System.Windows.Forms.SendKeys.SendWait("{ENTER}");
-            //SendMessage(steamGuardWindow.RawPtr, WM_KEYDOWN, VK_RETURN, IntPtr.Zero);
-            //PostMessage(steamGuardWindow.RawPtr, WM_KEYDOWN, (IntPtr)VK_RETURN, IntPtr.Zero);
+            SendMessage(steamGuardWindow.RawPtr, WM_KEYDOWN, VK_RETURN, IntPtr.Zero);
 
             // Restore CapsLock back if CapsLock is off before we start typing
             if (!capsLockEnabled)
