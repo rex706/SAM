@@ -49,9 +49,11 @@ namespace SAM
         #endregion
 
         public const int WM_KEYDOWN = 0x0100;
+        public const int WM_KEYUP = 0x0101;
         public const int WM_CHAR = 0x0102;
         public const int VK_RETURN = 0x0D;
         public const int VK_TAB = 0x09;
+        public const int VK_SPACE = 0x20;
 
         public static int API_KEY_LENGTH = 32;
         readonly static char[] specialChars = { '{', '}', '(', ')', '[', ']', '+', '^', '%', '~' };
@@ -836,6 +838,26 @@ namespace SAM
 
                 case VirtualInputMethod.SendWait:
                     System.Windows.Forms.SendKeys.SendWait("{TAB}");
+                    break;
+            }
+        }
+
+        public static void SendSpace(IntPtr hwnd, VirtualInputMethod inputMethod)
+        {
+            switch (inputMethod)
+            {
+                case VirtualInputMethod.SendMessage:
+                    SendMessage(hwnd, WM_KEYDOWN, VK_SPACE, IntPtr.Zero);
+                    SendMessage(hwnd, WM_KEYUP, VK_SPACE, IntPtr.Zero);
+                    break;
+
+                case VirtualInputMethod.PostMessage:
+                    PostMessage(hwnd, WM_KEYDOWN, (IntPtr)VK_SPACE, IntPtr.Zero);
+                    PostMessage(hwnd, WM_KEYUP, (IntPtr)VK_SPACE, IntPtr.Zero);
+                    break;
+
+                case VirtualInputMethod.SendWait:
+                    System.Windows.Forms.SendKeys.SendWait(" ");
                     break;
             }
         }

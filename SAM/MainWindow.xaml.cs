@@ -1390,8 +1390,7 @@ namespace SAM
                 Thread.Sleep(100);
                 Utils.SendTab(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod);
                 Thread.Sleep(100);
-                Utils.SendCharacter(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod, ' ');
-                //System.Windows.Forms.SendKeys.SendWait(" ");
+                Utils.SendSpace(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod);
             }
 
             Utils.SetForegroundWindow(steamLoginWindow.RawPtr);
