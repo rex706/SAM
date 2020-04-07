@@ -31,16 +31,6 @@ namespace SAM
     {
         #region Globals
 
-        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, IntPtr lParam);
-
-        public const int WM_KEYDOWN = 0x0100;
-        public const int WM_CHAR = 0x0102;
-        public const int VK_RETURN = 0x0D;
-
         public static List<Account> encryptedAccounts;
         private static List<Account> decryptedAccounts;
         private static Dictionary<int, Account> exportAccounts;
@@ -318,6 +308,10 @@ namespace SAM
                             {
                                 settings.User.ButtonSize = buttonSize;
                             }
+                            break;
+
+                        case SAMSettings.INPUT_METHOD:
+                            settings.User.VirtualInputMethod = (VirtualInputMethod)Enum.Parse(typeof(VirtualInputMethod), settings.File.Read(SAMSettings.INPUT_METHOD, SAMSettings.SECTION_AUTOLOG));
                             break;
 
                         default:
@@ -1368,45 +1362,42 @@ namespace SAM
             steamLoginProcess.WaitForInputIdle();
 
             Thread.Sleep(settings.User.SleepTime);
-
-            SetForegroundWindow(steamLoginWindow.RawPtr);
+            Utils.SetForegroundWindow(steamLoginWindow.RawPtr);
+            Thread.Sleep(100);
             
+            foreach (char c in decryptedAccounts[index].Name.ToCharArray())
+            {
+                Utils.SetForegroundWindow(steamLoginWindow.RawPtr);
+                Thread.Sleep(10);
+                Utils.SendCharacter(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod, c);
+            }
+
             Thread.Sleep(100);
-            System.Windows.Forms.SendKeys.SendWait(decryptedAccounts[index].Name);
-            Thread.Sleep(100);
-            System.Windows.Forms.SendKeys.SendWait("{TAB}");
+            Utils.SendTab(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod);
             Thread.Sleep(100);
 
             foreach (char c in decryptedAccounts[index].Password.ToCharArray())
             {
-                SetForegroundWindow(steamLoginWindow.RawPtr);
-
+                Utils.SetForegroundWindow(steamLoginWindow.RawPtr);
                 Thread.Sleep(10);
-
-                if (Utils.IsSpecialCharacter(c))
-                {
-                    System.Windows.Forms.SendKeys.SendWait("{" + c.ToString() + "}");
-                }
-                else
-                {
-                    System.Windows.Forms.SendKeys.SendWait(c.ToString());
-                }
+                Utils.SendCharacter(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod, c);
             }
 
             if (settings.User.RememberPassword)
             {
-                SetForegroundWindow(steamLoginWindow.RawPtr);
+                Utils.SetForegroundWindow(steamLoginWindow.RawPtr);
 
                 Thread.Sleep(100);
-                System.Windows.Forms.SendKeys.SendWait("{TAB}");
+                Utils.SendTab(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod);
                 Thread.Sleep(100);
-                System.Windows.Forms.SendKeys.SendWait(" ");
+                Utils.SendCharacter(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod, ' ');
+                //System.Windows.Forms.SendKeys.SendWait(" ");
             }
 
-            SetForegroundWindow(steamLoginWindow.RawPtr);
+            Utils.SetForegroundWindow(steamLoginWindow.RawPtr);
 
             Thread.Sleep(100);
-            System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+            Utils.SendEnter(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod);
 
             int waitCount = 0;
 
@@ -1480,11 +1471,11 @@ namespace SAM
             // Generate 2FA code, then send it to the client.
             Console.WriteLine("It is idle now, typing code...");
 
-            SetForegroundWindow(steamGuardWindow.RawPtr);
+            Utils.SetForegroundWindow(steamGuardWindow.RawPtr);
 
-            // Enable Caps-Lock, to prevent IME problems
+            // Enable Caps-Lock, to prevent IME problems.
             bool capsLockEnabled = System.Windows.Forms.Control.IsKeyLocked(System.Windows.Forms.Keys.CapsLock);
-            if (!capsLockEnabled)
+            if (settings.User.HandleMicrosoftIME && !capsLockEnabled)
             {
                 Utils.SendCapsLockGlobally();
             }
@@ -1493,22 +1484,21 @@ namespace SAM
 
             foreach (char c in Generate2FACode(decryptedAccounts[index].SharedSecret).ToCharArray())
             {
-                SetForegroundWindow(steamGuardWindow.RawPtr);
-                
+                Utils.SetForegroundWindow(steamGuardWindow.RawPtr);
                 Thread.Sleep(10);
 
                 // Can also send keys to login window handle, but nothing works unless it is the foreground window.
-                SendMessage(steamGuardWindow.RawPtr, WM_CHAR, c, IntPtr.Zero);
+                Utils.SendCharacter(steamGuardWindow.RawPtr, settings.User.VirtualInputMethod, c);
             }
 
-            SetForegroundWindow(steamGuardWindow.RawPtr);
+            Utils.SetForegroundWindow(steamGuardWindow.RawPtr);
 
             Thread.Sleep(10);
 
-            SendMessage(steamGuardWindow.RawPtr, WM_KEYDOWN, VK_RETURN, IntPtr.Zero);
+            Utils.SendEnter(steamGuardWindow.RawPtr, settings.User.VirtualInputMethod);
 
-            // Restore CapsLock back if CapsLock is off before we start typing
-            if (!capsLockEnabled)
+            // Restore CapsLock back if CapsLock is off before we start typing.
+            if (settings.User.HandleMicrosoftIME && !capsLockEnabled)
             {
                 Utils.SendCapsLockGlobally();
             }

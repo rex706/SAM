@@ -21,14 +21,37 @@ namespace SAM
 {
     class Utils
     {
+        #region dll imports
+
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern int GetWindowThreadProcessId(IntPtr handle, out int processId);
+
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern int GetWindowTextLength(IntPtr hWnd);
+
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, IntPtr lParam);
+
+        [return: MarshalAs(UnmanagedType.Bool)]
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, uint dwExtraInfo);
+
+        #endregion
+
+        public const int WM_KEYDOWN = 0x0100;
+        public const int WM_CHAR = 0x0102;
+        public const int VK_RETURN = 0x0D;
+        public const int VK_TAB = 0x09;
 
         public static int API_KEY_LENGTH = 32;
         readonly static char[] specialChars = { '{', '}', '(', ')', '[', ']', '+', '^', '%', '~' };
@@ -740,6 +763,113 @@ namespace SAM
             keybd_event((byte)System.Windows.Forms.Keys.CapsLock, 0, 0, 0);
             // Press key up
             keybd_event((byte)System.Windows.Forms.Keys.CapsLock, 0, 0x2, 0);
+        }
+
+        public static void SendCharacter(IntPtr hwnd, VirtualInputMethod inputMethod, char c)
+        {
+            switch (inputMethod)
+            {
+                case VirtualInputMethod.SendMessage:
+                    SendMessage(hwnd, WM_CHAR, c, IntPtr.Zero);
+                    break;
+
+                case VirtualInputMethod.PostMessage:
+                    PostMessage(hwnd, WM_CHAR, (IntPtr)c, IntPtr.Zero);
+                    break;
+
+                case VirtualInputMethod.keybd_event:
+
+                    System.Windows.Forms.Keys key = (System.Windows.Forms.Keys)Enum.Parse(typeof(System.Windows.Forms.Keys), c.ToString().ToUpper());
+
+                    // Press key down
+                    keybd_event((byte)key, 0, 0, 0);
+                    // Press key up
+                    keybd_event((byte)key, 0, 0x2, 0);
+                    break;
+
+                default:
+                    if (Utils.IsSpecialCharacter(c))
+                    {
+                        if (inputMethod == VirtualInputMethod.SendWait)
+                        {
+                            System.Windows.Forms.SendKeys.SendWait("{" + c.ToString() + "}");
+                        }
+                        else
+                        {
+                            System.Windows.Forms.SendKeys.Send("{" + c.ToString() + "}");
+                        }
+                    }
+                    else
+                    {
+                        if (inputMethod == VirtualInputMethod.SendWait)
+                        {
+                            System.Windows.Forms.SendKeys.SendWait(c.ToString());
+                        }
+                        else
+                        {
+                            System.Windows.Forms.SendKeys.Send(c.ToString());
+                        }
+                    }
+                    break;
+            }
+        }
+
+        public static void SendEnter(IntPtr hwnd, VirtualInputMethod inputMethod)
+        {
+            switch (inputMethod)
+            {
+                case VirtualInputMethod.SendMessage:
+                    SendMessage(hwnd, WM_KEYDOWN, VK_RETURN, IntPtr.Zero);
+                    break;
+
+                case VirtualInputMethod.PostMessage:
+                    PostMessage(hwnd, WM_KEYDOWN, (IntPtr)VK_RETURN, IntPtr.Zero);
+                    break;
+
+                case VirtualInputMethod.SendWait:
+                    System.Windows.Forms.SendKeys.SendWait("{ENTER}");
+                    break;
+
+                case VirtualInputMethod.Send:
+                    System.Windows.Forms.SendKeys.Send("{ENTER}");
+                    break;
+
+                case VirtualInputMethod.keybd_event:
+                    // Press key down
+                    keybd_event((byte)System.Windows.Forms.Keys.Enter, 0, 0, 0);
+                    // Press key up
+                    keybd_event((byte)System.Windows.Forms.Keys.Enter, 0, 0x2, 0);
+                    break;
+            }
+        }
+
+        public static void SendTab(IntPtr hwnd, VirtualInputMethod inputMethod)
+        {
+            switch (inputMethod)
+            {
+                case VirtualInputMethod.SendMessage:
+                    SendMessage(hwnd, WM_KEYDOWN, VK_TAB, IntPtr.Zero);
+                    break;
+
+                case VirtualInputMethod.PostMessage:
+                    PostMessage(hwnd, WM_KEYDOWN, (IntPtr)VK_TAB, IntPtr.Zero);
+                    break;
+
+                case VirtualInputMethod.SendWait:
+                    System.Windows.Forms.SendKeys.SendWait("{TAB}");
+                    break;
+
+                case VirtualInputMethod.Send:
+                    System.Windows.Forms.SendKeys.Send("{TAB}");
+                    break;
+
+                case VirtualInputMethod.keybd_event:
+                    // Press key down
+                    keybd_event((byte)System.Windows.Forms.Keys.Tab, 0, 0, 0);
+                    // Press key up
+                    keybd_event((byte)System.Windows.Forms.Keys.Tab, 0, 0x2, 0);
+                    break;
+            }
         }
 
         public static void ClearSteamUserDataFolder(string steamPath, int sleepTime, int maxRetry)

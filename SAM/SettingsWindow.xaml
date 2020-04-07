@@ -48,11 +48,15 @@
             </TabItem>
             <TabItem Header="Auto-Login">
                 <Grid>
-                    <CheckBox x:Name="mostRecentCheckBox" Content="Most recent:" HorizontalAlignment="Left" Margin="17,61,0,0" VerticalAlignment="Top" Checked="AutologRecentCheckBox_Checked" Unchecked="AutologRecentCheckBox_Unchecked"/>
-                    <CheckBox x:Name="selectedAccountCheckBox" Content="Pre-selected:" HorizontalAlignment="Left" Margin="17,109,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.465,-0.933" Checked="SelectedAccountLabel_Checked" Unchecked="SelectedAccountLabel_Unchecked"/>
-                    <TextBlock x:Name="selectedAccountLabel" Text="" HorizontalAlignment="Left" Margin="121,111,0,0" VerticalAlignment="Top"/>
-                    <TextBlock x:Name="recentAccountLabel" Text="" HorizontalAlignment="Left" Margin="121,61,0,0" VerticalAlignment="Top"/>
-                    <TextBlock Text="Only triggers if Steam is closed" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" TextDecorations="Underline"/>
+                    <CheckBox x:Name="mostRecentCheckBox" Content="Most recent:" HorizontalAlignment="Left" Margin="17,38,0,0" VerticalAlignment="Top" Checked="AutologRecentCheckBox_Checked" Unchecked="AutologRecentCheckBox_Unchecked" ToolTip="Log in the most recently used account when SAM starts if Steam is closed."/>
+                    <TextBlock x:Name="recentAccountLabel" Text="" HorizontalAlignment="Left" Margin="121,38,0,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="selectedAccountCheckBox" Content="Pre-selected:" HorizontalAlignment="Left" Margin="17,66,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.465,-0.933" Checked="SelectedAccountLabel_Checked" Unchecked="SelectedAccountLabel_Unchecked" ToolTip="Login the selected auto account when SAM starts if Steam is closed."/>
+                    <TextBlock x:Name="selectedAccountLabel" Text="" HorizontalAlignment="Left" Margin="121,66,0,0" VerticalAlignment="Top"/>
+                    <TextBlock Text="Auto accounts only trigger if Steam is closed" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" TextDecorations="Underline"/>
+                    <TextBlock Text="Automatic Input Method:" HorizontalAlignment="Center" Margin="17,122,187,0" VerticalAlignment="Top"/>
+                    <CheckBox x:Name="HandleImeCheckBox" Content="Handle Microsoft IME" HorizontalAlignment="Left" Margin="17,153,0,0" VerticalAlignment="Top" ToolTip="Toggle Caps-Lock when automatically entering characters to handle IME for international keyboard settings."/>
+                    <ComboBox x:Name="InputMethodSelectBox" HorizontalAlignment="Left" Margin="159,118,0,0" VerticalAlignment="Top" Width="154"/>
+                    <Rectangle HorizontalAlignment="Left" Height="3" Margin="10,101,0,0" VerticalAlignment="Top" Width="318" Fill="{DynamicResource xctkForegoundBrush}"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Customize" mah:ControlsHelper.HeaderFontSize="{DynamicResource TabItemFontSize}">

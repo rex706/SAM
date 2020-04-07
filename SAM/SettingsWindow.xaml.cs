@@ -3,6 +3,7 @@ using MahApps.Metro.Controls;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -50,6 +51,8 @@ namespace SAM
 
             this.Loaded += new RoutedEventHandler(SettingsWindow_Loaded);
             this.Decrypt = false;
+
+            InputMethodSelectBox.ItemsSource = Enum.GetValues(typeof(VirtualInputMethod)).Cast<VirtualInputMethod>();
         }
 
         private void SettingsWindow_Loaded(object sender, RoutedEventArgs e)
@@ -82,6 +85,8 @@ namespace SAM
                     selectedAccountCheckBox.IsChecked = true;
                     selectedAccountLabel.Text = MainWindow.encryptedAccounts[Int32.Parse(settings.File.Read(SAMSettings.SELECTED_ACCOUNT_INDEX, SAMSettings.SECTION_AUTOLOG))].Name;
                 }
+                InputMethodSelectBox.SelectedItem = (VirtualInputMethod)Enum.Parse(typeof(VirtualInputMethod), settings.File.Read(SAMSettings.INPUT_METHOD, SAMSettings.SECTION_AUTOLOG));
+                HandleImeCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.HANDLE_IME, SAMSettings.SECTION_AUTOLOG));
 
                 // Customize
                 ThemeSelectBox.Text = settings.File.Read(SAMSettings.THEME, SAMSettings.SECTION_CUSTOMIZE);
@@ -240,6 +245,8 @@ namespace SAM
             // AutoLog
             settings.File.Write(SAMSettings.LOGIN_RECENT_ACCOUNT, mostRecentCheckBox.IsChecked.ToString(), SAMSettings.SECTION_AUTOLOG);
             settings.File.Write(SAMSettings.LOGIN_RECENT_ACCOUNT, selectedAccountCheckBox.IsChecked.ToString(), SAMSettings.SECTION_AUTOLOG);
+            settings.File.Write(SAMSettings.INPUT_METHOD, InputMethodSelectBox.SelectedItem.ToString(), SAMSettings.SECTION_AUTOLOG);
+            settings.File.Write(SAMSettings.HANDLE_IME, HandleImeCheckBox.IsChecked.ToString(), SAMSettings.SECTION_AUTOLOG);
 
             // Steam
             settings.File.Write(SAMSettings.STEAM_PATH, SteamPathTextBox.Text, SAMSettings.SECTION_STEAM);
@@ -402,6 +409,8 @@ namespace SAM
 
             mostRecentCheckBox.IsChecked = settings.Default.LoginRecentAccount;
             selectedAccountCheckBox.IsChecked = settings.Default.LoginSelectedAccount;
+            InputMethodSelectBox.SelectedItem = settings.Default.VirtualInputMethod;
+            HandleImeCheckBox.IsChecked = settings.Default.HandleMicrosoftIME;
             
             SteamPathTextBox.Text = Utils.CheckSteamPath();
             ApiKeyTextBox.Text = settings.Default.ApiKey;

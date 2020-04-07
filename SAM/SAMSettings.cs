@@ -36,6 +36,8 @@ namespace SAM
         public const string RECENT_ACCOUNT_INDEX = "RecentAccountIndex";
         public const string LOGIN_SELECTED_ACCOUNT = "LoginSelectedAccount";
         public const string SELECTED_ACCOUNT_INDEX = "SelectedAccountIndex";
+        public const string INPUT_METHOD = "InputMethod";
+        public const string HANDLE_IME = "HandleIME";
 
         public const string THEME = "Theme";
         public const string ACCENT = "Accent";
@@ -105,6 +107,8 @@ namespace SAM
             { RECENT_ACCOUNT_INDEX, SECTION_AUTOLOG },
             { LOGIN_SELECTED_ACCOUNT, SECTION_AUTOLOG },
             { SELECTED_ACCOUNT_INDEX, SECTION_AUTOLOG },
+            { INPUT_METHOD, SECTION_AUTOLOG },
+            { HANDLE_IME, SECTION_AUTOLOG },
 
             { THEME, SECTION_CUSTOMIZE },
             { ACCENT, SECTION_CUSTOMIZE },
