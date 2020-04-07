@@ -777,16 +777,6 @@ namespace SAM
                     PostMessage(hwnd, WM_CHAR, (IntPtr)c, IntPtr.Zero);
                     break;
 
-                case VirtualInputMethod.keybd_event:
-
-                    System.Windows.Forms.Keys key = (System.Windows.Forms.Keys)Enum.Parse(typeof(System.Windows.Forms.Keys), c.ToString().ToUpper());
-
-                    // Press key down
-                    keybd_event((byte)key, 0, 0, 0);
-                    // Press key up
-                    keybd_event((byte)key, 0, 0x2, 0);
-                    break;
-
                 default:
                     if (Utils.IsSpecialCharacter(c))
                     {
@@ -829,17 +819,6 @@ namespace SAM
                 case VirtualInputMethod.SendWait:
                     System.Windows.Forms.SendKeys.SendWait("{ENTER}");
                     break;
-
-                case VirtualInputMethod.Send:
-                    System.Windows.Forms.SendKeys.Send("{ENTER}");
-                    break;
-
-                case VirtualInputMethod.keybd_event:
-                    // Press key down
-                    keybd_event((byte)System.Windows.Forms.Keys.Enter, 0, 0, 0);
-                    // Press key up
-                    keybd_event((byte)System.Windows.Forms.Keys.Enter, 0, 0x2, 0);
-                    break;
             }
         }
 
@@ -857,17 +836,6 @@ namespace SAM
 
                 case VirtualInputMethod.SendWait:
                     System.Windows.Forms.SendKeys.SendWait("{TAB}");
-                    break;
-
-                case VirtualInputMethod.Send:
-                    System.Windows.Forms.SendKeys.Send("{TAB}");
-                    break;
-
-                case VirtualInputMethod.keybd_event:
-                    // Press key down
-                    keybd_event((byte)System.Windows.Forms.Keys.Tab, 0, 0, 0);
-                    // Press key up
-                    keybd_event((byte)System.Windows.Forms.Keys.Tab, 0, 0x2, 0);
                     break;
             }
         }

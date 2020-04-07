@@ -4,8 +4,6 @@
     {
         SendMessage,
         PostMessage,
-        Send,
-        SendWait,
-        keybd_event
+        SendWait
     }
 }

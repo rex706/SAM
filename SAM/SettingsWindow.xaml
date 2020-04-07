@@ -56,7 +56,7 @@
                     <TextBlock Text="Automatic Input Method:" HorizontalAlignment="Center" Margin="17,122,187,0" VerticalAlignment="Top"/>
                     <CheckBox x:Name="HandleImeCheckBox" Content="Handle Microsoft IME" HorizontalAlignment="Left" Margin="17,153,0,0" VerticalAlignment="Top" ToolTip="Toggle Caps-Lock when automatically entering characters to handle IME for international keyboard settings."/>
                     <ComboBox x:Name="InputMethodSelectBox" HorizontalAlignment="Left" Margin="159,118,0,0" VerticalAlignment="Top" Width="154"/>
-                    <Rectangle HorizontalAlignment="Left" Height="3" Margin="10,101,0,0" VerticalAlignment="Top" Width="318" Fill="{DynamicResource xctkForegoundBrush}"/>
+                    <Rectangle HorizontalAlignment="Left" Height="1" Margin="10,102,0,0" VerticalAlignment="Top" Width="318" Fill="{DynamicResource xctkForegoundBrush}"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Customize" mah:ControlsHelper.HeaderFontSize="{DynamicResource TabItemFontSize}">
