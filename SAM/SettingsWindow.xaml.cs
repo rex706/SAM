@@ -87,6 +87,7 @@ namespace SAM
                 }
                 InputMethodSelectBox.SelectedItem = (VirtualInputMethod)Enum.Parse(typeof(VirtualInputMethod), settings.File.Read(SAMSettings.INPUT_METHOD, SAMSettings.SECTION_AUTOLOG));
                 HandleImeCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.HANDLE_IME, SAMSettings.SECTION_AUTOLOG));
+                SteamGuardOnlyCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.IME_2FA_ONLY, SAMSettings.SECTION_AUTOLOG));
 
                 // Customize
                 ThemeSelectBox.Text = settings.File.Read(SAMSettings.THEME, SAMSettings.SECTION_CUSTOMIZE);
@@ -247,6 +248,7 @@ namespace SAM
             settings.File.Write(SAMSettings.LOGIN_RECENT_ACCOUNT, selectedAccountCheckBox.IsChecked.ToString(), SAMSettings.SECTION_AUTOLOG);
             settings.File.Write(SAMSettings.INPUT_METHOD, InputMethodSelectBox.SelectedItem.ToString(), SAMSettings.SECTION_AUTOLOG);
             settings.File.Write(SAMSettings.HANDLE_IME, HandleImeCheckBox.IsChecked.ToString(), SAMSettings.SECTION_AUTOLOG);
+            settings.File.Write(SAMSettings.IME_2FA_ONLY, SteamGuardOnlyCheckBox.IsChecked.ToString(), SAMSettings.SECTION_AUTOLOG);
 
             // Steam
             settings.File.Write(SAMSettings.STEAM_PATH, SteamPathTextBox.Text, SAMSettings.SECTION_STEAM);
@@ -411,6 +413,7 @@ namespace SAM
             selectedAccountCheckBox.IsChecked = settings.Default.LoginSelectedAccount;
             InputMethodSelectBox.SelectedItem = settings.Default.VirtualInputMethod;
             HandleImeCheckBox.IsChecked = settings.Default.HandleMicrosoftIME;
+            SteamGuardOnlyCheckBox.IsChecked = settings.Default.IME2FAOnly;
             
             SteamPathTextBox.Text = Utils.CheckSteamPath();
             ApiKeyTextBox.Text = settings.Default.ApiKey;
@@ -485,6 +488,17 @@ namespace SAM
         private void CustomParamsHelpButton_Click(object sender, RoutedEventArgs e)
         {
             Process.Start("https://developer.valvesoftware.com/wiki/Command_Line_Options#Steam_.28Windows.29");
+        }
+
+        private void HandleImeCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            SteamGuardOnlyCheckBox.IsEnabled = true;
+        }
+
+        private void HandleImeCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            SteamGuardOnlyCheckBox.IsEnabled = false;
+            SteamGuardOnlyCheckBox.IsChecked = false;
         }
     }
 }

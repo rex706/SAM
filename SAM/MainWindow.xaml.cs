@@ -1364,7 +1364,14 @@ namespace SAM
             Thread.Sleep(settings.User.SleepTime);
             Utils.SetForegroundWindow(steamLoginWindow.RawPtr);
             Thread.Sleep(100);
-            
+
+            // Enable Caps-Lock, to prevent IME problems.
+            bool capsLockEnabled = System.Windows.Forms.Control.IsKeyLocked(System.Windows.Forms.Keys.CapsLock);
+            if (settings.User.HandleMicrosoftIME && !settings.User.IME2FAOnly && !capsLockEnabled)
+            {
+                Utils.SendCapsLockGlobally();
+            }
+
             foreach (char c in decryptedAccounts[index].Name.ToCharArray())
             {
                 Utils.SetForegroundWindow(steamLoginWindow.RawPtr);
@@ -1397,6 +1404,12 @@ namespace SAM
 
             Thread.Sleep(100);
             Utils.SendEnter(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod);
+
+            // Restore CapsLock back if CapsLock is off before we start typing.
+            if (settings.User.HandleMicrosoftIME && !settings.User.IME2FAOnly && !capsLockEnabled)
+            {
+                Utils.SendCapsLockGlobally();
+            }
 
             int waitCount = 0;
 

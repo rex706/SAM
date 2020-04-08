@@ -38,6 +38,7 @@ namespace SAM
         public const string SELECTED_ACCOUNT_INDEX = "SelectedAccountIndex";
         public const string INPUT_METHOD = "InputMethod";
         public const string HANDLE_IME = "HandleIME";
+        public const string IME_2FA_ONLY = "IME_2FA_ONLY";
 
         public const string THEME = "Theme";
         public const string ACCENT = "Accent";
@@ -109,6 +110,7 @@ namespace SAM
             { SELECTED_ACCOUNT_INDEX, SECTION_AUTOLOG },
             { INPUT_METHOD, SECTION_AUTOLOG },
             { HANDLE_IME, SECTION_AUTOLOG },
+            { IME_2FA_ONLY, SECTION_AUTOLOG },
 
             { THEME, SECTION_CUSTOMIZE },
             { ACCENT, SECTION_CUSTOMIZE },

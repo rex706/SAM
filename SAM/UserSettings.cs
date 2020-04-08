@@ -31,6 +31,7 @@ namespace SAM
         public int SelectedAccountIndex { get { return (int)KeyValuePairs[SAMSettings.SELECTED_ACCOUNT_INDEX]; } set { KeyValuePairs[SAMSettings.SELECTED_ACCOUNT_INDEX] = value; } }
         public VirtualInputMethod VirtualInputMethod { get { return (VirtualInputMethod)KeyValuePairs[SAMSettings.INPUT_METHOD]; } set { KeyValuePairs[SAMSettings.INPUT_METHOD] = value; } }
         public bool HandleMicrosoftIME { get { return (bool)KeyValuePairs[SAMSettings.HANDLE_IME]; } set { KeyValuePairs[SAMSettings.HANDLE_IME] = value; } }
+        public bool IME2FAOnly { get { return (bool)KeyValuePairs[SAMSettings.IME_2FA_ONLY]; } set { KeyValuePairs[SAMSettings.IME_2FA_ONLY] = value; } }
 
         #endregion
 
@@ -134,6 +135,7 @@ namespace SAM
             { SAMSettings.SELECTED_ACCOUNT_INDEX, -1 },
             { SAMSettings.INPUT_METHOD, VirtualInputMethod.SendMessage },
             { SAMSettings.HANDLE_IME, false },
+            { SAMSettings.IME_2FA_ONLY, false },
 
             { SAMSettings.STEAM_PATH, string.Empty },
             { SAMSettings.STEAM_API_KEY, string.Empty },

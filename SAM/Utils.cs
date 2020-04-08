@@ -812,10 +812,12 @@ namespace SAM
             {
                 case VirtualInputMethod.SendMessage:
                     SendMessage(hwnd, WM_KEYDOWN, VK_RETURN, IntPtr.Zero);
+                    SendMessage(hwnd, WM_KEYUP, VK_RETURN, IntPtr.Zero);
                     break;
 
                 case VirtualInputMethod.PostMessage:
                     PostMessage(hwnd, WM_KEYDOWN, (IntPtr)VK_RETURN, IntPtr.Zero);
+                    PostMessage(hwnd, WM_KEYUP, (IntPtr)VK_RETURN, IntPtr.Zero);
                     break;
 
                 case VirtualInputMethod.SendWait:
@@ -830,10 +832,12 @@ namespace SAM
             {
                 case VirtualInputMethod.SendMessage:
                     SendMessage(hwnd, WM_KEYDOWN, VK_TAB, IntPtr.Zero);
+                    SendMessage(hwnd, WM_KEYUP, VK_TAB, IntPtr.Zero);
                     break;
 
                 case VirtualInputMethod.PostMessage:
                     PostMessage(hwnd, WM_KEYDOWN, (IntPtr)VK_TAB, IntPtr.Zero);
+                    PostMessage(hwnd, WM_KEYUP, (IntPtr)VK_TAB, IntPtr.Zero);
                     break;
 
                 case VirtualInputMethod.SendWait:
