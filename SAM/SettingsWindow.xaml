@@ -57,7 +57,7 @@
                     <CheckBox x:Name="HandleImeCheckBox" Content="Handle Microsoft IME" HorizontalAlignment="Left" Margin="17,153,0,0" VerticalAlignment="Top" ToolTip="Toggle Caps-Lock when automatically entering characters to handle IME for international keyboard settings." Checked="HandleImeCheckBox_Checked" Unchecked="HandleImeCheckBox_Unchecked"/>
                     <ComboBox x:Name="InputMethodSelectBox" HorizontalAlignment="Left" Margin="159,118,0,0" VerticalAlignment="Top" Width="154"/>
                     <Rectangle HorizontalAlignment="Left" Height="1" Margin="10,102,0,0" VerticalAlignment="Top" Width="318" Fill="{DynamicResource xctkForegoundBrush}"/>
-                    <CheckBox x:Name="SteamGuardOnlyCheckBox" Content="2FA Only" HorizontalAlignment="Left" Margin="184,153,0,0" VerticalAlignment="Top" ToolTip="Only toggle Caps-Lock for the Steam Guard 2FA window." IsEnabled="False"/>
+                    <CheckBox x:Name="SteamGuardOnlyCheckBox" Content="Steam Guard Only" HorizontalAlignment="Left" Margin="193,153,0,0" VerticalAlignment="Top" ToolTip="Only toggle Caps-Lock for the Steam Guard 2FA window." IsEnabled="False"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Customize" mah:ControlsHelper.HeaderFontSize="{DynamicResource TabItemFontSize}">

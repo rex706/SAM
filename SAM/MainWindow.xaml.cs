@@ -342,7 +342,7 @@ namespace SAM
                 }
             }
 
-            //Load and validate saved window loaction.
+            //Load and validate saved window location.
             if (settings.File.KeyExists(SAMSettings.WINDOW_LEFT, SAMSettings.SECTION_LOCATION) && settings.File.KeyExists(SAMSettings.WINDOW_TOP, SAMSettings.SECTION_LOCATION))
             {
                 Left = Double.Parse(settings.File.Read(SAMSettings.WINDOW_LEFT, SAMSettings.SECTION_LOCATION));
@@ -1006,6 +1006,7 @@ namespace SAM
             MenuItem clearTimeoutItem = new MenuItem();
             MenuItem copyUsernameItem = new MenuItem();
             MenuItem copyPasswordItem = new MenuItem();
+            MenuItem copyProfileUrlItem = new MenuItem();
 
             if (!Utils.AccountHasActiveTimeout(account))
             {
@@ -1020,6 +1021,7 @@ namespace SAM
             clearTimeoutItem.Header = "Clear Timeout";
             copyUsernameItem.Header = "Copy Username";
             copyPasswordItem.Header = "Copy Password";
+            copyProfileUrlItem.Header = "Copy Profile URL";
 
             deleteItem.Click += delegate { DeleteEntry(index); };
             editItem.Click += delegate { EditEntryAsync(index); };
@@ -1034,6 +1036,7 @@ namespace SAM
             clearTimeoutItem.Click += delegate { AccountButtonClearTimeout_Click(index); };
             copyUsernameItem.Click += delegate { CopyUsernameToClipboard(index); };
             copyPasswordItem.Click += delegate { CopyPasswordToClipboard(index); };
+            copyProfileUrlItem.Click += delegate { CopyProfileUrlToClipboard(index); };
 
             accountContext.Items.Add(editItem);
             accountContext.Items.Add(deleteItem);
@@ -1043,6 +1046,7 @@ namespace SAM
             accountContext.Items.Add(clearTimeoutItem);
             accountContext.Items.Add(copyUsernameItem);
             accountContext.Items.Add(copyPasswordItem);
+            accountContext.Items.Add(copyProfileUrlItem);
 
             return accountContext;
         }
@@ -1928,7 +1932,14 @@ namespace SAM
 
         private void CopyUsernameToClipboard(int index)
         {
-            Clipboard.SetText(decryptedAccounts[index].Name);
+            try
+            {
+                Clipboard.SetText(decryptedAccounts[index].Name);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
         }
 
         
@@ -1937,6 +1948,18 @@ namespace SAM
             try
             {
                 Clipboard.SetText(decryptedAccounts[index].Password);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
+        }
+
+        private void CopyProfileUrlToClipboard(int index)
+        {
+            try
+            {
+                Clipboard.SetText(decryptedAccounts[index].ProfUrl);
             }
             catch (Exception e)
             {
