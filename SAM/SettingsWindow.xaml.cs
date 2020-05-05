@@ -245,7 +245,7 @@ namespace SAM
 
             // AutoLog
             settings.File.Write(SAMSettings.LOGIN_RECENT_ACCOUNT, mostRecentCheckBox.IsChecked.ToString(), SAMSettings.SECTION_AUTOLOG);
-            settings.File.Write(SAMSettings.LOGIN_RECENT_ACCOUNT, selectedAccountCheckBox.IsChecked.ToString(), SAMSettings.SECTION_AUTOLOG);
+            settings.File.Write(SAMSettings.LOGIN_SELECTED_ACCOUNT, selectedAccountCheckBox.IsChecked.ToString(), SAMSettings.SECTION_AUTOLOG);
             settings.File.Write(SAMSettings.INPUT_METHOD, InputMethodSelectBox.SelectedItem.ToString(), SAMSettings.SECTION_AUTOLOG);
             settings.File.Write(SAMSettings.HANDLE_IME, HandleImeCheckBox.IsChecked.ToString(), SAMSettings.SECTION_AUTOLOG);
             settings.File.Write(SAMSettings.IME_2FA_ONLY, SteamGuardOnlyCheckBox.IsChecked.ToString(), SAMSettings.SECTION_AUTOLOG);
