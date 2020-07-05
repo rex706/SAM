@@ -34,3 +34,4 @@
 * Delete userdata folder after every login toggle.
 * Set custom sleep time for waiting actions.
 * Toggle Steam client launch parameters.
+* Support for Sandbox Mode for users of Sandboxie/Avast Sandbox.
