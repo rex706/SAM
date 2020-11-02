@@ -442,7 +442,7 @@ namespace SAM
                 VObject accountsObj = accounts;
                 VToken value;
 
-                accountsObj.TryGetValue(userName, out value);
+                accountsObj.TryGetValue(userName.ToLower(), out value);
 
                 dynamic user = value;
                 VValue userId = user.SteamID;

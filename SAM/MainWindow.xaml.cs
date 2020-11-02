@@ -562,6 +562,7 @@ namespace SAM
                     string steamId = Utils.GetSteamIdFromConfig(account.Name);
                     if (steamId != null && steamId.Length > 0)
                     {
+                        account.SteamId = steamId;
                         steamIds.Add(steamId);
                     }
                     else if (account.ProfUrl != null && account.ProfUrl.Length > 0) 
