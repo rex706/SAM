@@ -275,16 +275,16 @@ namespace SAM
 
                         case SAMSettings.SLEEP_TIME:
                             string sleepTimeString = settings.File.Read(SAMSettings.SLEEP_TIME, SAMSettings.SECTION_GENERAL);
-                            int sleepTime = 0;
+                            float sleepTime = 0;
 
-                            if (!Regex.IsMatch(sleepTimeString, @"^\d+$") || !Int32.TryParse(sleepTimeString, out sleepTime) || sleepTime < 0 || sleepTime > 100)
+                            if (!Single.TryParse(sleepTimeString, out sleepTime) || sleepTime < 0 || sleepTime > 100)
                             {
                                 settings.File.Write(SAMSettings.SLEEP_TIME, settings.Default.SleepTime.ToString(), SAMSettings.SECTION_GENERAL);
                                 settings.User.SleepTime = settings.Default.SleepTime * 1000;
                             }
                             else
                             {
-                                settings.User.SleepTime = sleepTime * 1000;
+                                settings.User.SleepTime = (int)(sleepTime * 1000);
                             }
                             break;
 
@@ -1006,6 +1006,7 @@ namespace SAM
             setTimeoutItem.Items.Add(customTimeoutItem);
 
             MenuItem clearTimeoutItem = new MenuItem();
+            MenuItem copyMenuItem = new MenuItem();
             MenuItem copyUsernameItem = new MenuItem();
             MenuItem copyPasswordItem = new MenuItem();
             MenuItem copyProfileUrlItem = new MenuItem();
@@ -1021,9 +1022,10 @@ namespace SAM
             reloadItem.Header = "Reload";
             setTimeoutItem.Header = "Set Timeout";
             clearTimeoutItem.Header = "Clear Timeout";
-            copyUsernameItem.Header = "Copy Username";
-            copyPasswordItem.Header = "Copy Password";
-            copyProfileUrlItem.Header = "Copy Profile URL";
+            copyMenuItem.Header = "Copy";
+            copyUsernameItem.Header = "Username";
+            copyPasswordItem.Header = "Password";
+            copyProfileUrlItem.Header = "Profile URL";
 
             deleteItem.Click += delegate { DeleteEntry(index); };
             editItem.Click += delegate { EditEntryAsync(index); };
@@ -1046,9 +1048,12 @@ namespace SAM
             accountContext.Items.Add(reloadItem);
             accountContext.Items.Add(setTimeoutItem);
             accountContext.Items.Add(clearTimeoutItem);
-            accountContext.Items.Add(copyUsernameItem);
-            accountContext.Items.Add(copyPasswordItem);
-            accountContext.Items.Add(copyProfileUrlItem);
+
+            copyMenuItem.Items.Add(copyUsernameItem);
+            copyMenuItem.Items.Add(copyPasswordItem);
+            copyMenuItem.Items.Add(copyProfileUrlItem);
+
+            accountContext.Items.Add(copyMenuItem);
 
             return accountContext;
         }

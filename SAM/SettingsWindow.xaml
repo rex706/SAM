@@ -29,16 +29,16 @@
         <TabControl Background="{x:Null}" VerticalAlignment="Top" Height="210">
             <TabItem Header="General" Foreground="{DynamicResource xctkForegoundBrush}">
                 <Grid>
-                    <Label x:Name="NumPerRowLabel" Content="Accounts Per Row" HorizontalAlignment="Left" Margin="220,7,0,0" VerticalAlignment="Top"/>
-                    <xctk:IntegerUpDown x:Name="accountsPerRowSpinBox" Minimum="1" Maximum="999" HorizontalAlignment="Left" Height="23" Margin="175,10,0,0" VerticalAlignment="Top" Width="45" TextAlignment="Center" ToolTip="Number of accounts displayed per row" Foreground="{DynamicResource xctkForegoundBrush}"/>
+                    <Label x:Name="NumPerRowLabel" Content="Accounts Per Row" HorizontalAlignment="Left" Margin="228,7,0,0" VerticalAlignment="Top"/>
+                    <xctk:IntegerUpDown x:Name="accountsPerRowSpinBox" Minimum="1" Maximum="999" HorizontalAlignment="Left" Height="23" Margin="175,10,0,0" VerticalAlignment="Top" Width="50" TextAlignment="Center" ToolTip="Number of accounts displayed per row" Foreground="{DynamicResource xctkForegoundBrush}"/>
                     <CheckBox x:Name="startupCheckBox" Content="Start with Windows" HorizontalAlignment="Left" Margin="10,146,0,0" VerticalAlignment="Top"/>
                     <CheckBox x:Name="startupMinCheckBox" Content="Start Minimized" HorizontalAlignment="Left" Margin="10,123,0,0" VerticalAlignment="Top"/>
                     <CheckBox x:Name="minimizeToTrayCheckBox" Content="Minimize To Tray" HorizontalAlignment="Left" Margin="10,77,0,0" VerticalAlignment="Top"/>
                     <CheckBox x:Name="passwordProtectCheckBox" Content="Password Protect" HorizontalAlignment="Left" Margin="10,54,0,0" VerticalAlignment="Top" ToolTip="Password protect SAM"/>
                     <CheckBox x:Name="rememberLoginPasswordCheckBox" Content="Remember Password" HorizontalAlignment="Left" Margin="10,100,0,0" VerticalAlignment="Top" ToolTip="Checks the 'Remember my password' checkbox when logging into Steam. (Currently not working with '-login' parameter)"/>
                     <CheckBox x:Name="clearUserDataCheckBox" Content="Clear User Data" HorizontalAlignment="Left" Margin="10,8,0,0" VerticalAlignment="Top" ToolTip="Deletes all files in the '..\Steam\userdata' folder after every login"/>
-                    <xctk:IntegerUpDown x:Name="sleepTimeSpinBox" Minimum="1" Maximum="99" HorizontalAlignment="Left" Height="23" Margin="175,38,0,0" VerticalAlignment="Top" Width="45" TextAlignment="Center" ToolTip="Sleep time for waiting actions" Foreground="{DynamicResource xctkForegoundBrush}"/>
-                    <Label x:Name="sleepTimeLabel" Content="Sleep Time (sec)" HorizontalAlignment="Left" Margin="220,35,0,0" VerticalAlignment="Top" Width="104"/>
+                    <xctk:DecimalUpDown x:Name="sleepTimeSpinBox" Minimum="0" Maximum="99" Increment=".1" HorizontalAlignment="Left" Height="23" Margin="175,38,0,0" VerticalAlignment="Top" Width="50" TextAlignment="Center" ToolTip="Sleep time for waiting actions" Foreground="{DynamicResource xctkForegoundBrush}"/>
+                    <Label x:Name="sleepTimeLabel" Content="Sleep Time (sec)" HorizontalAlignment="Left" Margin="228,35,0,0" VerticalAlignment="Top" Width="104"/>
                     <CheckBox x:Name="HideAddButtonCheckBox" Content="Hide Add Button" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" ToolTip="Hide the Add account button in the button grid."/>
                     <CheckBox x:Name="CheckForUpdatesCheckBox" Content="Check For Updates" HorizontalAlignment="Left" Margin="175,123,0,0" VerticalAlignment="Top" ToolTip="Check for updates on program startup."/>
                     <CheckBox x:Name="CloseOnLoginCheckBox" Content="Close on Login" HorizontalAlignment="Left" Margin="175,100,0,0" VerticalAlignment="Top" ToolTip="Close SAM after every login."/>
