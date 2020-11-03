@@ -58,6 +58,8 @@ namespace SAM
         public static int API_KEY_LENGTH = 32;
         readonly static char[] specialChars = { '{', '}', '(', ')', '[', ']', '+', '^', '%', '~' };
 
+        private static bool loginAllCancelled = false;
+
         public static void Serialize(List<Account> accounts)
         {
             var serializer = new XmlSerializer(accounts.GetType());
@@ -446,7 +448,11 @@ namespace SAM
 
                 dynamic user = value;
                 VValue userId = user.SteamID;
-                steamId = userId.Value.ToString();
+
+                if (userId != null)
+                {
+                    steamId = userId.Value.ToString();
+                }
             }
             catch (Exception ex)
             {
@@ -718,6 +724,13 @@ namespace SAM
              wh.GetWindowText().StartsWith("Steam — ")));
         }
 
+        private static WindowHandle GetMainSteamClientWindow()
+        {
+            return TopLevelWindowUtils.FindWindow(wh =>
+            wh.GetClassName().Equals("vguiPopupWindow") &&
+            wh.GetWindowText().Equals("Steam"));
+        }
+
         public static Process WaitForSteamProcess(WindowHandle windowHandle)
         {
             Process process = null;
@@ -732,7 +745,7 @@ namespace SAM
                 // Wait for valid process id from handle.
                 while (procId == 0)
                 {
-                    Thread.Sleep(10);
+                    Thread.Sleep(100);
                     GetWindowThreadProcessId(windowHandle.RawPtr, out procId);
                 }
 
@@ -747,6 +760,49 @@ namespace SAM
             }
 
             return process;
+        }
+
+        public static WindowHandle WaitForSteamClientWindow()
+        {
+            WindowHandle steamClientWindow = WindowHandle.Invalid;
+
+            Console.WriteLine("Waiting for full Steam client to initialize.");
+
+            int waitCounter = 0;
+
+            while (!steamClientWindow.IsValid && !loginAllCancelled)
+            {
+                if (waitCounter >= 600)
+                {
+                    MessageBoxResult messageBoxResult = MessageBox.Show(
+                    "SAM has been waiting for Steam for longer than 60 seconds." +
+                    "Would you like to skip this account and continue?" +
+                    "Click No to wait another 60 seconds.",
+                    "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                    if (messageBoxResult == MessageBoxResult.Yes)
+                    {
+                        return steamClientWindow;
+                    }
+                    else
+                    {
+                        waitCounter = 0;
+                    }
+                }
+
+                steamClientWindow = GetMainSteamClientWindow();
+                Thread.Sleep(100);
+                waitCounter += 1;
+            }
+
+            loginAllCancelled = false;
+
+            return steamClientWindow;
+        }
+
+        public static void CancelLoginAll()
+        {
+            loginAllCancelled = true;
         }
 
         /**

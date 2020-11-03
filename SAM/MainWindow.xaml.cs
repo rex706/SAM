@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -66,6 +65,8 @@ namespace SAM
 
         private static bool exporting = false;
         private static bool deleting = false;
+        private static bool loginAllSequence = false;
+        private static bool loginAllCancelled = false;
 
         private static Button holdingButton = null;
         private static bool dragging = false;
@@ -73,7 +74,7 @@ namespace SAM
 
         private static System.Timers.Timer autoReloadApiTimer;
 
-        private static int maxRetry = 2;
+        private static readonly int maxRetry = 2;
 
         // Resize animation variables
         private static System.Windows.Forms.Timer _Timer = new System.Windows.Forms.Timer();
@@ -434,7 +435,7 @@ namespace SAM
 
         private void AutoReloadApiTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            this.Dispatcher.Invoke(() =>
+            Dispatcher.Invoke(() =>
             {
                 ReloadAccountsAsync();
             });
@@ -692,7 +693,7 @@ namespace SAM
 
                             timeoutTimer.Elapsed += delegate
                             {
-                                this.Dispatcher.Invoke(() =>
+                                Dispatcher.Invoke(() =>
                                 {
                                     TimeoutTimer_Tick(index, timeoutTimer);
                                 });
@@ -853,7 +854,7 @@ namespace SAM
 
                             timeoutTimer.Elapsed += delegate
                             {
-                                this.Dispatcher.Invoke(() =>
+                                Dispatcher.Invoke(() =>
                                 {
                                     TimeoutTimer_Tick(buttonIndex, timeoutTextBlock, timeoutTimer);
                                 });
@@ -884,7 +885,7 @@ namespace SAM
                                 "\nGame Bans: " + account.NumberOfGameBans +
                                 "\nCommunity Banned: " + account.CommunityBanned +
                                 "\nEconomy Ban: " + account.EconomyBan +
-                                "\nDays Since Last Ban:" + account.DaysSinceLastBan;
+                                "\nDays Since Last Ban: " + account.DaysSinceLastBan;
 
                             accountButtonGrid.Children.Add(banInfoImage);
                         }
@@ -1250,25 +1251,7 @@ namespace SAM
 
             if (!settings.User.SandboxMode)
             {
-                // Shutdown Steam process via command if it is already open.
-                ProcessStartInfo stopInfo = new ProcessStartInfo
-                {
-                    UseShellExecute = true,
-                    FileName = settings.User.SteamPath + "steam.exe",
-                    WorkingDirectory = settings.User.SteamPath,
-                    Arguments = "-shutdown"
-                };
-
-                try
-                {
-                    Process SteamProc = Process.GetProcessesByName("Steam")[0];
-                    Process.Start(stopInfo);
-                    SteamProc.WaitForExit();
-                }
-                catch
-                {
-                    Console.WriteLine("No steam process found or steam failed to shutdown.");
-                }
+                ShutdownSteam();
             }
 
             // Make sure Username field is empty and Remember Password checkbox is unchecked.
@@ -1357,7 +1340,7 @@ namespace SAM
 
             while (!steamLoginWindow.IsValid)
             {
-                Thread.Sleep(10);
+                Thread.Sleep(100);
                 steamLoginWindow = Utils.GetSteamLoginWindow();
             }
 
@@ -1466,7 +1449,7 @@ namespace SAM
 
             while (!steamLoginWindow.IsValid || !steamGuardWindow.IsValid)
             {
-                Thread.Sleep(10);
+                Thread.Sleep(100);
                 steamLoginWindow = Utils.GetSteamLoginWindow();
                 steamGuardWindow = Utils.GetSteamGuardWindow();
 
@@ -1499,7 +1482,7 @@ namespace SAM
                 Utils.SendCapsLockGlobally();
             }
 
-            Thread.Sleep(10);
+            Thread.Sleep(100);
 
             foreach (char c in Generate2FACode(decryptedAccounts[index].SharedSecret).ToCharArray())
             {
@@ -1512,7 +1495,7 @@ namespace SAM
 
             Utils.SetForegroundWindow(steamGuardWindow.RawPtr);
 
-            Thread.Sleep(10);
+            Thread.Sleep(100);
 
             Utils.SendEnter(steamGuardWindow.RawPtr, settings.User.VirtualInputMethod);
 
@@ -1553,13 +1536,16 @@ namespace SAM
 
         private void PostLogin()
         {
-            if (settings.User.ClearUserData == true)
+            if (loginAllSequence == false)
             {
-                Utils.ClearSteamUserDataFolder(settings.User.SteamPath, settings.User.SleepTime, maxRetry);
-            }
-            if (settings.User.CloseOnLogin == true)
-            {
-                Dispatcher.Invoke(delegate () { Close(); });
+                if (settings.User.ClearUserData == true)
+                {
+                    Utils.ClearSteamUserDataFolder(settings.User.SteamPath, settings.User.SleepTime, maxRetry);
+                }
+                if (settings.User.CloseOnLogin == true)
+                {
+                    Dispatcher.Invoke(delegate () { Close(); });
+                }
             }
         }
 
@@ -1970,6 +1956,33 @@ namespace SAM
             }
         }
 
+        private void LoginAllMissingItem_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult messageBoxResult = MessageBox.Show(
+                "You are about to start the automatic login sequence for all " +
+                "accounts that do not currently have an associated Steam Id. " +
+                "This will generate a Steam Id in the config.vdf file for these " +
+                "accounts to be read by SAM.\n\n" +
+                "You can cancel this process at any time with ESC.\n\n" +
+                "This may take some time depending on the number of accounts. " +
+                "Are you sure you want to login all accounts missing a Steam Id?",
+                "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (messageBoxResult == MessageBoxResult.Yes)
+            {
+                FileMenu.IsEnabled = false;
+                AccountsDataGrid.IsEnabled = false;
+                buttonGrid.IsEnabled = false;
+                AddButtonGrid.IsEnabled = false;
+
+                loginAllSequence = true;
+
+                InterceptKeys.OnKeyDown += new System.Windows.Forms.KeyEventHandler(EscKeyDown);
+                InterceptKeys.Start();
+
+                Task.Run(() => LoginAllMissing());
+            }
+        }
         #endregion
 
         private void ContextMenu_ContextMenuOpening(object sender, ContextMenuEventArgs e)
@@ -2440,6 +2453,92 @@ namespace SAM
             ScrollViewer scv = (ScrollViewer)sender;
             scv.ScrollToVerticalOffset(scv.VerticalOffset - e.Delta);
             e.Handled = true;
+        }
+
+        private void LoginAllMissing()
+        {
+            // Auto login all accounts missing steamId.
+            for (int i = 0; i < encryptedAccounts.Count; i++)
+            {
+                if (loginAllCancelled == true)
+                {
+                    loginAllCancelled = false;
+                    StopLoginAllMissing();
+                    return;
+                }
+
+                if (encryptedAccounts[i].SteamId == null || encryptedAccounts[i].SteamId.Length == 0)
+                {
+                    Login(i, 0);
+
+                    // Wait and check if full steam client window is open.
+                    Utils.WaitForSteamClientWindow();
+                    Utils.WaitForSteamClientWindow();
+                }
+            }
+
+            StopLoginAllMissing();
+
+            MessageBox.Show("Done!");
+        }
+
+        private void StopLoginAllMissing()
+        {
+            InterceptKeys.Stop();
+            InterceptKeys.OnKeyDown -= EscKeyDown;
+
+            ShutdownSteam();
+
+            Dispatcher.Invoke(() =>
+            {
+                ReloadAccountsAsync();
+                
+                FileMenu.IsEnabled = true;
+                AccountsDataGrid.IsEnabled = true;
+                buttonGrid.IsEnabled = true;
+                AddButtonGrid.IsEnabled = true;
+                loginAllSequence = false;
+            });
+        }
+
+        private void EscKeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            if (e.KeyCode == System.Windows.Forms.Keys.Escape)
+            {
+                // Prompt to cancel auto login process.
+                MessageBoxResult messageBoxResult = MessageBox.Show(
+                "Cancel Login All Sequence?",
+                "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (messageBoxResult == MessageBoxResult.Yes)
+                {
+                    loginAllCancelled = true;
+                    Utils.CancelLoginAll();
+                }
+            }
+        }
+
+        private void ShutdownSteam()
+        {
+            // Shutdown Steam process via command if it is already open.
+            ProcessStartInfo stopInfo = new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = settings.User.SteamPath + "steam.exe",
+                WorkingDirectory = settings.User.SteamPath,
+                Arguments = "-shutdown"
+            };
+
+            try
+            {
+                Process SteamProc = Process.GetProcessesByName("Steam")[0];
+                Process.Start(stopInfo);
+                SteamProc.WaitForExit();
+            }
+            catch
+            {
+                Console.WriteLine("No steam process found or steam failed to shutdown.");
+            }
         }
     }
 }

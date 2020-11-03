@@ -127,6 +127,7 @@
       <DependentUpon>ExposedInfoWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="IniFile.cs" />
+    <Compile Include="InterceptKeys.cs" />
     <Compile Include="VirtualInputMethod.cs" />
     <Compile Include="PriorityMultiValueConverter.cs" />
     <Compile Include="SAMSettings.cs" />

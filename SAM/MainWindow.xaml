@@ -198,7 +198,8 @@
                                 <Separator />
                                 <MenuItem Header="Exit" Click="ExitMenuItem_Click" />
                             </MenuItem>
-                            <MenuItem x:Name="EditMenuItem" Header="Edit" Padding="{DynamicResource MenuItemPadding}">
+                            <MenuItem x:Name="EditMenuItem" Header="Edit" Padding="{DynamicResource MenuItemPadding}" >
+                                <MenuItem Header="Login All Missing" ToolTip="Auto login all accounts missing a Steam Id to populate them in the local vdf files and then reload all account web data" Click="LoginAllMissingItem_Click"/>
                                 <MenuItem Header="Refresh" Click="RefreshMenuItem_Click" ToolTip="Refresh entire window"/>
                                 <MenuItem Header="Reload Accounts" Click="ReloadAccounts_Click" ToolTip="Reload account web data"/>
                                 <MenuItem Header="Settings" Click="SettingsButton_Click" />
