@@ -1143,7 +1143,8 @@ namespace SAM
                 PasswordText = decryptedAccounts[index].Password,
                 SharedSecretText = decryptedAccounts[index].SharedSecret,
                 UrlText = decryptedAccounts[index].ProfUrl,
-                DescriptionText = decryptedAccounts[index].Description
+                DescriptionText = decryptedAccounts[index].Description,
+                SteamId = decryptedAccounts[index].SteamId
             };
 
             // Reload slected boolean
@@ -1194,6 +1195,7 @@ namespace SAM
                     encryptedAccounts[index].AviUrl = aviUrl;
                     encryptedAccounts[index].SteamId = dialog.SteamId;
                     encryptedAccounts[index].Description = dialog.DescriptionText;
+                    encryptedAccounts[index].SteamId = dialog.SteamId;
 
                     SerializeAccounts();
                 }

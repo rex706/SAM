@@ -1,5 +1,4 @@
 ﻿using MahApps.Metro.Controls;
-using System.Diagnostics;
 using System.Windows;
 
 namespace SAM
@@ -56,7 +55,10 @@ namespace SAM
 
         public string AviText { get; set; }
 
-        public string SteamId { get; set; }
+        public string SteamId {
+            get { return SteamIdBox.Text; }
+            set { SteamIdBox.Text = value; }
+        }
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
