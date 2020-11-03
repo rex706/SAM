@@ -1979,6 +1979,7 @@ namespace SAM
                 AccountsDataGrid.IsEnabled = false;
                 buttonGrid.IsEnabled = false;
                 AddButtonGrid.IsEnabled = false;
+                TaskBarIconLoginContextMenu.IsEnabled = false;
 
                 loginAllSequence = true;
 
@@ -2478,7 +2479,6 @@ namespace SAM
 
                     // Wait and check if full steam client window is open.
                     Utils.WaitForSteamClientWindow();
-                    Utils.WaitForSteamClientWindow();
                 }
             }
 
@@ -2502,6 +2502,7 @@ namespace SAM
                 AccountsDataGrid.IsEnabled = true;
                 buttonGrid.IsEnabled = true;
                 AddButtonGrid.IsEnabled = true;
+                TaskBarIconLoginContextMenu.IsEnabled = true;
                 loginAllSequence = false;
             });
         }
