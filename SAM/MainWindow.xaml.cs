@@ -1966,7 +1966,7 @@ namespace SAM
             MessageBoxResult messageBoxResult = MessageBox.Show(
                 "You are about to start the automatic login sequence for all " +
                 "accounts that do not currently have an associated Steam Id. " +
-                "This will generate a Steam Id in the config.vdf file for these " +
+                "This will generate a Steam Id in the local vdf files for these " +
                 "accounts to be read by SAM.\n\n" +
                 "You can cancel this process at any time with ESC.\n\n" +
                 "This may take some time depending on the number of accounts. " +
@@ -2468,7 +2468,6 @@ namespace SAM
             {
                 if (loginAllCancelled == true)
                 {
-                    loginAllCancelled = false;
                     StopLoginAllMissing();
                     return;
                 }
@@ -2504,6 +2503,7 @@ namespace SAM
                 AddButtonGrid.IsEnabled = true;
                 TaskBarIconLoginContextMenu.IsEnabled = true;
                 loginAllSequence = false;
+                loginAllCancelled = false;
             });
         }
 
@@ -2518,7 +2518,11 @@ namespace SAM
 
                 if (messageBoxResult == MessageBoxResult.Yes)
                 {
-                    loginAllCancelled = true;
+                    Dispatcher.Invoke(() =>
+                    {
+                        loginAllCancelled = true;
+                    });
+                    
                     Utils.CancelLoginAll();
                 }
             }
