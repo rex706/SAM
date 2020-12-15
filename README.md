@@ -7,7 +7,7 @@
 
 **Latest Version:** 1.4.3.0
 
-[**DOWNLOAD**](https://github.com/rex706/SAM/releases)
+[**DOWNLOAD**](https://github.com/rex706/SAM/releases/latest)
 
 
 *NEW*
