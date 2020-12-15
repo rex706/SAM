@@ -1,4 +1,4 @@
-1.4.2.0
+1.4.3.0
 SAM.exe
-https://drive.google.com/uc?export=download&id=0B2byNRcR0k4vblQxNWNEakNISFU
+https://github.com/rex706/SAM/releases/download/v1.4.3.0/SAM.exe
 SAM.exe
