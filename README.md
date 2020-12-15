@@ -35,3 +35,5 @@
 * Set custom sleep time for waiting actions.
 * Toggle Steam client launch parameters.
 * Support for Sandbox Mode for users of Sandboxie/Avast Sandbox.
+-----------------------------------------
+May require [.NET Framework 4.8](https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net48-web-installer)
