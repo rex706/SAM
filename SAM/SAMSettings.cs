@@ -60,7 +60,7 @@ namespace SAM
         public const string CAFE_APP_LAUNCH_PARAMETER = "cafeapplaunch";
         public const string CLEAR_BETA_PARAMETER = "clearbeta";
         public const string CONSOLE_PARAMETER = "console";
-        public const string DEVELOPER_PARAMETER = "developer";
+        public const string DEVELOPER_PARAMETER = "dev";
         public const string FORCE_SERVICE_PARAMETER = "forceservice";
         public const string LOGIN_PARAMETER = "login";
         public const string NO_CACHE_PARAMETER = "nocache";
@@ -203,6 +203,13 @@ namespace SAM
             {
                 File.Write(BUTTON_SIZE, File.Read(BUTTON_SIZE, SECTION_GENERAL), SECTION_CUSTOMIZE);
                 File.DeleteKey(BUTTON_SIZE, SECTION_GENERAL);
+            }
+
+            // Update developer launch parameter.
+            if (File.KeyExists("developer", SECTION_PARAMETERS))
+            {
+                File.Write(DEVELOPER_PARAMETER, File.Read("developer", SECTION_PARAMETERS), SECTION_PARAMETERS);
+                File.DeleteKey("developer", SECTION_PARAMETERS);
             }
         }
     }
