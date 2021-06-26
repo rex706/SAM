@@ -1,0 +1,37 @@
+﻿<mah:MetroWindow x:Class="SAM.Views.TextDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:local="clr-namespace:SAM.Views"
+                 xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        mc:Ignorable="d"
+        Title="Account Info" Height="390" Width="450" ResizeMode="NoResize" Icon="/Resources/steam.ico" WindowStartupLocation="CenterScreen">
+    <mah:MetroWindow.IconTemplate>
+        <DataTemplate>
+            <Grid Width="20" Height="20" Background="Transparent" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality">
+                <Image Source="/Resources/steam.ico"/>
+            </Grid>
+        </DataTemplate>
+    </mah:MetroWindow.IconTemplate>
+    <Grid>
+        <Label Name="UsernameLabel" Content="Username *" ToolTip="What you use to login to Steam. Could be an email address." HorizontalAlignment="Left" VerticalAlignment="Top" Margin="43,10,0,0"/>
+        <TextBox Name="UsernameBox" Padding="3,3,3,3" LostFocus="UsernameBox_LostFocus" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="120,9,0,0" Width="314"  />
+        <Label Name="AliasLabel" Content="Alias" ToolTip="Optional: Display a custom alias instead of username. Leave blank otherwise." HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,46,0,0" />
+        <TextBox Name="AliasBox" Padding="3,3,3,3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,44,0,0" Width="314"/>
+        <Label x:Name="PasswordLabel" Content="Password *" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="47,81,0,0"/>
+        <PasswordBox Name="PasswordBox" PasswordChar="•"  Padding="3,3,3,3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,79,0,0" Width="314" />
+        <Label x:Name="SharedSecretLabel" Content="2FA Shared Secret" ToolTip="Can be found in your .maFile from Steam Desktop Authenticator" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,117,0,0" />
+        <PasswordBox Name="SharedSecretBox" PasswordChar="•" Padding="3,3,3,3" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="120,114,0,0" Width="314" />
+        <Label x:Name="UrlLabel" Content="Profile URL" ToolTip="Enter steam profile url to get user avatar without an API key" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="47,151,0,0"/>
+        <TextBox Name="UrlTextBox" Padding="3,3,3,3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,149,0,0" Width="314" LostFocus="UrlBox_LostFocus" GotFocus="UrlBox_GotFocus" />
+        <Label x:Name="DescriptionLabel" Content="Description" ToolTip="Enter a description for this entry. Will display as a tooltip." HorizontalAlignment="Left" VerticalAlignment="Top" Height="28" Margin="45,221,0,0" />
+        <TextBox Name="DescriptionBox" Padding="3,3,3,3" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Height="63" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="120,220,0,0" Width="314"/>
+        <Button Name="OKButton" Content="OK" Grid.Column="0" Margin="120,322,0,0" Click="OKButton_Click" VerticalAlignment="Top" Width="100" HorizontalAlignment="Left" />
+        <Button Name="CancelButton" Content="Cancel" Margin="225,322,0,0" Click="CancelButton_Click" VerticalAlignment="Top" Width="100" HorizontalAlignment="Left" />
+        <CheckBox x:Name="autoLogCheckBox" Content="Auto Login" HorizontalAlignment="Left" Margin="120,288,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="SteamIdLabel" Content="Steam Id" ToolTip="Base64 Steam Id" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="59,186,0,0"/>
+        <TextBox x:Name="SteamIdBox" Padding="3,3,3,3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,184,0,0" Width="314" />
+    </Grid>
+</mah:MetroWindow>
