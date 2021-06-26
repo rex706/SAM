@@ -1,0 +1,23 @@
+﻿<mah:MetroWindow x:Class="SAM.Views.ExposedInfoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SAM.Views"
+                 xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        mc:Ignorable="d"
+        Title="Account Credentials" Height="400" Width="400" MinWidth="250" MinHeight="200" WindowStartupLocation="CenterScreen" Icon="/Resources/steam.ico">
+    <mah:MetroWindow.IconTemplate>
+        <DataTemplate>
+            <Grid Width="20" Height="20" Background="Transparent" RenderOptions.BitmapScalingMode="HighQuality">
+                <Image Source="/Resources/steam.ico"/>
+            </Grid>
+        </DataTemplate>
+    </mah:MetroWindow.IconTemplate>
+    <Grid>
+        <TextBox x:Name="DelimitedAccountsTextBox" Margin="10,40,10,10" TextWrapping="NoWrap" Text="" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" IsReadOnly="True"/>
+        <Label HorizontalAlignment="Left" Margin="10,6,0,0" Content="Delimiter" VerticalAlignment="Top"/>
+        <TextBox x:Name="DelimiterCharacterTextBox" HorizontalAlignment="Left" Height="23" Margin="76,6,0,0" TextWrapping="Wrap" Text=":" VerticalAlignment="Top" Width="25" TextAlignment="Center" MaxLength="1" TextChanged="DelimiterCharacterTextBox_TextChanged"/>
+        <Label x:Name="PreviewTextBlock" HorizontalAlignment="Right" Margin="0,6,10,0" Content="account:password:sharedSecret" VerticalAlignment="Top"/>
+    </Grid>
+</mah:MetroWindow>
