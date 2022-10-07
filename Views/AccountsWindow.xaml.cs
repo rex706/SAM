@@ -877,7 +877,7 @@ namespace SAM.Views
                             banInfoImage.Height = 14;
                             banInfoImage.Width = 14;
                             banInfoImage.Margin = new Thickness(10, 10, 10, 10);
-                            banInfoImage.Source = new BitmapImage(new Uri(@"error_red_18dp.png", UriKind.RelativeOrAbsolute));
+                            banInfoImage.Source = new BitmapImage(new Uri(@"\Resources\error.png", UriKind.RelativeOrAbsolute));
 
                             banInfoImage.ToolTip = "VAC Bans: " + account.NumberOfVACBans +
                                 "\nGame Bans: " + account.NumberOfGameBans +
