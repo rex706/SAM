@@ -1116,12 +1116,12 @@ namespace SAM.Views
                 // If the auto login checkbox was checked, update settings file and global variables. 
                 if (dialog.AutoLogAccountIndex == true)
                 {
-                    settings.File.Write(SAMSettings.SELECTED_ACCOUNT_INDEX, (encryptedAccounts.Count + 1).ToString(), SAMSettings.SECTION_AUTOLOG);
+                    settings.File.Write(SAMSettings.SELECTED_ACCOUNT_INDEX, (encryptedAccounts.Count).ToString(), SAMSettings.SECTION_AUTOLOG);
                     settings.File.Write(SAMSettings.LOGIN_SELECTED_ACCOUNT, true.ToString(), SAMSettings.SECTION_AUTOLOG);
                     settings.File.Write(SAMSettings.LOGIN_RECENT_ACCOUNT, false.ToString(), SAMSettings.SECTION_AUTOLOG);
                     settings.User.LoginSelectedAccount = true;
                     settings.User.LoginRecentAccount = false;
-                    settings.User.SelectedAccountIndex = encryptedAccounts.Count + 1;
+                    settings.User.SelectedAccountIndex = encryptedAccounts.Count;
                 }
 
                 try
@@ -2555,9 +2555,12 @@ namespace SAM.Views
 
             try
             {
-                Process SteamProc = Process.GetProcessesByName("Steam")[0];
-                Process.Start(stopInfo);
-                SteamProc.WaitForExit();
+                Process SteamProc = Process.GetProcessesByName("Steam").FirstOrDefault();
+                if (SteamProc != null)
+                {
+                    Process.Start(stopInfo);
+                    SteamProc.WaitForExit();
+                }
             }
             catch
             {
