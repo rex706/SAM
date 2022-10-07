@@ -5,9 +5,9 @@
 
 ![alt tag](https://i.imgur.com/v4eJzzH.png) ![alt tag](https://i.imgur.com/laBORcJ.png)
 
-**Latest Version:** 1.4.3.0
+**Latest Version:** 1.5.0.0
 
-[**DOWNLOAD**](https://github.com/rex706/SAM/releases/latest)
+[**DOWNLOAD**](https://github.com/Venipa/SAM/releases/latest)
 
 
 *NEW*
