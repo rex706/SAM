@@ -7,7 +7,7 @@
 
 **Latest Version:** 1.5.0.0
 
-[**DOWNLOAD**](https://github.com/Venipa/SAM/releases/latest)
+[**DOWNLOAD**](https://github.com/rex706/SAM/releases/latest)
 
 
 *NEW*
