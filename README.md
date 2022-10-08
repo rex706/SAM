@@ -7,7 +7,7 @@
 
 **Latest Version:** 1.5.0.1
 
-[**DOWNLOAD**](https://github.com/rex706/SAM/releases/latest)
+# [**DOWNLOAD**](https://github.com/rex706/SAM/releases/latest)
 
 **Core Features**
 * 1-click Steam logins for multiple accounts with 2FA support.
