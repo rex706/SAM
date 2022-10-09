@@ -1931,8 +1931,17 @@ namespace SAM.Views
             await ReloadAccountsAsync();
         }
 
-
         private void ShowWindowButton_Click(object sender, RoutedEventArgs e)
+        {
+            ShowMainWindow();
+        }
+
+        private void TaskbarIcon_TrayLeftMouseUp(object sender, RoutedEventArgs e)
+        {
+            ShowMainWindow();
+        }
+
+        private void ShowMainWindow()
         {
             Show();
             WindowState = WindowState.Normal;
@@ -1949,7 +1958,6 @@ namespace SAM.Views
                 MessageBox.Show(e.Message);
             }
         }
-
 
         private void CopyPasswordToClipboard(int index)
         {

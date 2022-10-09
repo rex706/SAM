@@ -220,7 +220,7 @@
                 </DockPanel>
             </Grid>
         </ScrollViewer>
-        <tb:TaskbarIcon IconSource="/Resources/steam.ico" ToolTipText="SAM">
+        <tb:TaskbarIcon IconSource="/Resources/steam.ico" ToolTipText="SAM" TrayLeftMouseUp="TaskbarIcon_TrayLeftMouseUp">
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu x:Name="TaskbarIconContextMenu">
                     <MenuItem Header="New Account" Click="AddButton_Click"/>
