@@ -48,6 +48,8 @@ namespace SAM.Views
         private static bool firstLoad = true;
 
         private static readonly string dataFile = "info.dat";
+        private static readonly string backupFile = dataFile + ".bak";
+        private static string loadSource;
 
         // Keys are changed before releases/updates
         private static readonly string eKey = "PRIVATE_KEY";
@@ -139,7 +141,7 @@ namespace SAM.Views
             originalWidth = Width;
 
             // Load window with account buttons.
-            RefreshWindow();
+            RefreshWindow(dataFile);
 
             // Login to auto log account if enabled and Steam is not already open.
             Process[] SteamProc = Process.GetProcessesByName("Steam");
@@ -439,8 +441,10 @@ namespace SAM.Views
             });
         }
 
-        public void RefreshWindow()
+        public void RefreshWindow(string file)
         {
+            loadSource = file;
+
             decryptedAccounts = new List<Account>();
 
             buttonGrid.Children.Clear();
@@ -452,18 +456,18 @@ namespace SAM.Views
             AddButtonGrid.Width = settings.User.ButtonSize;
 
             // Check if info.dat exists
-            if (File.Exists(dataFile))
+            if (File.Exists(file))
             {
+                MessageBoxResult messageBoxResult = MessageBoxResult.OK;
+
                 // Deserialize file
                 if (ePassword.Length > 0)
                 {
-                    MessageBoxResult messageBoxResult = MessageBoxResult.OK;
-
                     while (messageBoxResult == MessageBoxResult.OK)
                     {
                         try
                         {
-                            encryptedAccounts = Core.Utils.PasswordDeserialize(dataFile, ePassword);
+                            encryptedAccounts = Core.Utils.PasswordDeserialize(file, ePassword);
                             messageBoxResult = MessageBoxResult.None;
                         }
                         catch (Exception e)
@@ -484,7 +488,37 @@ namespace SAM.Views
                 }
                 else
                 {
-                    encryptedAccounts = Core.Utils.Deserialize(dataFile);
+                    try
+                    {
+                        encryptedAccounts = Core.Utils.Deserialize(file);
+                    } 
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+
+                        if (file == backupFile)
+                        {
+                            MessageBox.Show(e.Message, "Deserialization Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            Close();
+                        }
+
+                        if (File.Exists(backupFile))
+                        {
+                            messageBoxResult = MessageBox.Show("An error has occured attempting to deserialize your .dat file.\n\n" +
+                                "Would you like to try a detected backup?", "Deserialization Error", MessageBoxButton.YesNo, MessageBoxImage.Error);
+
+                            if (messageBoxResult == MessageBoxResult.No)
+                            {
+                                Close();
+                            }
+                            else
+                            {
+                                RefreshWindow(backupFile);
+                            }
+                        }
+
+                        return;
+                    }
                 }
 
                 PostDeserializedRefresh(true);
@@ -1595,6 +1629,12 @@ namespace SAM.Views
 
         private void SerializeAccounts()
         {
+            if (loadSource != backupFile)
+            {
+                File.Delete(backupFile);
+                File.Copy(dataFile, backupFile);
+            }
+
             if (IsPasswordProtected() == true && ePassword.Length > 0)
             {
                 Core.Utils.PasswordSerialize(encryptedAccounts, ePassword);
@@ -1604,7 +1644,7 @@ namespace SAM.Views
                 Core.Utils.Serialize(encryptedAccounts);
             }
 
-            RefreshWindow();
+            RefreshWindow(dataFile);
         }
 
         private void ExportAccount(int index)
@@ -1845,7 +1885,7 @@ namespace SAM.Views
             }
 
             LoadSettings();
-            RefreshWindow();
+            RefreshWindow(dataFile);
         }
 
         private void DeleteBannedAccounts_Click(object sender, RoutedEventArgs e)
@@ -1889,7 +1929,7 @@ namespace SAM.Views
 
         private void RefreshMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            RefreshWindow();
+            RefreshWindow(dataFile);
         }
 
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
@@ -1910,7 +1950,7 @@ namespace SAM.Views
         private void ImportFromFileMenuItem_Click(object sender, RoutedEventArgs e)
         {
             Core.Utils.ImportAccountFile();
-            RefreshWindow();
+            RefreshWindow(dataFile);
         }
 
         private void ExportAllMenuItem_Click(object sender, RoutedEventArgs e)
@@ -2052,7 +2092,7 @@ namespace SAM.Views
             var importDelimitedWindow = new ImportDelimited(eKey);
             importDelimitedWindow.ShowDialog();
 
-            RefreshWindow();
+            RefreshWindow(dataFile);
         }
 
         private void ExposeCredentialsMenuItem_Click(object sender, RoutedEventArgs e)
@@ -2282,7 +2322,7 @@ namespace SAM.Views
                             MessageBox.Show(ex.Message);
                         }
 
-                        RefreshWindow();
+                        RefreshWindow(dataFile);
                     }
                 }
             }
