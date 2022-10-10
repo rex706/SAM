@@ -1629,7 +1629,7 @@ namespace SAM.Views
 
         private void SerializeAccounts()
         {
-            if (loadSource != backupFile)
+            if (loadSource != backupFile && File.Exists(dataFile))
             {
                 File.Delete(backupFile);
                 File.Copy(dataFile, backupFile);
