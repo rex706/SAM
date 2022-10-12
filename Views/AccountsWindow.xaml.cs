@@ -149,9 +149,9 @@ namespace SAM.Views
             if (SteamProc.Length == 0)
             {
                 if (settings.User.LoginRecentAccount == true)
-                    Login(settings.User.RecentAccountIndex, 0);
+                    Login(settings.User.RecentAccountIndex);
                 else if (settings.User.LoginSelectedAccount == true)
-                    Login(settings.User.SelectedAccountIndex, 0);
+                    Login(settings.User.SelectedAccountIndex);
             }
         }
 
@@ -1264,8 +1264,32 @@ namespace SAM.Views
             }
         }
 
+        private void Login(int index)
+        {
+            foreach (Thread loginThread in loginThreads)
+            {
+                loginThread.Abort();
+            }
+
+            new Thread(() => { 
+                try
+                {
+                    Login(index, 0);
+                }
+                finally
+                {
+                    Dispatcher.Invoke(delegate () { MainGrid.IsEnabled = true; });
+                }
+            }).Start();
+        }
+
         private void Login(int index, int tryCount)
         {
+            if (tryCount == 0)
+            {
+                loginThreads.Add(Thread.CurrentThread);
+            }
+
             if (tryCount == maxRetry)
             {
                 MessageBox.Show("Login Failed! Please try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -1280,11 +1304,6 @@ namespace SAM.Views
                 {
                     return;
                 }
-            }
-
-            foreach (Thread loginThread in loginThreads)
-            {
-                loginThread.Abort();
             }
 
             // Update the most recently used account index.
@@ -1364,7 +1383,7 @@ namespace SAM.Views
 
                 if (decryptedAccounts[index].SharedSecret != null && decryptedAccounts[index].SharedSecret.Length > 0)
                 {
-                    Task.Run(() => Type2FA(index, 0));
+                    Type2FA(index);
                 }
                 else
                 {
@@ -1373,14 +1392,12 @@ namespace SAM.Views
             }
             else
             {
-                Task.Run(() => TypeCredentials(index, 0));
+                TypeCredentials(index, tryCount);
             }
         }
 
         private void TypeCredentials(int index, int tryCount)
         {
-            loginThreads.Add(Thread.CurrentThread);
-
             WindowHandle steamLoginWindow = Core.Utils.GetSteamLoginWindow();
 
             while (!steamLoginWindow.IsValid)
@@ -1477,7 +1494,7 @@ namespace SAM.Views
                     return;
                 }
 
-                Type2FA(index, 0);
+                Type2FA(index);
             }
             else
             {
@@ -1493,6 +1510,12 @@ namespace SAM.Views
                 SystemSounds.Beep.Play();
             });
         }
+
+        private void Type2FA(int index)
+        {
+            Type2FA(index, 0);
+        }
+
         private void Type2FA(int index, int tryCount)
         {
             // Need both the Steam Login and Steam Guard windows.
@@ -1779,9 +1802,11 @@ namespace SAM.Views
         {
             if (sender is Button btn)
             {
+                MainGrid.IsEnabled = false;
+
                 // Login with clicked button's index, which stored in Tag.
                 int index = Int32.Parse(btn.Tag.ToString());
-                Login(index, 0);
+                Login(index);
             }
         }
 
@@ -1789,7 +1814,8 @@ namespace SAM.Views
         {
             if (sender is MenuItem item)
             {
-                Login(Int32.Parse(item.Tag.ToString()), 0);
+                int index = Int32.Parse(item.Tag.ToString());
+                Login(index);
             }
         }
 
@@ -2469,7 +2495,7 @@ namespace SAM.Views
             {
                 Account account = AccountsDataGrid.SelectedItem as Account;
                 int index = encryptedAccounts.FindIndex(a => a.Name == account.Name);
-                Login(index, 0);
+                Login(index);
             }
         }
 
@@ -2536,7 +2562,7 @@ namespace SAM.Views
 
                 if (encryptedAccounts[i].SteamId == null || encryptedAccounts[i].SteamId.Length == 0)
                 {
-                    Login(i, 0);
+                    Login(i);
 
                     // Wait and check if full steam client window is open.
                     Core.Utils.WaitForSteamClientWindow();
