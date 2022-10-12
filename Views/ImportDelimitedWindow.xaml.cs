@@ -1,9 +1,10 @@
 ﻿using MahApps.Metro.Controls;
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Windows;
 using SAM.Core;
+using Microsoft.Win32;
+using System.IO;
 
 namespace SAM.Views
 {
@@ -46,10 +47,8 @@ namespace SAM.Views
             int sucessful = 0;
             List<string> errors = new List<string>();
 
-            for (int i = 0; i < lines.Length; i++)
+            foreach (string line in lines)
             {
-                string line = Regex.Replace(lines[i], @"\s+", string.Empty);
-
                 // Skip empty lines.
                 if (line.Length == 0)
                 {
@@ -94,6 +93,67 @@ namespace SAM.Views
             {
                 PreviewTextBlock.Content = "account" + DelimiterCharacterTextBox.Text + "password" + DelimiterCharacterTextBox.Text + "sharedSecret";
             }
+        }
+
+        private void ReadTextFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog
+            {
+                DefaultExt = ".txt",
+                Filter = "Text Files (*.txt)|*.txt",
+                Multiselect = true
+            };
+
+            bool? result = dialog.ShowDialog();
+
+            if (result == true)
+            {
+                SetTextFromFiles(dialog.FileNames);
+            }
+        }
+
+        private void DelimitedAccountsTextBox_PreviewDragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effects = DragDropEffects.Copy;
+            else
+                e.Effects = DragDropEffects.None;
+
+            e.Handled = true;
+        }
+
+        private void DelimitedAccountsTextBox_PreviewDrop(object sender, DragEventArgs e)
+        {
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            SetTextFromFiles(files);
+            e.Handled = true;
+        }
+
+        private void SetTextFromFiles(string[] files)
+        {
+            DelimitedAccountsTextBox.Text = "";
+
+            foreach (string file in files)
+            {
+                try
+                {
+                    string ext = Path.GetExtension(file);
+
+                    if (ext == ".txt")
+                    {
+                        DelimitedAccountsTextBox.Text += File.ReadAllText(file);
+                    }
+                    else
+                    {
+                        string name = Path.GetFileName(file);
+                        MessageBox.Show(name + " is not a .txt file", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                catch (Exception m)
+                {
+                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            } 
         }
     }
 }

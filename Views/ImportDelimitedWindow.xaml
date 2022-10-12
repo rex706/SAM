@@ -15,10 +15,11 @@
         </DataTemplate>
     </Controls:MetroWindow.IconTemplate>
     <Grid>
-        <Button x:Name="ImportButton" Content="Import" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom" Width="75" Height="30" Click="ImportButton_Click"/>
-        <TextBox x:Name="DelimitedAccountsTextBox" Margin="10,40,10,50" TextWrapping="NoWrap" Text="" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
+        <Button x:Name="ImportButton" Content="Import" HorizontalAlignment="Left" Margin="200,0,0,10" VerticalAlignment="Bottom" Width="75" Height="30" Click="ImportButton_Click"/>
+        <TextBox x:Name="DelimitedAccountsTextBox" Margin="10,40,10,50" TextWrapping="NoWrap" Text="" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" PreviewDragOver="DelimitedAccountsTextBox_PreviewDragOver" PreviewDrop="DelimitedAccountsTextBox_PreviewDrop"/>
         <Label HorizontalAlignment="Left" Margin="10,7,0,0" Content="Delimiter" VerticalAlignment="Top"/>
         <TextBox x:Name="DelimiterCharacterTextBox" HorizontalAlignment="Left" Height="23" Margin="73,7,0,0" TextWrapping="Wrap" Text=":" VerticalAlignment="Top" Width="25" TextAlignment="Center" MaxLength="1" TextChanged="DelimiterCharacterTextBox_TextChanged"/>
         <Label x:Name="PreviewTextBlock" HorizontalAlignment="Right" Margin="0,7,10,0" Content="account:password:sharedSecret" VerticalAlignment="Top"/>
+        <Button x:Name="ReadTextFileButton" Content="Load" HorizontalAlignment="Left" Margin="119,0,0,10" VerticalAlignment="Bottom" Width="76" Height="30" ToolTip="Read text file to import window." Click="ReadTextFileButton_Click"/>
     </Grid>
 </Controls:MetroWindow>

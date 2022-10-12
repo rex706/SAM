@@ -148,7 +148,7 @@ namespace SAM.Core
                 Filter = "SAM DAT Files (*.dat)|*.dat"
             };
 
-            Nullable<bool> result = dialog.ShowDialog();
+            bool? result = dialog.ShowDialog();
 
             if (result == true)
             {
