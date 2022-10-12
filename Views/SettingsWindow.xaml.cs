@@ -8,7 +8,8 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media;
-using DK.WshRuntime;
+using IWshRuntimeLibrary;
+using File = System.IO.File;
 
 namespace SAM.Views
 {
@@ -212,19 +213,22 @@ namespace SAM.Views
             settings.File.Write(SAMSettings.ACCOUNTS_PER_ROW, apr, SAMSettings.SECTION_GENERAL);
             settings.File.Write(SAMSettings.SLEEP_TIME, sleepTimeSpinBox.Text, SAMSettings.SECTION_GENERAL);
 
+            string shortcutAddress = Environment.GetFolderPath(Environment.SpecialFolder.Startup) + SAMshortcut;
             if (startupCheckBox.IsChecked == true)
             {
                 settings.File.Write(SAMSettings.START_WITH_WINDOWS, true.ToString(), SAMSettings.SECTION_GENERAL);
 
-                string shortcutAddress = Environment.GetFolderPath(Environment.SpecialFolder.Startup) + SAMshortcut;
-                WshInterop.CreateShortcut(shortcutAddress, "Start with windows shortcut for SAM.", Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + SAMexe, "", "");
+                WshShell shell = new WshShell();
+                IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(shortcutAddress);
+                shortcut.Description = "Start with windows shortcut for SAM.";
+                shortcut.TargetPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + SAMexe;
+                shortcut.WorkingDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                shortcut.Save();
             }   
             else
             {
-                string filePath = Environment.GetFolderPath(Environment.SpecialFolder.Startup) + SAMshortcut;
-
-                if (File.Exists(filePath))
-                    File.Delete(filePath);
+                if (File.Exists(shortcutAddress))
+                    File.Delete(shortcutAddress);
 
                 settings.File.Write(SAMSettings.START_WITH_WINDOWS, false.ToString(), SAMSettings.SECTION_GENERAL);
             }
