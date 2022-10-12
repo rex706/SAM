@@ -1266,11 +1266,14 @@ namespace SAM.Views
 
         private void Login(int index)
         {
-            foreach (Thread loginThread in loginThreads)
+            if (!settings.User.SandboxMode)
             {
-                loginThread.Abort();
+                foreach (Thread loginThread in loginThreads)
+                {
+                    loginThread.Abort();
+                }
             }
-
+            
             new Thread(() => { 
                 try
                 {
@@ -1802,7 +1805,7 @@ namespace SAM.Views
         {
             if (sender is Button btn)
             {
-                MainGrid.IsEnabled = false;
+                MainGrid.IsEnabled = settings.User.SandboxMode;
 
                 // Login with clicked button's index, which stored in Tag.
                 int index = Int32.Parse(btn.Tag.ToString());
