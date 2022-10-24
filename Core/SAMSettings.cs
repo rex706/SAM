@@ -69,6 +69,7 @@ namespace SAM.Core
         public const string SINGLE_CORE_PARAMETER = "single_core";
         public const string TCP_PARAMETER = "tcp";
         public const string TEN_FOOT_PARAMETER = "tenfoot";
+        public const string NO_REACT_LOGIN_PARAMETER = "noreactlogin";
         public const string CUSTOM_PARAMETERS = "customParameters";
         public const string CUSTOM_PARAMETERS_VALUE = "customParametersValue";
 
@@ -141,6 +142,7 @@ namespace SAM.Core
             { SINGLE_CORE_PARAMETER, SECTION_PARAMETERS },
             { TCP_PARAMETER, SECTION_PARAMETERS },
             { TEN_FOOT_PARAMETER, SECTION_PARAMETERS },
+            { NO_REACT_LOGIN_PARAMETER, SECTION_PARAMETERS },
             { CUSTOM_PARAMETERS, SECTION_PARAMETERS },
             { CUSTOM_PARAMETERS_VALUE, SECTION_PARAMETERS },
 

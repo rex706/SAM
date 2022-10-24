@@ -135,6 +135,48 @@ namespace SAM.Views
 
                     SetDefaultSettings();
                 }
+<<<<<<< Updated upstream
+=======
+                InputMethodSelectBox.SelectedItem = (VirtualInputMethod)Enum.Parse(typeof(VirtualInputMethod), settings.File.Read(SAMSettings.INPUT_METHOD, SAMSettings.SECTION_AUTOLOG));
+                HandleImeCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.HANDLE_IME, SAMSettings.SECTION_AUTOLOG));
+                SteamGuardOnlyCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.IME_2FA_ONLY, SAMSettings.SECTION_AUTOLOG));
+
+                // Customize
+                ThemeSelectBox.Text = settings.File.Read(SAMSettings.THEME, SAMSettings.SECTION_CUSTOMIZE);
+                AccentSelectBox.Text = settings.File.Read(SAMSettings.ACCENT, SAMSettings.SECTION_CUSTOMIZE);
+                buttonSizeSpinBox.Text = settings.File.Read(SAMSettings.BUTTON_SIZE, SAMSettings.SECTION_CUSTOMIZE);
+                ButtonColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.File.Read(SAMSettings.BUTTON_COLOR, SAMSettings.SECTION_CUSTOMIZE));
+                ButtonFontSizeSpinBox.Text = settings.File.Read(SAMSettings.BUTTON_FONT_SIZE, SAMSettings.SECTION_CUSTOMIZE);
+                ButtonFontColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.File.Read(SAMSettings.BUTTON_FONT_COLOR, SAMSettings.SECTION_CUSTOMIZE));
+                BannerColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.File.Read(SAMSettings.BUTTON_BANNER_COLOR, SAMSettings.SECTION_CUSTOMIZE));
+                BannerFontSizeSpinBox.Text = settings.File.Read(SAMSettings.BUTTON_BANNER_FONT_SIZE, SAMSettings.SECTION_CUSTOMIZE);
+                BannerFontColorPicker.SelectedColor = (Color)ColorConverter.ConvertFromString(settings.File.Read(SAMSettings.BUTTON_BANNER_FONT_COLOR, SAMSettings.SECTION_CUSTOMIZE));
+                HideBanIconsCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.HIDE_BAN_ICONS, SAMSettings.SECTION_CUSTOMIZE));
+
+                // Steam
+                SteamPathTextBox.Text = settings.File.Read(SAMSettings.STEAM_PATH, SAMSettings.SECTION_STEAM);
+                ApiKeyTextBox.Text = settings.File.Read(SAMSettings.STEAM_API_KEY, SAMSettings.SECTION_STEAM);
+                AutoReloadCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.AUTO_RELOAD_ENABLED, SAMSettings.SECTION_STEAM));
+                AutoReloadIntervalSpinBox.Text = settings.File.Read(SAMSettings.AUTO_RELOAD_INTERVAL, SAMSettings.SECTION_STEAM);
+
+                // Parameters
+                CafeAppLaunchCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.CAFE_APP_LAUNCH_PARAMETER, SAMSettings.SECTION_PARAMETERS));
+                ClearBetaCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.CLEAR_BETA_PARAMETER, SAMSettings.SECTION_PARAMETERS));
+                ConsoleCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.CONSOLE_PARAMETER, SAMSettings.SECTION_PARAMETERS));
+                LoginCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.LOGIN_PARAMETER, SAMSettings.SECTION_PARAMETERS));
+                DeveloperCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.DEVELOPER_PARAMETER, SAMSettings.SECTION_PARAMETERS));
+                ForceServiceCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.FORCE_SERVICE_PARAMETER, SAMSettings.SECTION_PARAMETERS));
+                ConsoleCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.FORCE_SERVICE_PARAMETER, SAMSettings.SECTION_PARAMETERS));
+                NoCacheCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.FORCE_SERVICE_PARAMETER, SAMSettings.SECTION_PARAMETERS));
+                NoVerifyFilesCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.NO_VERIFY_FILES_PARAMETER, SAMSettings.SECTION_PARAMETERS));
+                SilentCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.SILENT_PARAMETER, SAMSettings.SECTION_PARAMETERS));
+                SingleCoreCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.SINGLE_CORE_PARAMETER, SAMSettings.SECTION_PARAMETERS));
+                TcpCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.TCP_PARAMETER, SAMSettings.SECTION_PARAMETERS));
+                TenFootCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.TEN_FOOT_PARAMETER, SAMSettings.SECTION_PARAMETERS));
+                NoReactLoginCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.NO_REACT_LOGIN_PARAMETER, SAMSettings.SECTION_PARAMETERS));
+                CustomParametersCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.CUSTOM_PARAMETERS, SAMSettings.SECTION_PARAMETERS));
+                CustomParametersTextBox.Text = settings.File.Read(SAMSettings.CUSTOM_PARAMETERS_VALUE, SAMSettings.SECTION_PARAMETERS);
+>>>>>>> Stashed changes
             }
         }
 
@@ -279,6 +321,7 @@ namespace SAM.Views
             settings.File.Write(SAMSettings.SINGLE_CORE_PARAMETER, SingleCoreCheckBox.IsChecked.ToString(), SAMSettings.SECTION_PARAMETERS);
             settings.File.Write(SAMSettings.TCP_PARAMETER, TcpCheckBox.IsChecked.ToString(), SAMSettings.SECTION_PARAMETERS);
             settings.File.Write(SAMSettings.TEN_FOOT_PARAMETER, TenFootCheckBox.IsChecked.ToString(), SAMSettings.SECTION_PARAMETERS);
+            settings.File.Write(SAMSettings.NO_REACT_LOGIN_PARAMETER, NoReactLoginCheckBox.IsChecked.ToString(), SAMSettings.SECTION_PARAMETERS);
             settings.File.Write(SAMSettings.CUSTOM_PARAMETERS, CustomParametersCheckBox.IsChecked.ToString(), SAMSettings.SECTION_PARAMETERS);
             settings.File.Write(SAMSettings.CUSTOM_PARAMETERS_VALUE, CustomParametersTextBox.Text, SAMSettings.SECTION_PARAMETERS);
         }
@@ -458,6 +501,7 @@ namespace SAM.Views
             SingleCoreCheckBox.IsChecked = settings.Default.SingleCore;
             TcpCheckBox.IsChecked = settings.Default.TCP;
             TenFootCheckBox.IsChecked = settings.Default.TenFoot;
+            NoReactLoginCheckBox.IsChecked = settings.Default.TenFoot;
             CustomParametersCheckBox.IsChecked = settings.Default.CustomParameters;
             CustomParametersTextBox.Text = settings.Default.CustomParametersValue;
         }

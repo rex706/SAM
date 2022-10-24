@@ -87,6 +87,8 @@ namespace SAM.Core
         public bool SingleCore { get { return (bool)KeyValuePairs[SAMSettings.SINGLE_CORE_PARAMETER]; } set { KeyValuePairs[SAMSettings.SINGLE_CORE_PARAMETER] = value; } }
         public bool TCP { get { return (bool)KeyValuePairs[SAMSettings.TCP_PARAMETER]; } set { KeyValuePairs[SAMSettings.TCP_PARAMETER] = value; } }
         public bool TenFoot { get { return (bool)KeyValuePairs[SAMSettings.TEN_FOOT_PARAMETER]; } set { KeyValuePairs[SAMSettings.TEN_FOOT_PARAMETER] = value; } }
+
+        public bool NoReactLogin { get { return (bool)KeyValuePairs[SAMSettings.NO_REACT_LOGIN_PARAMETER]; } set { KeyValuePairs[SAMSettings.NO_REACT_LOGIN_PARAMETER] = value; } }
         public bool CustomParameters { get { return (bool)KeyValuePairs[SAMSettings.CUSTOM_PARAMETERS]; } set { KeyValuePairs[SAMSettings.CUSTOM_PARAMETERS] = value; } }
         public string CustomParametersValue { get { return (string)KeyValuePairs[SAMSettings.CUSTOM_PARAMETERS_VALUE]; } set { KeyValuePairs[SAMSettings.CUSTOM_PARAMETERS_VALUE] = value; } }
 
@@ -166,6 +168,7 @@ namespace SAM.Core
             { SAMSettings.SINGLE_CORE_PARAMETER, false },
             { SAMSettings.TCP_PARAMETER, false },
             { SAMSettings.TEN_FOOT_PARAMETER, false },
+            { SAMSettings.NO_REACT_LOGIN_PARAMETER, false },
             { SAMSettings.CUSTOM_PARAMETERS, false },
             { SAMSettings.CUSTOM_PARAMETERS_VALUE, string.Empty },
 

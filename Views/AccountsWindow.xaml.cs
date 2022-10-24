@@ -1364,7 +1364,7 @@ namespace SAM.Views
                 UseShellExecute = true,
                 FileName = settings.User.SteamPath + "steam.exe",
                 WorkingDirectory = settings.User.SteamPath,
-                Arguments = "-noreactlogin " + parametersBuilder.ToString()
+                Arguments = parametersBuilder.ToString()
             };
 
             try
