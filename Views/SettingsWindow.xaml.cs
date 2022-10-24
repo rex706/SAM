@@ -135,8 +135,7 @@ namespace SAM.Views
 
                     SetDefaultSettings();
                 }
-<<<<<<< Updated upstream
-=======
+
                 InputMethodSelectBox.SelectedItem = (VirtualInputMethod)Enum.Parse(typeof(VirtualInputMethod), settings.File.Read(SAMSettings.INPUT_METHOD, SAMSettings.SECTION_AUTOLOG));
                 HandleImeCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.HANDLE_IME, SAMSettings.SECTION_AUTOLOG));
                 SteamGuardOnlyCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.IME_2FA_ONLY, SAMSettings.SECTION_AUTOLOG));
@@ -176,7 +175,6 @@ namespace SAM.Views
                 NoReactLoginCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.NO_REACT_LOGIN_PARAMETER, SAMSettings.SECTION_PARAMETERS));
                 CustomParametersCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.CUSTOM_PARAMETERS, SAMSettings.SECTION_PARAMETERS));
                 CustomParametersTextBox.Text = settings.File.Read(SAMSettings.CUSTOM_PARAMETERS_VALUE, SAMSettings.SECTION_PARAMETERS);
->>>>>>> Stashed changes
             }
         }
 
