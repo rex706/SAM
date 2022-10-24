@@ -499,7 +499,7 @@ namespace SAM.Views
             SingleCoreCheckBox.IsChecked = settings.Default.SingleCore;
             TcpCheckBox.IsChecked = settings.Default.TCP;
             TenFootCheckBox.IsChecked = settings.Default.TenFoot;
-            NoReactLoginCheckBox.IsChecked = settings.Default.TenFoot;
+            NoReactLoginCheckBox.IsChecked = settings.Default.NoReactLogin;
             CustomParametersCheckBox.IsChecked = settings.Default.CustomParameters;
             CustomParametersTextBox.Text = settings.Default.CustomParametersValue;
         }
