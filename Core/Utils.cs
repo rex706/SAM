@@ -17,7 +17,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
 using SAM.Views;
-using ControlzEx.Standard;
 
 namespace SAM.Core
 {
@@ -56,8 +55,6 @@ namespace SAM.Core
         public const int VK_RETURN = 0x0D;
         public const int VK_TAB = 0x09;
         public const int VK_SPACE = 0x20;
-        public const int WM_LBUTTONDOWN = 0x0201;
-        public const int WM_LBUTTONUP = 0x0202;
 
         public static int API_KEY_LENGTH = 32;
         readonly static char[] specialChars = { '{', '}', '(', ')', '[', ']', '+', '^', '%', '~' };
@@ -853,12 +850,6 @@ namespace SAM.Core
             // Press key up
             keybd_event((byte)System.Windows.Forms.Keys.CapsLock, 0, 0x2, 0);
         }
-
-
-
-
-
-
 
         public static void SendCharacter(IntPtr hwnd, VirtualInputMethod inputMethod, char c)
         {
