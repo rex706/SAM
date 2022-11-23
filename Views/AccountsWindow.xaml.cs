@@ -1562,6 +1562,9 @@ namespace SAM.Views
             }
 
             Thread.Sleep(100);
+            //send tab twice, should work for old and new UI
+            Core.Utils.SendTab(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod);
+            Core.Utils.SendTab(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod);
 
             foreach (char c in Generate2FACode(decryptedAccounts[index].SharedSecret).ToCharArray())
             {

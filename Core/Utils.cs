@@ -17,6 +17,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
 using SAM.Views;
+using ControlzEx.Standard;
 
 namespace SAM.Core
 {
@@ -55,6 +56,8 @@ namespace SAM.Core
         public const int VK_RETURN = 0x0D;
         public const int VK_TAB = 0x09;
         public const int VK_SPACE = 0x20;
+        public const int WM_LBUTTONDOWN = 0x0201;
+        public const int WM_LBUTTONUP = 0x0202;
 
         public static int API_KEY_LENGTH = 32;
         readonly static char[] specialChars = { '{', '}', '(', ')', '[', ']', '+', '^', '%', '~' };
@@ -713,7 +716,34 @@ namespace SAM.Core
             wh.GetClassName().Equals("vguiPopupWindow") &&
             (wh.GetWindowText().StartsWith("Steam Guard") ||
              wh.GetWindowText().StartsWith("Steam 令牌") ||
-             wh.GetWindowText().StartsWith("Steam ガード")));
+             wh.GetWindowText().StartsWith("Steam ガード") ||
+             // fix the window detection for the new react based login prompt, i added all these whilst Mimi was falling asleep and im super tired and sleepy as well, these are located in "steamui_LANG.txt" where LANG is the language - Killa 23/11/2022
+             wh.GetWindowText().StartsWith("Steamサインイン") ||
+             wh.GetWindowText().StartsWith("Iniciar a sessão no Steam") ||
+             wh.GetWindowText().StartsWith("Steam вписване") ||
+             wh.GetWindowText().StartsWith("Přihlášení do služby Steam") ||
+             wh.GetWindowText().StartsWith("Steam-login") ||
+             wh.GetWindowText().StartsWith("Aanmelden bij Steam") ||
+             wh.GetWindowText().StartsWith("Steam Sign In") ||
+             wh.GetWindowText().StartsWith("Kirjautuminen Steamiin") ||
+             wh.GetWindowText().StartsWith("Connexion à Steam") ||
+             wh.GetWindowText().StartsWith("Steam-Anmeldung") ||
+             wh.GetWindowText().StartsWith("Σύνδεση στο Steam") ||
+             wh.GetWindowText().StartsWith("Steam bejelentkezés") ||
+             wh.GetWindowText().StartsWith("Accesso a Steam") ||
+             wh.GetWindowText().StartsWith("Steamサインイン") ||
+             wh.GetWindowText().StartsWith("Steam 로그인") ||
+             wh.GetWindowText().StartsWith("Inicio de sesión en Steam") ||
+             wh.GetWindowText().StartsWith("Steam Ship Embarkation") ||
+             wh.GetWindowText().StartsWith("Iniciar sessão no Steam") ||
+             wh.GetWindowText().StartsWith("Вход в Steam") ||
+             wh.GetWindowText().StartsWith("Steam 登录") ||
+             wh.GetWindowText().StartsWith("Inloggning på Steam") ||
+             wh.GetWindowText().StartsWith("การเข้าสู่ระบบ Steam") ||
+             wh.GetWindowText().StartsWith("Вхід у Steam") ||
+             wh.GetWindowText().StartsWith("Đăng nhập Steam")
+
+             ));
             return windowHandle;
         }
 
@@ -823,6 +853,12 @@ namespace SAM.Core
             // Press key up
             keybd_event((byte)System.Windows.Forms.Keys.CapsLock, 0, 0x2, 0);
         }
+
+
+
+
+
+
 
         public static void SendCharacter(IntPtr hwnd, VirtualInputMethod inputMethod, char c)
         {
