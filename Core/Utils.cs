@@ -17,6 +17,9 @@ using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
 using SAM.Views;
+using FlaUI.UIA3;
+using FlaUI.Core.AutomationElements;
+using FlaUI.Core.Definitions;
 
 namespace SAM.Core
 {
@@ -700,10 +703,11 @@ namespace SAM.Core
         {
             return TopLevelWindowUtils.FindWindow(wh =>
             wh.GetClassName().Equals("vguiPopupWindow") &&
-            (wh.GetWindowText().Contains("Steam") &&
+            ((wh.GetWindowText().Contains("Steam") &&
             !wh.GetWindowText().Contains("-") &&
             !wh.GetWindowText().Contains("—") &&
-             wh.GetWindowText().Length > 5));
+             wh.GetWindowText().Length > 5) ||
+             wh.GetWindowText().Equals("蒸汽平台登录")));
         }
 
         public static WindowHandle GetSteamGuardWindow()
@@ -725,11 +729,53 @@ namespace SAM.Core
              wh.GetWindowText().StartsWith("Steam — ")));
         }
 
-        private static WindowHandle GetMainSteamClientWindow()
+        public static WindowHandle GetMainSteamClientWindow()
         {
             return TopLevelWindowUtils.FindWindow(wh =>
             wh.GetClassName().Equals("vguiPopupWindow") &&
-            wh.GetWindowText().Equals("Steam"));
+            (wh.GetWindowText().Equals("Steam") || 
+            wh.GetWindowText().Equals("蒸汽平台")));
+        }
+
+        public static bool IsReactWindowReadyForCodeInput()
+        {
+            WindowHandle loginWindow = GetSteamLoginWindow();
+
+            if (!loginWindow.IsValid || !loginWindow.IsVisible())
+            {
+                return false;
+            }
+
+            using (var automation = new UIA3Automation())
+            {
+                AutomationElement window = automation.FromHandle(loginWindow.RawPtr);
+
+                if (window == null)
+                {
+                    return false;
+                }
+
+                AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
+
+                if (document == null)
+                {
+                    return false;
+                }
+
+                AutomationElement[] elements = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
+
+                if (elements != null)
+                {
+                    Console.WriteLine("Found " + elements.Length + " edit controls");
+
+                    if (elements.Length == 5)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         public static Process WaitForSteamProcess(WindowHandle windowHandle)
@@ -837,7 +883,7 @@ namespace SAM.Core
                     break;
 
                 default:
-                    if (Utils.IsSpecialCharacter(c))
+                    if (IsSpecialCharacter(c))
                     {
                         if (inputMethod == VirtualInputMethod.SendWait)
                         {
@@ -983,14 +1029,6 @@ namespace SAM.Core
             }
 
             return false;
-        }
-
-        public static string RandomString(int length)
-        {
-            Random random = new Random();
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-
-            return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

@@ -68,6 +68,7 @@ namespace SAM.Views
         private static bool deleting = false;
         private static bool loginAllSequence = false;
         private static bool loginAllCancelled = false;
+        private static bool noReactLogin = false;
 
         private static Button holdingButton = null;
         private static bool dragging = false;
@@ -1332,6 +1333,7 @@ namespace SAM.Views
             if (settings.User.CustomParameters)
             {
                 parametersBuilder.Append(settings.User.CustomParametersValue).Append(" ");
+                noReactLogin = settings.User.CustomParametersValue.Contains("-noreactlogin");
             }
 
             foreach (string parameter in launchParameters)
@@ -1364,7 +1366,7 @@ namespace SAM.Views
                 UseShellExecute = true,
                 FileName = settings.User.SteamPath + "steam.exe",
                 WorkingDirectory = settings.User.SteamPath,
-                Arguments = "-noreactlogin " + parametersBuilder.ToString()
+                Arguments = parametersBuilder.ToString()
             };
 
             try
@@ -1521,6 +1523,12 @@ namespace SAM.Views
 
         private void Type2FA(int index, int tryCount)
         {
+            if (tryCount > 0 && Core.Utils.GetMainSteamClientWindow().IsValid)
+            {
+                PostLogin();
+                return;
+            }
+
             // Need both the Steam Login and Steam Guard windows.
             // Can't focus the Steam Guard window directly.
             var steamLoginWindow = Core.Utils.GetSteamLoginWindow();
@@ -1530,7 +1538,15 @@ namespace SAM.Views
             {
                 Thread.Sleep(100);
                 steamLoginWindow = Core.Utils.GetSteamLoginWindow();
-                steamGuardWindow = Core.Utils.GetSteamGuardWindow();
+
+                if (noReactLogin)
+                {
+                    steamGuardWindow = Core.Utils.GetSteamGuardWindow();
+                }
+                else
+                {
+                    steamGuardWindow = steamLoginWindow;
+                }
 
                 // Check for Steam warning window.
                 var steamWarningWindow = Core.Utils.GetSteamWarningWindow();
@@ -1543,11 +1559,23 @@ namespace SAM.Views
 
             Console.WriteLine("Found windows.");
 
-            Process steamGuardProcess = Core.Utils.WaitForSteamProcess(steamGuardWindow);
-            steamGuardProcess.WaitForInputIdle();
+            if (!noReactLogin)
+            {
+                while (!Core.Utils.IsReactWindowReadyForCodeInput())
+                {
+                    Thread.Sleep(100);
 
-            // Wait a bit for the window to fully initialize just in case.
-            Thread.Sleep(settings.User.SleepTime);
+                    if (Core.Utils.GetMainSteamClientWindow().IsValid)
+                    {
+                        PostLogin();
+                        return;
+                    }
+                    else if (!Core.Utils.GetSteamLoginWindow().IsValid)
+                    {
+                        return;
+                    }
+                }
+            }
 
             // Generate 2FA code, then send it to the client.
             Console.WriteLine("It is idle now, typing code...");
@@ -1572,12 +1600,13 @@ namespace SAM.Views
                 Core.Utils.SendCharacter(steamGuardWindow.RawPtr, settings.User.VirtualInputMethod, c);
             }
 
-            Core.Utils.SetForegroundWindow(steamGuardWindow.RawPtr);
-
-            Thread.Sleep(100);
-
-            Core.Utils.SendEnter(steamGuardWindow.RawPtr, settings.User.VirtualInputMethod);
-
+            if (noReactLogin)
+            {
+                Core.Utils.SetForegroundWindow(steamGuardWindow.RawPtr);
+                Thread.Sleep(100);
+                Core.Utils.SendEnter(steamGuardWindow.RawPtr, settings.User.VirtualInputMethod);
+            }
+            
             // Restore CapsLock back if CapsLock is off before we start typing.
             if (settings.User.HandleMicrosoftIME && !capsLockEnabled)
             {
@@ -1588,12 +1617,21 @@ namespace SAM.Views
             Thread.Sleep(settings.User.SleepTime);
 
             // Check if we still have a 2FA popup, which means the previous one failed.
-            steamGuardWindow = Core.Utils.GetSteamGuardWindow();
+            if (noReactLogin)
+            {
+                steamGuardWindow = Core.Utils.GetSteamGuardWindow();
+            }
+            else
+            {
+                steamGuardWindow = Core.Utils.GetSteamLoginWindow();
+            }
+
+            int retry = tryCount + 1;
 
             if (tryCount < maxRetry && steamGuardWindow.IsValid)
             {
-                Console.WriteLine("2FA code failed, retrying...");
-                Type2FA(index, tryCount + 1);
+                Console.WriteLine("2FA code might have failed, attempting retry " + retry + "...");
+                Type2FA(index, retry);
                 return;
             }
             else if (tryCount == maxRetry && steamGuardWindow.IsValid)
@@ -1602,7 +1640,7 @@ namespace SAM.Views
 
                 if (result == MessageBoxResult.OK)
                 {
-                    Type2FA(index, tryCount + 1);
+                    Type2FA(index, retry);
                 }
             }
             else if (tryCount == maxRetry + 1 && steamGuardWindow.IsValid)
@@ -2642,6 +2680,15 @@ namespace SAM.Views
             catch
             {
                 Console.WriteLine("No steam process found or steam failed to shutdown.");
+            }
+        }
+
+        private void AccountsWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            foreach (Thread thread in loginThreads)
+            {
+                Console.WriteLine("Aboring thread...");
+                thread.Abort();
             }
         }
     }

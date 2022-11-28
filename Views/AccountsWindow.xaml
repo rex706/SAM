@@ -7,7 +7,7 @@
         xmlns:tb="http://www.hardcodet.net/taskbar" 
         xmlns:local="clr-namespace:SAM.Views"
         xmlns:wpf="clr-namespace:SAM.Wpf" xmlns:core="clr-namespace:SAM.Core" d:DataContext="{d:DesignInstance Type=core:Account}"
-                  mc:Ignorable="d" Height="180" Width="138" WindowStartupLocation="Manual" ResizeMode="CanMinimize" Title="SAM" StateChanged="Window_StateChanged" TextOptions.TextFormattingMode="Display" LocationChanged="Window_LocationChanged" SizeChanged="MetroWindow_SizeChanged">
+                  mc:Ignorable="d" Height="180" Width="138" WindowStartupLocation="Manual" ResizeMode="CanMinimize" Title="SAM" StateChanged="Window_StateChanged" TextOptions.TextFormattingMode="Display" LocationChanged="Window_LocationChanged" SizeChanged="MetroWindow_SizeChanged" Closing="AccountsWindow_Closing">
     <mah:MetroWindow.IconTemplate>
         <DataTemplate>
             <Grid Width="20" Height="20" Background="Transparent" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality">

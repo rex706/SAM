@@ -360,11 +360,6 @@ namespace SAM.Views
             Close();
         }
 
-        private void GenerateKeyButton_Click(object sender, RoutedEventArgs e)
-        {
-            //keyTextBox.Text = RandomString(10);
-        }
-
         private void ChangePathButton_Click(object sender, RoutedEventArgs e)
         {
             // Prompt user to find steam install
