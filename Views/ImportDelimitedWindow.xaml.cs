@@ -77,7 +77,7 @@ namespace SAM.Views
                 sucessful++;
             }
 
-            Core.Utils.ImportAccountsFromList(accounts);
+            AccountUtils.ImportAccountsFromList(accounts);
 
             if (errors.Count > 0)
             {

@@ -99,7 +99,7 @@ namespace SAM.Views
 
             OKButton.IsEnabled = false;
 
-            dynamic userJson = await Core.Utils.GetUserInfoFromConfigAndWebApi(UsernameBox.Text.ToString());
+            dynamic userJson = await AccountUtils.GetUserInfoFromConfigAndWebApi(UsernameBox.Text.ToString());
 
             if (userJson != null)
             {
@@ -139,7 +139,7 @@ namespace SAM.Views
             {
                 OKButton.IsEnabled = false; 
 
-                dynamic steamId = await Core.Utils.GetSteamIdFromProfileUrl(UrlTextBox.Text);
+                dynamic steamId = await AccountUtils.GetSteamIdFromProfileUrl(UrlTextBox.Text);
 
                 if (steamId != null)
                 {

@@ -86,7 +86,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Core\AccountUtils.cs" />
     <Compile Include="Core\AltActionType.cs" />
+    <Compile Include="Core\WindowUtils.cs" />
     <Compile Include="Views\AccountInfoDialog.xaml.cs">
       <DependentUpon>AccountInfoDialog.xaml</DependentUpon>
     </Compile>
@@ -136,7 +138,6 @@
     <Compile Include="Core\StringCipher.cs" />
     <Compile Include="Core\UpdateCheck.cs" />
     <Compile Include="Core\UserSettings.cs" />
-    <Compile Include="Core\Utils.cs" />
     <Compile Include="Core\VirtualInputMethod.cs" />
     <Page Include="Views\PasswordWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -172,7 +172,7 @@ namespace SAM.Views
                         {
                             try
                             {
-                                Core.Utils.PasswordDeserialize("info.dat", passwordDialog.PasswordText);
+                                AccountUtils.PasswordDeserialize("info.dat", passwordDialog.PasswordText);
                                 messageBoxResult = MessageBoxResult.None;
                             }
                             catch (Exception e)
@@ -389,7 +389,7 @@ namespace SAM.Views
         {
             try
             {
-                SteamPathTextBox.Text = Core.Utils.CheckSteamPath();
+                SteamPathTextBox.Text = AccountUtils.CheckSteamPath();
             }
             catch (Exception ex)
             {
@@ -425,7 +425,7 @@ namespace SAM.Views
             HandleImeCheckBox.IsChecked = settings.Default.HandleMicrosoftIME;
             SteamGuardOnlyCheckBox.IsChecked = settings.Default.IME2FAOnly;
 
-            SteamPathTextBox.Text = Core.Utils.CheckSteamPath();
+            SteamPathTextBox.Text = AccountUtils.CheckSteamPath();
             ApiKeyTextBox.Text = settings.Default.ApiKey;
             AutoReloadCheckBox.IsChecked = settings.Default.AutoReloadEnabled;
             AutoReloadIntervalSpinBox.Text = settings.Default.AutoReloadInterval.ToString();
