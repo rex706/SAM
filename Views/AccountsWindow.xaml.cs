@@ -1547,11 +1547,12 @@ namespace SAM.Views
                 steamLoginWindow = WindowUtils.GetSteamLoginWindow(steamProcess);
             }
 
-            while (!WindowUtils.TryCodeEntry(steamLoginWindow, decryptedAccounts[index].SharedSecret))
-            {
-                Thread.Sleep(100);
+            string secret = decryptedAccounts[index].SharedSecret;
+            LoginWindowState state = WindowUtils.TryCodeEntry(steamLoginWindow, secret);
 
-                if (steamProcess.HasExited)
+            while (state != LoginWindowState.Success)
+            {
+                if (steamProcess.HasExited || state == LoginWindowState.Error)
                 {
                     return;
                 }
@@ -1560,10 +1561,10 @@ namespace SAM.Views
                     PostLogin();
                     return;
                 }
-                else if (!WindowUtils.GetSteamLoginWindow(steamProcess).IsValid)
-                {
-                    return;
-                }
+
+                Thread.Sleep(100);
+
+                state = WindowUtils.TryCodeEntry(steamLoginWindow, secret);
             }
 
             // Need a little pause here to more reliably check for window later.

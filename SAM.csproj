@@ -88,6 +88,7 @@
     </ApplicationDefinition>
     <Compile Include="Core\AccountUtils.cs" />
     <Compile Include="Core\AltActionType.cs" />
+    <Compile Include="Core\LoginWindowState.cs" />
     <Compile Include="Core\WindowUtils.cs" />
     <Compile Include="Views\AccountInfoDialog.xaml.cs">
       <DependentUpon>AccountInfoDialog.xaml</DependentUpon>

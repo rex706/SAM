@@ -84,7 +84,7 @@ namespace SAM.Core
             {
                 string text = GetWindowTextRaw(windowHandle);
 
-                if ((text.Contains("Steam") && !text.Contains("-") && !text.Contains("—") && text.Length > 5) || text.Equals("蒸汽平台登录"))
+                if ((text.Contains("Steam") && text.Length > 5) || text.Equals("蒸汽平台登录"))
                 {
                     return new WindowHandle(windowHandle);
                 }
@@ -148,11 +148,11 @@ namespace SAM.Core
             wh.GetWindowText().Equals("蒸汽平台")));
         }
 
-        public static bool TryCodeEntry(WindowHandle loginWindow, string secret)
+        public static LoginWindowState TryCodeEntry(WindowHandle loginWindow, string secret)
         {
             if (!loginWindow.IsValid)
             {
-                return false;
+                return LoginWindowState.Invalid;
             }
 
             SetForegroundWindow(loginWindow.RawPtr);
@@ -163,22 +163,25 @@ namespace SAM.Core
 
                 if (window == null)
                 {
-                    return false;
+                    return LoginWindowState.Invalid;
                 }
 
                 AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
 
-                if (document == null)
+                if (document == null || document.FindAllChildren().Length == 0)
                 {
-                    return false;
+                    return LoginWindowState.Invalid;
+                }
+
+                if (document.FindAllChildren().Length == 3)
+                {
+                    return LoginWindowState.Error;
                 }
 
                 AutomationElement[] elements = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
 
                 if (elements != null)
                 {
-                    Console.WriteLine("Found " + elements.Length + " edit controls");
-
                     if (elements.Length == 5)
                     {
                         string code = Generate2FACode(secret);
@@ -195,15 +198,15 @@ namespace SAM.Core
                         }
                         catch (Exception)
                         {
-                            return false;
+                            return LoginWindowState.Code;
                         }
 
-                        return true;
+                        return LoginWindowState.Success;
                     }
                 }
             }
 
-            return false;
+            return LoginWindowState.Invalid;
         }
 
         public static Process WaitForSteamProcess(WindowHandle windowHandle)
