@@ -7,9 +7,9 @@ namespace SAM.Views
     /// <summary>
     /// Interaction logic for TextDialog.xaml
     /// </summary>
-    public partial class TextDialog : MetroWindow
+    public partial class AccountInfoDialog : MetroWindow
     {
-        public TextDialog()
+        public AccountInfoDialog()
         {
             InitializeComponent();
         }
@@ -45,6 +45,12 @@ namespace SAM.Views
         }
 
         private string OriginalUrlText { get; set; }
+
+        public string ParametersText
+        {
+            get { return ParametersBox.Text; }
+            set { ParametersBox.Text = value; }
+        }
 
         public string DescriptionText
         {

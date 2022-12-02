@@ -55,7 +55,7 @@ namespace SAM.Views
         private static string ePassword = "";
         private static string account;
 
-        private static List<string> launchParameters;
+        private static List<string> globalParameters;
 
         private static double originalHeight;
         private static double originalWidth;
@@ -247,7 +247,7 @@ namespace SAM.Views
             settings = new SAMSettings();
 
             isLoadingSettings = true;
-            launchParameters = new List<string>();
+            globalParameters = new List<string>();
 
             settings.HandleDeprecatedSettings();
 
@@ -322,7 +322,7 @@ namespace SAM.Views
                                     settings.User.KeyValuePairs[entry.Key] = Convert.ToBoolean(settings.File.Read(entry.Key, entry.Value));
                                     if (entry.Value.Equals(SAMSettings.SECTION_PARAMETERS) && (bool)settings.User.KeyValuePairs[entry.Key] == true && !entry.Key.StartsWith("custom"))
                                     {
-                                        launchParameters.Add("-" + entry.Key);
+                                        globalParameters.Add("-" + entry.Key);
                                     }
                                     break;
 
@@ -698,7 +698,18 @@ namespace SAM.Views
                             steamId = account.SteamId;
                         }
 
-                        decryptedAccounts.Add(new Account() { Name = account.Name, Alias = account.Alias, Password = tempPass, SharedSecret = temp2fa, ProfUrl = account.ProfUrl, AviUrl = account.AviUrl, SteamId = steamId, Timeout = account.Timeout, Description = account.Description });
+                        decryptedAccounts.Add(new Account() { 
+                            Name = account.Name,
+                            Alias = account.Alias, 
+                            Password = tempPass, 
+                            SharedSecret = temp2fa, 
+                            ProfUrl = account.ProfUrl, 
+                            AviUrl = account.AviUrl, 
+                            SteamId = steamId, 
+                            Timeout = account.Timeout, 
+                            Parameters = account.Parameters,
+                            Description = account.Description 
+                        });
                     }
                 }
 
@@ -1127,7 +1138,7 @@ namespace SAM.Views
         private async void AddAccount()
         {
             // User entered info
-            var dialog = new TextDialog();
+            var dialog = new AccountInfoDialog();
 
             if (dialog.ShowDialog() == true && dialog.AccountText != "" && dialog.PasswordText != "")
             {
@@ -1160,7 +1171,17 @@ namespace SAM.Views
 
                 try
                 {
-                    Account newAccount = new Account() { Name = dialog.AccountText, Alias = dialog.AliasText, Password = StringCipher.Encrypt(password, eKey), SharedSecret = StringCipher.Encrypt(sharedSecret, eKey), ProfUrl = dialog.UrlText, AviUrl = aviUrl, SteamId = steamId, Description = dialog.DescriptionText };
+                    Account newAccount = new Account() {
+                        Name = dialog.AccountText,
+                        Alias = dialog.AliasText,
+                        Password = StringCipher.Encrypt(password, eKey),
+                        SharedSecret = StringCipher.Encrypt(sharedSecret, eKey),
+                        ProfUrl = dialog.UrlText,
+                        AviUrl = aviUrl,
+                        SteamId = steamId,
+                        Parameters = dialog.ParametersText,
+                        Description = dialog.DescriptionText 
+                    };
 
                     await ReloadAccount(newAccount);
 
@@ -1182,19 +1203,20 @@ namespace SAM.Views
 
         private async Task EditEntryAsync(int index)
         {
-            var dialog = new TextDialog
+            var dialog = new AccountInfoDialog
             {
                 AccountText = decryptedAccounts[index].Name,
                 AliasText = decryptedAccounts[index].Alias,
                 PasswordText = decryptedAccounts[index].Password,
                 SharedSecretText = decryptedAccounts[index].SharedSecret,
                 UrlText = decryptedAccounts[index].ProfUrl,
-                DescriptionText = decryptedAccounts[index].Description,
-                SteamId = decryptedAccounts[index].SteamId
+                SteamId = decryptedAccounts[index].SteamId,
+                ParametersText = decryptedAccounts[index].Parameters,
+                DescriptionText = decryptedAccounts[index].Description
             };
 
             // Reload slected boolean
-            settings.User.LoginSelectedAccount = settings.File.Read(SAMSettings.LOGIN_SELECTED_ACCOUNT, SAMSettings.SECTION_AUTOLOG) == true.ToString() ? true : false;
+            settings.User.LoginSelectedAccount = settings.File.Read(SAMSettings.LOGIN_SELECTED_ACCOUNT, SAMSettings.SECTION_AUTOLOG) == true.ToString();
 
             if (settings.User.LoginSelectedAccount == true && settings.User.SelectedAccountIndex == index)
                 dialog.autoLogCheckBox.IsChecked = true;
@@ -1240,8 +1262,8 @@ namespace SAM.Views
                     encryptedAccounts[index].ProfUrl = dialog.UrlText;
                     encryptedAccounts[index].AviUrl = aviUrl;
                     encryptedAccounts[index].SteamId = dialog.SteamId;
+                    encryptedAccounts[index].Parameters = dialog.ParametersText;
                     encryptedAccounts[index].Description = dialog.DescriptionText;
-                    encryptedAccounts[index].SteamId = dialog.SteamId;
 
                     SerializeAccounts();
                 }
@@ -1328,14 +1350,21 @@ namespace SAM.Views
             }
 
             StringBuilder parametersBuilder = new StringBuilder();
+            Account account = decryptedAccounts[index];
+            List<string> parameters = globalParameters;
 
-            if (settings.User.CustomParameters)
+            if (account.HasParameters)
+            {
+                parameters = account.Parameters.Split(' ').ToList();
+                noReactLogin = account.Parameters.Contains("-noreactlogin");
+            }
+            else if (settings.User.CustomParameters)
             {
                 parametersBuilder.Append(settings.User.CustomParametersValue).Append(" ");
                 noReactLogin = settings.User.CustomParametersValue.Contains("-noreactlogin");
             }
 
-            foreach (string parameter in launchParameters)
+            foreach (string parameter in parameters)
             {
                 parametersBuilder.Append(parameter).Append(" ");
 
@@ -1343,7 +1372,7 @@ namespace SAM.Views
                 {
                     StringBuilder passwordBuilder = new StringBuilder();
 
-                    foreach (char c in decryptedAccounts[index].Password)
+                    foreach (char c in account.Password)
                     {
                         if (c.Equals('"'))
                         {
@@ -1355,7 +1384,7 @@ namespace SAM.Views
                         }
                     }
 
-                    parametersBuilder.Append(decryptedAccounts[index].Name).Append(" \"").Append(passwordBuilder.ToString()).Append("\" ");
+                    parametersBuilder.Append(account.Name).Append(" \"").Append(passwordBuilder.ToString()).Append("\" ");
                 }
             }
 
@@ -1387,9 +1416,9 @@ namespace SAM.Views
                     AccountUtils.SetRememeberPasswordKeyValue(1);
                 }
 
-                if (decryptedAccounts[index].SharedSecret != null && decryptedAccounts[index].SharedSecret.Length > 0)
+                if (account.SharedSecret != null && account.SharedSecret.Length > 0)
                 {
-                    Type2FA(steamProcess, index);
+                    Handle2FA(steamProcess, index);
                 }
                 else
                 {
@@ -1496,7 +1525,7 @@ namespace SAM.Views
                     return;
                 }
 
-                Type2FA(steamProcess, index);
+                Handle2FA(steamProcess, index);
             }
             else
             {
@@ -1514,7 +1543,7 @@ namespace SAM.Views
             });
         }
 
-        private void Type2FA(Process steamProcess, int index)
+        private void Handle2FA(Process steamProcess, int index)
         {
             if (noReactLogin)
             {

@@ -20,6 +20,10 @@ namespace SAM.Core
 
         public string SteamId { get; set; }
 
+        public string Parameters { get; set; }
+
+        public bool HasParameters { get { return Parameters != null && Parameters.Length > 0 && Parameters.Split(' ').Length > 0; } }
+
         public DateTime? Timeout { get; set; }
 
         private string timeoutTimeLeft;

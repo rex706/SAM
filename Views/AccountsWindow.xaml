@@ -206,7 +206,7 @@
                                 <MenuItem Header="Settings" Click="SettingsButton_Click" />
                                 <MenuItem Header="Sort">
                                     <MenuItem Header="Alphabetical" Click="SortAlphabetical_Click"/>
-                                    <MenuItem Header="Shuffle" Click="ShuffleAccounts_Click" IsEnabled="False"/>
+                                    <MenuItem Header="Shuffle" Click="ShuffleAccounts_Click"/>
                                 </MenuItem>
                             </MenuItem>
                             <MenuItem Header="Help" Padding="{DynamicResource MenuItemPadding}">
