@@ -708,7 +708,8 @@ namespace SAM.Views
                             SteamId = steamId, 
                             Timeout = account.Timeout, 
                             Parameters = account.Parameters,
-                            Description = account.Description 
+                            Description = account.Description,
+                            FriendsLoginStatus = account.FriendsLoginStatus
                         });
                     }
                 }
@@ -1180,7 +1181,8 @@ namespace SAM.Views
                         AviUrl = aviUrl,
                         SteamId = steamId,
                         Parameters = dialog.ParametersText,
-                        Description = dialog.DescriptionText 
+                        Description = dialog.DescriptionText,
+                        FriendsLoginStatus = dialog.FriendsLoginStatus
                     };
 
                     await ReloadAccount(newAccount);
@@ -1203,16 +1205,19 @@ namespace SAM.Views
 
         private async Task EditEntryAsync(int index)
         {
+            Account account = decryptedAccounts[index];
+
             var dialog = new AccountInfoDialog
             {
-                AccountText = decryptedAccounts[index].Name,
-                AliasText = decryptedAccounts[index].Alias,
-                PasswordText = decryptedAccounts[index].Password,
-                SharedSecretText = decryptedAccounts[index].SharedSecret,
-                UrlText = decryptedAccounts[index].ProfUrl,
-                SteamId = decryptedAccounts[index].SteamId,
-                ParametersText = decryptedAccounts[index].Parameters,
-                DescriptionText = decryptedAccounts[index].Description
+                AccountText = account.Name,
+                AliasText = account.Alias,
+                PasswordText = account.Password,
+                SharedSecretText = account.SharedSecret,
+                UrlText = account.ProfUrl,
+                SteamId = account.SteamId,
+                ParametersText = account.Parameters,
+                DescriptionText = account.Description,
+                FriendsLoginStatus = account.FriendsLoginStatus
             };
 
             // Reload slected boolean
@@ -1264,6 +1269,7 @@ namespace SAM.Views
                     encryptedAccounts[index].SteamId = dialog.SteamId;
                     encryptedAccounts[index].Parameters = dialog.ParametersText;
                     encryptedAccounts[index].Description = dialog.DescriptionText;
+                    encryptedAccounts[index].FriendsLoginStatus = dialog.FriendsLoginStatus;
 
                     SerializeAccounts();
                 }
@@ -1295,7 +1301,10 @@ namespace SAM.Views
                     loginThread.Abort();
                 }
             }
-            
+
+            MainGrid.IsEnabled = settings.User.SandboxMode;
+            Title = "SAM Working...";
+
             new Thread(() => { 
                 try
                 {
@@ -1303,7 +1312,10 @@ namespace SAM.Views
                 }
                 finally
                 {
-                    Dispatcher.Invoke(delegate () { MainGrid.IsEnabled = true; });
+                    Dispatcher.Invoke(delegate () { 
+                        MainGrid.IsEnabled = true;
+                        Title = "SAM";
+                    });
                 }
             }).Start();
         }
@@ -1352,6 +1364,11 @@ namespace SAM.Views
             StringBuilder parametersBuilder = new StringBuilder();
             Account account = decryptedAccounts[index];
             List<string> parameters = globalParameters;
+
+            if (account.FriendsLoginStatus != FriendsLoginStatus.Unchanged && account.SteamId != null && account.SteamId.Length > 0)
+            {
+                AccountUtils.SetFriendsOnlineMode(account.FriendsLoginStatus, account.SteamId, settings.User.SteamPath);
+            }
 
             if (account.HasParameters)
             {
@@ -1413,7 +1430,7 @@ namespace SAM.Views
             {
                 if (settings.User.RememberPassword == true)
                 {
-                    AccountUtils.SetRememeberPasswordKeyValue(1);
+                    AccountUtils.SetRememeberPasswordKeyValue(1, encryptedAccounts[index]);
                 }
 
                 if (account.SharedSecret != null && account.SharedSecret.Length > 0)
@@ -1896,8 +1913,6 @@ namespace SAM.Views
         {
             if (sender is Button btn)
             {
-                MainGrid.IsEnabled = settings.User.SandboxMode;
-
                 // Login with clicked button's index, which stored in Tag.
                 int index = Int32.Parse(btn.Tag.ToString());
                 Login(index);

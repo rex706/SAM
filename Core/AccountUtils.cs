@@ -13,12 +13,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Serialization;
+using SteamIDs_Engine;
+using Newtonsoft.Json;
 
 namespace SAM.Core
 {
     class AccountUtils
     {
-        public static int API_KEY_LENGTH = 32;
+        private const int API_KEY_LENGTH = 32;
 
         public static void Serialize(List<Account> accounts)
         {
@@ -118,9 +120,9 @@ namespace SAM.Core
                     Serialize(AccountsWindow.encryptedAccounts);
                     MessageBox.Show("Accounts imported!");
                 }
-                catch (Exception m)
+                catch (Exception e)
                 {
-                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -137,9 +139,9 @@ namespace SAM.Core
                     File.Copy("info.dat", dialog.SelectedPath + "\\info.dat");
                     MessageBox.Show("File exported to:\n" + dialog.SelectedPath);
                 }
-                catch (Exception m)
+                catch (Exception e)
                 {
-                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -160,9 +162,9 @@ namespace SAM.Core
 
                     MessageBox.Show("File exported to:\n" + dialog.SelectedPath);
                 }
-                catch (Exception m)
+                catch (Exception e)
                 {
-                    MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -170,7 +172,7 @@ namespace SAM.Core
         public static string GetSteamPathFromRegistry()
         {
             string registryValue = string.Empty;
-            RegistryKey localKey = null;
+            RegistryKey localKey;
 
             if (Environment.Is64BitOperatingSystem)
             {
@@ -186,9 +188,9 @@ namespace SAM.Core
                 localKey = localKey.OpenSubKey(@"Software\\Valve\\Steam");
                 registryValue = localKey.GetValue("SteamPath").ToString() + "/";
             }
-            catch (NullReferenceException nre)
+            catch (Exception e)
             {
-                Console.WriteLine(nre.Message);
+                Console.WriteLine(e.Message);
             }
 
             return registryValue;
@@ -196,8 +198,7 @@ namespace SAM.Core
 
         public static void ClearAutoLoginUserKeyValues()
         {
-            string registryValue = string.Empty;
-            RegistryKey localKey = null;
+            RegistryKey localKey;
 
             if (Environment.Is64BitOperatingSystem)
             {
@@ -213,17 +214,17 @@ namespace SAM.Core
                 localKey = localKey.OpenSubKey(@"Software\\Valve\\Steam", true);
                 localKey.SetValue("AutoLoginUser", "", RegistryValueKind.String);
                 localKey.SetValue("RememberPassword", 0, RegistryValueKind.DWord);
+                localKey.Close();
             }
-            catch (NullReferenceException nre)
+            catch (Exception e)
             {
-                Console.WriteLine(nre.Message);
+                Console.WriteLine(e.Message);
             }
         }
 
-        public static void SetRememeberPasswordKeyValue(int value)
+        public static void SetRememeberPasswordKeyValue(int value, Account account)
         {
-            string registryValue = string.Empty;
-            RegistryKey localKey = null;
+            RegistryKey localKey;
 
             if (Environment.Is64BitOperatingSystem)
             {
@@ -238,10 +239,31 @@ namespace SAM.Core
             {
                 localKey = localKey.OpenSubKey(@"Software\\Valve\\Steam", true);
                 localKey.SetValue("RememberPassword", value, RegistryValueKind.DWord);
+                localKey.SetValue("AutoLoginUser", account.Name.ToLower(), RegistryValueKind.String);
+                localKey.Close();
+
+                string steamPath = new IniFile(SAMSettings.FILE_NAME).Read(SAMSettings.STEAM_PATH, SAMSettings.SECTION_STEAM);
+                string loginusersPath = steamPath + "config/loginusers.vdf";
+
+                dynamic loginusers = VdfConvert.Deserialize(File.ReadAllText(loginusersPath));
+
+                dynamic usersObject = loginusers.Value;
+                dynamic userObject = usersObject[account.SteamId];
+
+                userObject.RememberPassword = "1";
+                userObject.AllowAutoLogin = "1";
+                //userObject.MostRecent = "1";
+
+                usersObject[account.SteamId] = userObject;
+                loginusers.Value = usersObject;
+
+                string serialized = VdfConvert.Serialize(loginusers);
+
+                File.WriteAllText(loginusersPath, serialized);
             }
-            catch (NullReferenceException nre)
+            catch (Exception e)
             {
-                Console.WriteLine(nre.Message);
+                MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -288,7 +310,7 @@ namespace SAM.Core
                     };
 
                     // Display OpenFileDialog by calling ShowDialog method 
-                    Nullable<bool> result = dlg.ShowDialog();
+                    bool? result = dlg.ShowDialog();
 
                     // Get the selected file path
                     if (result == true)
@@ -389,6 +411,22 @@ namespace SAM.Core
             return steamId;
         }
 
+        public static string GetSteamId3FromSteamId64(string steamId)
+        {
+            try
+            {
+                string value = SteamIDConvert.Steam64ToSteam32(long.Parse(steamId));
+                string[] parts = value.Split(':');
+                return parts[2];
+            }
+            catch(Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
+
+            return null;
+        }
+
         public static string GetSteamIdFromConfig(string userName)
         {
             dynamic steamId = null;
@@ -402,9 +440,8 @@ namespace SAM.Core
                 dynamic accounts = config.Value.Software.Valve.Steam.Accounts;
 
                 VObject accountsObj = accounts;
-                VToken value;
 
-                accountsObj.TryGetValue(userName.ToLower(), out value);
+                accountsObj.TryGetValue(userName.ToLower(), out VToken value);
 
                 dynamic user = value;
                 VValue userId = user.SteamID;
@@ -414,9 +451,9 @@ namespace SAM.Core
                     steamId = userId.Value.ToString();
                 }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(e.Message);
             }
 
             return Convert.ToString(steamId);
@@ -454,9 +491,9 @@ namespace SAM.Core
                         userJson = JValue.Parse(userJsonString);
                     }
                 }
-                catch (Exception m)
+                catch (Exception e)
                 {
-                    MessageBox.Show(m.Message);
+                    MessageBox.Show(e.Message);
                 }
             }
 
@@ -501,9 +538,9 @@ namespace SAM.Core
                             userInfos.Add(userInfoJson);
                         }
                     }
-                    catch (Exception m)
+                    catch (Exception e)
                     {
-                        MessageBox.Show(m.Message);
+                        MessageBox.Show(e.Message);
                     }
                 }
             }
@@ -530,9 +567,9 @@ namespace SAM.Core
                         userInfoJson = JValue.Parse(userJsonString);
                     }
                 }
-                catch (Exception m)
+                catch (Exception e)
                 {
-                    MessageBox.Show(m.Message);
+                    MessageBox.Show(e.Message);
                 }
             }
 
@@ -591,9 +628,9 @@ namespace SAM.Core
                             userBans.Add(userInfoJson);
                         }
                     }
-                    catch (Exception m)
+                    catch (Exception e)
                     {
-                        MessageBox.Show(m.Message);
+                        MessageBox.Show(e.Message);
                     }
                 }
             }
@@ -628,6 +665,78 @@ namespace SAM.Core
             }
 
             return "";
+        }
+
+        public static void SetFriendsOnlineMode(FriendsLoginStatus loginMode, string steamId, string steamPath)
+        {
+            if (loginMode == FriendsLoginStatus.Unchanged || steamId == null || steamId.Length == 0)
+            {
+                Console.WriteLine("Login mode is unchanged or steamId is invalid!");
+                return;
+            }
+
+            string steamId3 = GetSteamId3FromSteamId64(steamId);
+            string localPrefsKey = "FriendStoreLocalPrefs_" + steamId3;
+
+            string configPath = steamPath + "userdata/" + steamId3 + "/config";
+            string configFile = configPath + "/localconfig.vdf";
+
+            if (!Directory.Exists(configPath))
+            {
+                Directory.CreateDirectory(configPath);
+            }
+
+            if (!File.Exists(configFile))
+            {
+                // TODO: generate it?
+
+                MessageBox.Show("localconfig.vdf does not exist");
+                return;
+            }
+            
+            dynamic localconfig = VdfConvert.Deserialize(File.ReadAllText(configFile));
+            dynamic configStore = localconfig.Value;
+
+            string loginValue = "1";
+            if (loginMode == FriendsLoginStatus.Offline)
+            {
+                loginValue = "0";
+            }
+            else
+            {
+                dynamic webStorageObject = configStore["WebStorage"];
+                dynamic friendStorePrefs = webStorageObject[localPrefsKey];
+
+                if (friendStorePrefs == null)
+                {
+                    friendStorePrefs = new VValue("{\"ePersonaState\":1,\"strNonFriendsAllowedToMsg\":\"\"}");
+                }
+
+                dynamic prefsJson = JsonConvert.DeserializeObject(friendStorePrefs.Value);
+
+                if (loginMode == FriendsLoginStatus.Online)
+                {
+                    prefsJson.ePersonaState.Value = 1;
+                }
+                else if (loginMode == FriendsLoginStatus.Invisible)
+                {
+                    prefsJson.ePersonaState.Value = 7;
+                }
+
+                friendStorePrefs.Value = JsonConvert.SerializeObject(prefsJson);
+                webStorageObject[localPrefsKey] = friendStorePrefs;
+                configStore["WebStorage"] = webStorageObject;
+            }
+
+            dynamic friendsObject = configStore["friends"];
+            friendsObject.SignIntoFriends = loginValue;
+            configStore["friends"] = friendsObject;
+
+            localconfig.Value = configStore;
+
+            string serialized = VdfConvert.Serialize(localconfig);
+
+            File.WriteAllText(configFile, serialized);
         }
 
         public static string FormatTimespanString(TimeSpan time)

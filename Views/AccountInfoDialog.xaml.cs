@@ -58,6 +58,12 @@ namespace SAM.Views
             set { DescriptionBox.Text = value; }
         }
 
+        public FriendsLoginStatus FriendsLoginStatus
+        {
+            get { return (FriendsLoginStatus)FriendsOnlineStatusComboBox.SelectedIndex; }
+            set { FriendsOnlineStatusComboBox.SelectedIndex = (int)value; }
+        }
+
         public bool AutoLogAccountIndex { get; set; }
 
         public string AviText { get; set; }

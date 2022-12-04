@@ -31,6 +31,8 @@ namespace SAM.Core
 
         public string Description { get; set; }
 
+        public FriendsLoginStatus FriendsLoginStatus { get; set; }
+
         public bool CommunityBanned { get; set; }
 
         public bool VACBanned { get; set; }

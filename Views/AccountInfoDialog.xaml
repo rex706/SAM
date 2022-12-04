@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:SAM.Views"
                  xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="Account Info" Height="425" Width="450" ResizeMode="NoResize" Icon="/Resources/steam.ico" WindowStartupLocation="CenterScreen">
+        Title="Account Info" Height="430" Width="450" ResizeMode="NoResize" Icon="/Resources/steam.ico" WindowStartupLocation="CenterScreen">
     <mah:MetroWindow.IconTemplate>
         <DataTemplate>
             <Grid Width="20" Height="20" Background="Transparent" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality">
@@ -32,8 +32,15 @@
         <Label x:Name="ParametersLabel" Content="Parameters" ToolTip="Overrides global launch parameters for this account" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="46,221,0,0"/>
         <Label x:Name="DescriptionLabel" Content="Description" ToolTip="Enter a description for this entry. Will display as a tooltip." HorizontalAlignment="Left" VerticalAlignment="Top" Height="28" Margin="45,255,0,0" />
         <TextBox Name="DescriptionBox" Padding="3,3,3,3" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Height="63" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="120,254,0,0" Width="314"/>
-        <CheckBox x:Name="autoLogCheckBox" Content="Auto Login" HorizontalAlignment="Left" Margin="120,322,0,0" VerticalAlignment="Top"/>
-        <Button Name="OKButton" Content="OK" Grid.Column="0" Margin="120,356,0,0" Click="OKButton_Click" VerticalAlignment="Top" Width="100" HorizontalAlignment="Left" />
-        <Button Name="CancelButton" Content="Cancel" Margin="225,356,0,0" Click="CancelButton_Click" VerticalAlignment="Top" Width="100" HorizontalAlignment="Left" />
+        <CheckBox x:Name="autoLogCheckBox" Content="Auto Login" HorizontalAlignment="Left" Margin="320,328,0,0" VerticalAlignment="Top"/>
+        <Button Name="OKButton" Content="OK" Grid.Column="0" Margin="120,363,0,0" Click="OKButton_Click" VerticalAlignment="Top" Width="100" HorizontalAlignment="Left" />
+        <Button Name="CancelButton" Content="Cancel" Margin="225,363,0,0" Click="CancelButton_Click" VerticalAlignment="Top" Width="100" HorizontalAlignment="Left" />
+        <ComboBox Name="FriendsOnlineStatusComboBox" HorizontalAlignment="Left" Margin="120,322,0,0" VerticalAlignment="Top" Width="157" Height="30" SelectedIndex="0">
+            <ComboBoxItem Content="Unchanged"/>
+            <ComboBoxItem Content="Online"/>
+            <ComboBoxItem Content="Invisible"/>
+            <ComboBoxItem Content="Offline"/>
+        </ComboBox>
+        <Label x:Name="FriendsLoginStatusLabel" Content="Friends Status" ToolTip="Determine how to login to Friends when Steam opens" HorizontalAlignment="Left" VerticalAlignment="Top" Height="28" Margin="31,323,0,0" />
     </Grid>
 </mah:MetroWindow>
