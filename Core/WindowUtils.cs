@@ -173,7 +173,9 @@ namespace SAM.Core
                     return LoginWindowState.Invalid;
                 }
 
-                if (document.FindAllChildren().Length == 3)
+                int childNum = document.FindAllChildren().Length;
+
+                if (childNum == 3 || childNum == 4)
                 {
                     return LoginWindowState.Error;
                 }
