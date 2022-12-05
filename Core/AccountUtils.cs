@@ -678,23 +678,26 @@ namespace SAM.Core
             string steamId3 = GetSteamId3FromSteamId64(steamId);
             string localPrefsKey = "FriendStoreLocalPrefs_" + steamId3;
 
-            string configPath = steamPath + "userdata/" + steamId3 + "/config";
-            string configFile = configPath + "/localconfig.vdf";
+            string fileName = "localconfig.vdf";
+            string configPath = steamPath + "userdata/" + steamId3 + "/config/";
+            string configFile = configPath + fileName;
 
             if (!Directory.Exists(configPath))
             {
                 Directory.CreateDirectory(configPath);
             }
 
+            dynamic localconfig;
+
             if (!File.Exists(configFile))
             {
-                // TODO: generate it?
-
-                MessageBox.Show("localconfig.vdf does not exist");
-                return;
+                localconfig = VdfConvert.Deserialize(File.ReadAllText(@"Resources/" + fileName));
+            }
+            else
+            {
+                localconfig = VdfConvert.Deserialize(File.ReadAllText(configFile));
             }
             
-            dynamic localconfig = VdfConvert.Deserialize(File.ReadAllText(configFile));
             dynamic configStore = localconfig.Value;
 
             string loginValue = "1";

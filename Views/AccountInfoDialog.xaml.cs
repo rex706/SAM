@@ -68,7 +68,8 @@ namespace SAM.Views
 
         public string AviText { get; set; }
 
-        public string SteamId {
+        public string SteamId 
+        {
             get { return SteamIdBox.Text; }
             set { SteamIdBox.Text = value; }
         }
