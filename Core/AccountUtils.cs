@@ -15,6 +15,7 @@ using System.Windows;
 using System.Xml.Serialization;
 using SteamIDs_Engine;
 using Newtonsoft.Json;
+using SAM.Properties;
 
 namespace SAM.Core
 {
@@ -691,7 +692,7 @@ namespace SAM.Core
 
             if (!File.Exists(configFile))
             {
-                localconfig = VdfConvert.Deserialize(File.ReadAllText(@"Resources/" + fileName));
+                localconfig = VdfConvert.Deserialize(Resources.localconfig);
             }
             else
             {
