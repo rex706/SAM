@@ -27,7 +27,7 @@
         <Label x:Name="UrlLabel" Content="Profile URL" ToolTip="Enter steam profile url to get user avatar without an API key" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="47,151,0,0"/>
         <TextBox Name="UrlTextBox" Padding="3,3,3,3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,149,0,0" Width="314" LostFocus="UrlBox_LostFocus" GotFocus="UrlBox_GotFocus" />
         <Label x:Name="SteamIdLabel" Content="Steam Id" ToolTip="Base64 Steam Id" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="59,186,0,0"/>
-        <TextBox x:Name="SteamIdBox" Padding="3,3,3,3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,184,0,0" Width="314" />
+        <TextBox x:Name="SteamIdBox" Padding="3,3,3,3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,184,0,0" Width="314" TextChanged="SteamIdBox_TextChanged" />
         <TextBox x:Name="ParametersBox" Padding="3,3,3,3" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,219,0,0" Width="314" />
         <Label x:Name="ParametersLabel" Content="Parameters" ToolTip="Overrides global launch parameters for this account" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="46,221,0,0"/>
         <Label x:Name="DescriptionLabel" Content="Description" ToolTip="Enter a description for this entry. Will display as a tooltip." HorizontalAlignment="Left" VerticalAlignment="Top" Height="28" Margin="45,255,0,0" />
@@ -35,7 +35,7 @@
         <CheckBox x:Name="autoLogCheckBox" Content="Auto Login" HorizontalAlignment="Left" Margin="320,328,0,0" VerticalAlignment="Top"/>
         <Button Name="OKButton" Content="OK" Grid.Column="0" Margin="120,363,0,0" Click="OKButton_Click" VerticalAlignment="Top" Width="100" HorizontalAlignment="Left" />
         <Button Name="CancelButton" Content="Cancel" Margin="225,363,0,0" Click="CancelButton_Click" VerticalAlignment="Top" Width="100" HorizontalAlignment="Left" />
-        <ComboBox Name="FriendsOnlineStatusComboBox" HorizontalAlignment="Left" Margin="120,322,0,0" VerticalAlignment="Top" Width="157" Height="30" SelectedIndex="0">
+        <ComboBox Name="FriendsOnlineStatusComboBox" HorizontalAlignment="Left" Margin="120,322,0,0" VerticalAlignment="Top" Width="157" Height="30" SelectedIndex="0" IsEnabled="False">
             <ComboBoxItem Content="Unchanged"/>
             <ComboBoxItem Content="Online"/>
             <ComboBoxItem Content="Invisible"/>

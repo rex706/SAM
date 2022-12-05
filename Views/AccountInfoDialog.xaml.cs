@@ -9,6 +9,8 @@ namespace SAM.Views
     /// </summary>
     public partial class AccountInfoDialog : MetroWindow
     {
+        private const int STEAMID64_LENGTH = 17;
+
         public AccountInfoDialog()
         {
             InitializeComponent();
@@ -160,6 +162,19 @@ namespace SAM.Views
                 }
 
                 OKButton.IsEnabled = true;
+            }
+        }
+
+        private void SteamIdBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (SteamId.Length == STEAMID64_LENGTH && long.TryParse(SteamId, out _))
+            {
+                FriendsOnlineStatusComboBox.IsEnabled = true;
+            }
+            else
+            {
+                FriendsOnlineStatusComboBox.IsEnabled = false;
+                FriendsOnlineStatusComboBox.SelectedIndex= 0;
             }
         }
     }
