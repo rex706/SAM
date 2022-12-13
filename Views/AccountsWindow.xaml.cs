@@ -1408,7 +1408,6 @@ namespace SAM.Views
             // Start Steam process with the selected path.
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
-                UseShellExecute = true,
                 FileName = settings.User.SteamPath + "steam.exe",
                 WorkingDirectory = settings.User.SteamPath,
                 Arguments = parametersBuilder.ToString()
@@ -2730,7 +2729,6 @@ namespace SAM.Views
             // Shutdown Steam process via command if it is already open.
             ProcessStartInfo stopInfo = new ProcessStartInfo
             {
-                UseShellExecute = true,
                 FileName = settings.User.SteamPath + "steam.exe",
                 WorkingDirectory = settings.User.SteamPath,
                 Arguments = "-shutdown"

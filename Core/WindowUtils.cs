@@ -219,8 +219,7 @@ namespace SAM.Core
             Console.WriteLine("Waiting for it to be idle.");
             while (process == null)
             {
-                int procId = 0;
-                GetWindowThreadProcessId(windowHandle.RawPtr, out procId);
+                GetWindowThreadProcessId(windowHandle.RawPtr, out int procId);
 
                 // Wait for valid process id from handle.
                 while (procId == 0)

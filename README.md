@@ -5,9 +5,15 @@
 
 ![alt tag](https://i.imgur.com/v4eJzzH.png) ![alt tag](https://i.imgur.com/laBORcJ.png)
 
-**Latest Version:** 1.5.0.1
+**Latest Version:** 1.5.1.0
 
 # [**DOWNLOAD**](https://github.com/rex706/SAM/releases/latest)
+
+**NEW**
+* Steam React UI support. (enabled by default)
+* Account data file backup system. (enabled by default)
+* Launch Parameters per account.
+* Friends login status per account.
 
 **Core Features**
 * 1-click Steam logins for multiple accounts with 2FA support.
@@ -25,12 +31,10 @@
 * Data password protection.
 * Set/Clear account timeouts.
 * Delete userdata folder after every login toggle.
-* Set custom sleep time for waiting actions.
-* Toggle Steam client launch parameters.
+* Toggle Steam client launch parameters globally and by account.
 * Support for Sandbox Mode for users of Sandboxie/Avast Sandbox.
 * Alternate List view.
 * Theme and Accent customization.
-* Quick timeout selections.
 * Close on login toggle setting.
 
 -----------------------------------------
