@@ -430,26 +430,23 @@ namespace SAM.Core
 
         public static string GetSteamIdFromConfig(string userName)
         {
-            dynamic steamId = null;
-
             try
             {
                 string steamPath = new IniFile(SAMSettings.FILE_NAME).Read(SAMSettings.STEAM_PATH, SAMSettings.SECTION_STEAM);
+                string content = File.ReadAllText(steamPath + "config\\loginusers.vdf");
+                dynamic config = VdfConvert.Deserialize(content);
 
-                // Attempt to find Steam Id from steam config.
-                dynamic config = VdfConvert.Deserialize(File.ReadAllText(steamPath + "config\\config.vdf"));
-                dynamic accounts = config.Value.Software.Valve.Steam.Accounts;
+                dynamic users = config.Value;
 
-                VObject accountsObj = accounts;
-
-                accountsObj.TryGetValue(userName.ToLower(), out VToken value);
-
-                dynamic user = value;
-                VValue userId = user.SteamID;
-
-                if (userId != null)
+                foreach (dynamic user in users)
                 {
-                    steamId = userId.Value.ToString();
+                    string steamId = Convert.ToString(user.Key);
+                    string accountName = Convert.ToString(user.Value.AccountName);
+
+                    if (accountName.Equals(userName))
+                    {
+                        return steamId;
+                    }
                 }
             }
             catch (Exception e)
@@ -457,7 +454,7 @@ namespace SAM.Core
                 Console.WriteLine(e.Message);
             }
 
-            return Convert.ToString(steamId);
+            return null;
         }
 
         public static async Task<dynamic> GetUserInfoFromConfigAndWebApi(string userName)
