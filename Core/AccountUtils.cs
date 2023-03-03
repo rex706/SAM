@@ -693,7 +693,10 @@ namespace SAM.Core
             }
             else
             {
-                localconfig = VdfConvert.Deserialize(File.ReadAllText(configFile));
+                VdfSerializerSettings vdfSerializerSettings = new VdfSerializerSettings();
+                vdfSerializerSettings.MaximumTokenSize = 4096 * 2;
+                vdfSerializerSettings.UsesEscapeSequences = true;
+                localconfig = VdfConvert.Deserialize(File.ReadAllText(configFile),vdfSerializerSettings);
             }
             
             dynamic configStore = localconfig.Value;
