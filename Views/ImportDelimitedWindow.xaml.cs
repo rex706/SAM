@@ -37,6 +37,8 @@ namespace SAM.Views
                 return;
             }
 
+            ImportButton.IsEnabled = false;
+
             char delimiter = DelimiterCharacterTextBox.Text[0];
             string delimitedAccountsText = DelimitedAccountsTextBox.Text;
 
@@ -49,13 +51,15 @@ namespace SAM.Views
 
             foreach (string line in lines)
             {
+                string current = RemoveWhitespace(line);
+
                 // Skip empty lines.
-                if (line.Length == 0)
+                if (current.Length == 0)
                 {
                     continue;
                 }
 
-                string[] info = line.Split(delimiter);
+                string[] info = current.Split(delimiter);
 
                 // Log account error.
                 if (info.Length < 2)
@@ -64,14 +68,20 @@ namespace SAM.Views
                     continue;
                 }
 
+                string name = info[0];
+                string password = info[1];
+
+                string steamId = AccountUtils.GetSteamIdFromConfig(name);
+
                 // Shared secret.
                 if (info.Length > 2 && info[2] != null && info[2] != string.Empty)
                 {
-                    accounts.Add(new Account { Name = info[0], Password = StringCipher.Encrypt(info[1], eKey), SharedSecret = StringCipher.Encrypt(info[2], eKey) });
+                    string secret = info[2];
+                    accounts.Add(new Account { Name = name, Password = StringCipher.Encrypt(password, eKey), SharedSecret = StringCipher.Encrypt(secret, eKey), SteamId = steamId });
                 }
                 else
                 {
-                    accounts.Add(new Account { Name = info[0], Password = StringCipher.Encrypt(info[1], eKey) });
+                    accounts.Add(new Account { Name = name, Password = StringCipher.Encrypt(password, eKey), SteamId = steamId });
                 }
 
                 sucessful++;
@@ -154,6 +164,11 @@ namespace SAM.Views
                     MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             } 
+        }
+
+        private string RemoveWhitespace(string str)
+        {
+            return string.Join("", str.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
         }
     }
 }

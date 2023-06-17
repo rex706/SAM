@@ -491,7 +491,7 @@ namespace SAM.Views
                     try
                     {
                         encryptedAccounts = AccountUtils.Deserialize(file);
-                    } 
+                    }
                     catch (Exception e)
                     {
                         Console.WriteLine(e.Message);
@@ -540,8 +540,7 @@ namespace SAM.Views
 
         private async Task ReloadAccount(Account account)
         {
-            dynamic userJson = null;
-
+            dynamic userJson;
             if (account.SteamId != null && account.SteamId.Length > 0)
             {
                 userJson = await AccountUtils.GetUserInfoFromWebApiBySteamId(account.SteamId);
@@ -580,7 +579,7 @@ namespace SAM.Views
 
         public async Task ReloadAccountsAsync()
         {
-            Title = "SAM Loading...";
+            Title = "SAM | Loading";
 
             List<string> steamIds = new List<string>();
 
@@ -698,15 +697,15 @@ namespace SAM.Views
                             steamId = account.SteamId;
                         }
 
-                        decryptedAccounts.Add(new Account() { 
+                        decryptedAccounts.Add(new Account() {
                             Name = account.Name,
-                            Alias = account.Alias, 
-                            Password = tempPass, 
-                            SharedSecret = temp2fa, 
-                            ProfUrl = account.ProfUrl, 
-                            AviUrl = account.AviUrl, 
-                            SteamId = steamId, 
-                            Timeout = account.Timeout, 
+                            Alias = account.Alias,
+                            Password = tempPass,
+                            SharedSecret = temp2fa,
+                            ProfUrl = account.ProfUrl,
+                            AviUrl = account.AviUrl,
+                            SteamId = steamId,
+                            Timeout = account.Timeout,
                             Parameters = account.Parameters,
                             Description = account.Description,
                             FriendsLoginStatus = account.FriendsLoginStatus
@@ -1303,16 +1302,16 @@ namespace SAM.Views
             }
 
             MainGrid.IsEnabled = settings.User.SandboxMode;
-            Title = "SAM Working...";
+            Title = "SAM | Working";
 
-            new Thread(() => { 
+            new Thread(() => {
                 try
                 {
                     Login(index, 0);
                 }
                 finally
                 {
-                    Dispatcher.Invoke(delegate () { 
+                    Dispatcher.Invoke(delegate () {
                         MainGrid.IsEnabled = true;
                         Title = "SAM";
                     });
@@ -1383,25 +1382,32 @@ namespace SAM.Views
 
             foreach (string parameter in parameters)
             {
-                parametersBuilder.Append(parameter).Append(" ");
-
                 if (parameter.Equals("-login"))
                 {
-                    StringBuilder passwordBuilder = new StringBuilder();
-
-                    foreach (char c in account.Password)
+                    if (account.SharedSecret == null || account.SharedSecret.Length == 0)
                     {
-                        if (c.Equals('"'))
-                        {
-                            passwordBuilder.Append('\\').Append(c);
-                        }
-                        else
-                        {
-                            passwordBuilder.Append(c);
-                        }
-                    }
+                        parametersBuilder.Append(parameter).Append(" ");
 
-                    parametersBuilder.Append(account.Name).Append(" \"").Append(passwordBuilder.ToString()).Append("\" ");
+                        StringBuilder passwordBuilder = new StringBuilder();
+
+                        foreach (char c in account.Password)
+                        {
+                            if (c.Equals('"'))
+                            {
+                                passwordBuilder.Append('\\').Append(c);
+                            }
+                            else
+                            {
+                                passwordBuilder.Append(c);
+                            }
+                        }
+
+                        parametersBuilder.Append(account.Name).Append(" \"").Append(passwordBuilder.ToString()).Append("\" ");
+                    }
+                }
+                else
+                {
+                    parametersBuilder.Append(parameter).Append(" ");
                 }
             }
 
@@ -1449,12 +1455,12 @@ namespace SAM.Views
 
         private void TypeCredentials(Process steamProcess, int index, int tryCount)
         {
-            WindowHandle steamLoginWindow = WindowUtils.GetSteamLoginWindow();
+            WindowHandle steamLoginWindow = WindowUtils.GetLegacySteamLoginWindow();
 
             while (!steamLoginWindow.IsValid)
             {
                 Thread.Sleep(100);
-                steamLoginWindow = WindowUtils.GetSteamLoginWindow();
+                steamLoginWindow = WindowUtils.GetLegacySteamLoginWindow();
             }
 
             Process steamLoginProcess = WindowUtils.WaitForSteamProcess(steamLoginWindow);
@@ -1515,16 +1521,16 @@ namespace SAM.Views
             // Only handle 2FA if shared secret was entered.
             if (decryptedAccounts[index].SharedSecret != null && decryptedAccounts[index].SharedSecret.Length > 0)
             {
-                WindowHandle steamGuardWindow = WindowUtils.GetSteamGuardWindow();
+                WindowHandle steamGuardWindow = WindowUtils.GetLegacySteamGuardWindow();
 
                 while (!steamGuardWindow.IsValid && waitCount < maxRetry)
                 {
                     Thread.Sleep(settings.User.SleepTime);
 
-                    steamGuardWindow = WindowUtils.GetSteamGuardWindow();
+                    steamGuardWindow = WindowUtils.GetLegacySteamGuardWindow();
 
                     // Check for Steam warning window.
-                    WindowHandle steamWarningWindow = WindowUtils.GetSteamWarningWindow();
+                    WindowHandle steamWarningWindow = WindowUtils.GetLegacySteamWarningWindow();
                     if (steamWarningWindow.IsValid)
                     {
                         //Cancel the 2FA process since Steam connection is likely unavailable. 
@@ -1578,22 +1584,37 @@ namespace SAM.Views
                 return;
             }
 
-            if (tryCount > 0 && WindowUtils.GetMainSteamClientWindow(steamProcess).IsValid)
+            if (tryCount > 0 && WindowUtils.GetMainSteamClientWindow().IsValid)
             {
                 PostLogin();
                 return;
             }
 
-            WindowHandle steamLoginWindow = WindowUtils.GetSteamLoginWindow(steamProcess);
+            WindowHandle steamLoginWindow = WindowUtils.GetSteamLoginWindow();
 
             while (!steamLoginWindow.IsValid)
             {
                 Thread.Sleep(100);
-                steamLoginWindow = WindowUtils.GetSteamLoginWindow(steamProcess);
+                steamLoginWindow = WindowUtils.GetSteamLoginWindow();
             }
 
-            string secret = decryptedAccounts[index].SharedSecret;
-            LoginWindowState state = WindowUtils.TryCodeEntry(steamLoginWindow, secret);
+            Account account = decryptedAccounts[index];
+            LoginWindowState state = LoginWindowState.None;
+
+            while (state != LoginWindowState.Success && state != LoginWindowState.Code)
+            {
+                if (steamProcess.HasExited || state == LoginWindowState.Error)
+                {
+                    return;
+                }
+
+                Thread.Sleep(100);
+
+                state = WindowUtils.TryCredentialsEntry(steamLoginWindow, account.Name, account.Password);
+            }
+
+            string secret = account.SharedSecret;
+            state = LoginWindowState.Code;
 
             while (state != LoginWindowState.Success)
             {
@@ -1601,7 +1622,7 @@ namespace SAM.Views
                 {
                     return;
                 }
-                else if (WindowUtils.GetMainSteamClientWindow(steamProcess).IsValid)
+                else if (WindowUtils.GetMainSteamClientWindow().IsValid)
                 {
                     PostLogin();
                     return;
@@ -1612,8 +1633,16 @@ namespace SAM.Views
                 state = WindowUtils.TryCodeEntry(steamLoginWindow, secret);
             }
 
-            // Need a little pause here to more reliably check for window later.
             Thread.Sleep(settings.User.SleepTime);
+            state = LoginWindowState.Loading;
+
+            while (state == LoginWindowState.Loading)
+            {
+                Thread.Sleep(100);
+                state = WindowUtils.GetLoginWindowState(steamLoginWindow);
+            }
+
+            steamLoginWindow = WindowUtils.GetSteamLoginWindow();
 
             int retry = tryCount + 1;
 
@@ -1634,7 +1663,7 @@ namespace SAM.Views
 
         private void Type2FA(Process steamProcess, int index, int tryCount)
         {
-            if (tryCount > 0 && WindowUtils.GetMainSteamClientWindow().IsValid)
+            if (tryCount > 0 && WindowUtils.GetLegacyMainSteamClientWindow().IsValid)
             {
                 PostLogin();
                 return;
@@ -1642,17 +1671,17 @@ namespace SAM.Views
 
             // Need both the Steam Login and Steam Guard windows.
             // Can't focus the Steam Guard window directly.
-            var steamLoginWindow = WindowUtils.GetSteamLoginWindow();
-            var steamGuardWindow = WindowUtils.GetSteamGuardWindow();
+            var steamLoginWindow = WindowUtils.GetLegacySteamLoginWindow();
+            var steamGuardWindow = WindowUtils.GetLegacySteamGuardWindow();
 
             while (!steamLoginWindow.IsValid || !steamGuardWindow.IsValid)
             {
                 Thread.Sleep(100);
-                steamLoginWindow = WindowUtils.GetSteamLoginWindow();
-                steamGuardWindow = WindowUtils.GetSteamGuardWindow();
+                steamLoginWindow = WindowUtils.GetLegacySteamLoginWindow();
+                steamGuardWindow = WindowUtils.GetLegacySteamGuardWindow();
 
                 // Check for Steam warning window.
-                var steamWarningWindow = WindowUtils.GetSteamWarningWindow();
+                var steamWarningWindow = WindowUtils.GetLegacySteamWarningWindow();
                 if (steamWarningWindow.IsValid)
                 {
                     //Cancel the 2FA process since Steam connection is likely unavailable. 
@@ -1699,7 +1728,7 @@ namespace SAM.Views
             Thread.Sleep(settings.User.SleepTime);
 
             // Check if we still have a 2FA popup, which means the previous one failed.
-            steamGuardWindow = WindowUtils.GetSteamGuardWindow();
+            steamGuardWindow = WindowUtils.GetLegacySteamGuardWindow();
 
             int retry = tryCount + 1;
 

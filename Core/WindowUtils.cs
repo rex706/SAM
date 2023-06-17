@@ -76,41 +76,49 @@ namespace SAM.Core
             return sb.ToString();
         }
 
-        public static WindowHandle GetSteamLoginWindow(Process process)
-        {
-            IEnumerable<IntPtr> windows = EnumerateProcessWindowHandles(process);
-
-            foreach (IntPtr windowHandle in windows)
-            {
-                string text = GetWindowTextRaw(windowHandle);
-
-                if ((text.Contains("Steam") && text.Length > 5) || text.Equals("蒸汽平台登录"))
-                {
-                    return new WindowHandle(windowHandle);
-                }
-            }
-
-            return WindowHandle.Invalid;
-        }
-
-        public static WindowHandle GetMainSteamClientWindow(Process process)
-        {
-            IEnumerable<IntPtr> windows = EnumerateProcessWindowHandles(process);
-
-            foreach (IntPtr windowHandle in windows)
-            {
-                string text = GetWindowTextRaw(windowHandle);
-
-                if (text.Equals("Steam") || text.Equals("蒸汽平台"))
-                {
-                    return new WindowHandle(windowHandle);
-                }
-            }
-
-            return WindowHandle.Invalid;
-        }
-
         public static WindowHandle GetSteamLoginWindow()
+        {
+            Process[] steamProcess = Process.GetProcessesByName("steamwebhelper");
+            foreach (Process process in steamProcess)
+            {
+                IEnumerable<IntPtr> windows = EnumerateProcessWindowHandles(process);
+
+                foreach (IntPtr windowHandle in windows)
+                {
+                    string text = GetWindowTextRaw(windowHandle);
+
+                    if ((text.Contains("Steam") && text.Length > 5) || text.Equals("蒸汽平台登录"))
+                    {
+                        return new WindowHandle(windowHandle);
+                    }
+                }
+            }
+
+            return WindowHandle.Invalid;
+        }
+
+        public static WindowHandle GetMainSteamClientWindow()
+        {
+            Process[] steamProcess = Process.GetProcessesByName("steamwebhelper");
+            foreach (Process process in steamProcess)
+            {
+                IEnumerable<IntPtr> windows = EnumerateProcessWindowHandles(process);
+
+                foreach (IntPtr windowHandle in windows)
+                {
+                    string text = GetWindowTextRaw(windowHandle);
+
+                    if (text.Equals("Steam") || text.Equals("蒸汽平台"))
+                    {
+                        return new WindowHandle(windowHandle);
+                    }
+                }
+            }
+
+            return WindowHandle.Invalid;
+        }
+
+        public static WindowHandle GetLegacySteamLoginWindow()
         {
             return TopLevelWindowUtils.FindWindow(wh =>
             wh.GetClassName().Equals("vguiPopupWindow") &&
@@ -121,7 +129,7 @@ namespace SAM.Core
              wh.GetWindowText().Equals("蒸汽平台登录")));
         }
 
-        public static WindowHandle GetSteamGuardWindow()
+        public static WindowHandle GetLegacySteamGuardWindow()
         {
             // Also checking for vguiPopupWindow class name to avoid catching things like browser tabs.
             WindowHandle windowHandle = TopLevelWindowUtils.FindWindow(wh =>
@@ -132,7 +140,7 @@ namespace SAM.Core
             return windowHandle;
         }
 
-        public static WindowHandle GetSteamWarningWindow()
+        public static WindowHandle GetLegacySteamWarningWindow()
         {
             return TopLevelWindowUtils.FindWindow(wh =>
             wh.GetClassName().Equals("vguiPopupWindow") &&
@@ -140,7 +148,7 @@ namespace SAM.Core
              wh.GetWindowText().StartsWith("Steam — ")));
         }
 
-        public static WindowHandle GetMainSteamClientWindow()
+        public static WindowHandle GetLegacyMainSteamClientWindow()
         {
             return TopLevelWindowUtils.FindWindow(wh =>
             wh.GetClassName().Equals("vguiPopupWindow") &&
@@ -148,7 +156,73 @@ namespace SAM.Core
             wh.GetWindowText().Equals("蒸汽平台")));
         }
 
-        public static LoginWindowState TryCodeEntry(WindowHandle loginWindow, string secret)
+        public static LoginWindowState GetLoginWindowState(WindowHandle loginWindow)
+        {
+            if (!loginWindow.IsValid)
+            {
+                return LoginWindowState.Invalid;
+            }
+
+            using (var automation = new UIA3Automation())
+            {
+                try
+                {
+                    AutomationElement window = automation.FromHandle(loginWindow.RawPtr);
+
+                    if (window == null)
+                    {
+                        return LoginWindowState.Invalid;
+                    }
+
+                    AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
+
+                    if (document == null || document.FindAllChildren().Length == 0)
+                    {
+                        return LoginWindowState.Invalid;
+                    }
+
+                    int childNum = document.FindAllChildren().Length;
+
+                    if (childNum == 2)
+                    {
+                        return LoginWindowState.Loading;
+                    }
+
+
+                    if (childNum == 3 || childNum == 4)
+                    {
+                        return LoginWindowState.Error;
+                    }
+
+                    AutomationElement[] elements = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
+                    AutomationElement[] buttons = document.FindAllChildren(e => e.ByControlType(ControlType.Button));
+
+                    if (elements != null)
+                    {
+                        if (elements.Length == 0 && buttons.Length == 1)
+                        {
+                            return LoginWindowState.Error;
+                        }
+                        else if (elements.Length == 5)
+                        {
+                            return LoginWindowState.Code;
+                        }
+                        else if (elements.Length == 2 && buttons.Length == 1)
+                        {
+                            return LoginWindowState.Login;
+                        }
+                    }
+                }
+                catch
+                {
+                    return LoginWindowState.Error;
+                }
+            }
+
+            return LoginWindowState.Invalid;
+        }
+
+        public static LoginWindowState TryCredentialsEntry(WindowHandle loginWindow, string username, string password)
         {
             if (!loginWindow.IsValid)
             {
@@ -181,9 +255,95 @@ namespace SAM.Core
                 }
 
                 AutomationElement[] elements = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
+                AutomationElement[] buttons = document.FindAllChildren(e => e.ByControlType(ControlType.Button));
 
                 if (elements != null)
                 {
+                    if (elements.Length == 0 && buttons.Length == 1)
+                    {
+                        return LoginWindowState.Error;
+                    }
+
+                    if (elements.Length == 5)
+                    {
+                        return LoginWindowState.Code;
+                    }
+
+                    if (elements.Length == 2 && buttons.Length == 1)
+                    {
+                        try
+                        {
+                            TextBox usernameBox = elements[0].AsTextBox();
+                            usernameBox.Text = username;
+
+                            TextBox passwordBox = elements[1].AsTextBox();
+                            passwordBox.Text = password;
+
+                            SendEnter(loginWindow.RawPtr, VirtualInputMethod.SendWait);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.Write(e.Message);
+                            return LoginWindowState.Invalid;
+                        }
+
+                        return LoginWindowState.Success;
+                    }
+                }
+            }
+
+            return LoginWindowState.Invalid;
+        }
+
+        public static LoginWindowState TryCodeEntry(WindowHandle loginWindow, string secret)
+        {
+            if (!loginWindow.IsValid)
+            {
+                return LoginWindowState.Invalid;
+            }
+
+            SetForegroundWindow(loginWindow.RawPtr);
+
+            using (var automation = new UIA3Automation())
+            {
+                AutomationElement window = automation.FromHandle(loginWindow.RawPtr);
+
+                if (window == null)
+                {
+                    return LoginWindowState.Invalid;
+                }
+
+                AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
+
+                if (document == null || document.FindAllChildren().Length == 0)
+                {
+                    return LoginWindowState.Invalid;
+                }
+
+                int childNum = document.FindAllChildren().Length;
+
+                Console.WriteLine(childNum);
+
+                if (childNum == 2)
+                {
+                    return LoginWindowState.Loading;
+                }
+
+                if (childNum == 3 || childNum == 4)
+                {
+                    return LoginWindowState.Error;
+                }
+
+                AutomationElement[] elements = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
+                AutomationElement[] buttons = document.FindAllChildren(e => e.ByControlType(ControlType.Button));
+
+                if (elements != null)
+                {
+                    if (elements.Length == 0 && buttons.Length == 1)
+                    {
+                        return LoginWindowState.Error;
+                    }
+
                     if (elements.Length == 5)
                     {
                         string code = Generate2FACode(secret);
@@ -193,13 +353,12 @@ namespace SAM.Core
                             for (int i = 0; i < elements.Length; i++)
                             {
                                 TextBox textBox = elements[i].AsTextBox();
-                                textBox.Focus();
-                                textBox.WaitUntilEnabled();
                                 textBox.Text = code[i].ToString();
                             }
                         }
-                        catch (Exception)
+                        catch (Exception e)
                         {
+                            Console.Write(e.Message);
                             return LoginWindowState.Code;
                         }
 
@@ -269,7 +428,7 @@ namespace SAM.Core
                     }
                 }
 
-                steamClientWindow = GetMainSteamClientWindow();
+                steamClientWindow = GetLegacyMainSteamClientWindow();
                 Thread.Sleep(100);
                 waitCounter += 1;
             }
@@ -356,6 +515,7 @@ namespace SAM.Core
                     break;
 
                 case VirtualInputMethod.SendWait:
+                    SetForegroundWindow(hwnd);
                     System.Windows.Forms.SendKeys.SendWait("{ENTER}");
                     break;
             }
@@ -376,6 +536,7 @@ namespace SAM.Core
                     break;
 
                 case VirtualInputMethod.SendWait:
+                    SetForegroundWindow(hwnd);
                     System.Windows.Forms.SendKeys.SendWait("{TAB}");
                     break;
             }
@@ -396,6 +557,7 @@ namespace SAM.Core
                     break;
 
                 case VirtualInputMethod.SendWait:
+                    SetForegroundWindow(hwnd);
                     System.Windows.Forms.SendKeys.SendWait(" ");
                     break;
             }
@@ -403,7 +565,7 @@ namespace SAM.Core
 
         public static void ClearSteamUserDataFolder(string steamPath, int sleepTime, int maxRetry)
         {
-            WindowHandle steamLoginWindow = GetSteamLoginWindow();
+            WindowHandle steamLoginWindow = GetLegacySteamLoginWindow();
             int waitCount = 0;
 
             while (steamLoginWindow.IsValid && waitCount < maxRetry)
