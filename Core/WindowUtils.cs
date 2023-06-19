@@ -35,6 +35,9 @@ namespace SAM.Core
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
+        [DllImport("user32.dll", EntryPoint = "PostMessageA")]
+        public static extern bool PostMessage(IntPtr hWnd, uint msg, int wParam, IntPtr lParam);
+
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, uint dwExtraInfo);
 
@@ -273,10 +276,14 @@ namespace SAM.Core
                     {
                         try
                         {
+                            SetForegroundWindow(loginWindow.RawPtr);
+
                             TextBox usernameBox = elements[0].AsTextBox();
+                            usernameBox.WaitUntilEnabled();
                             usernameBox.Text = username;
 
                             TextBox passwordBox = elements[1].AsTextBox();
+                            passwordBox.WaitUntilEnabled();
                             passwordBox.Text = password;
 
                             SendEnter(loginWindow.RawPtr, VirtualInputMethod.SendWait);
@@ -342,6 +349,10 @@ namespace SAM.Core
                     if (elements.Length == 0 && buttons.Length == 1)
                     {
                         return LoginWindowState.Error;
+                    }
+                    else if (elements.Length == 2 && buttons.Length == 1)
+                    {
+                        return LoginWindowState.Login;
                     }
 
                     if (elements.Length == 5)
@@ -510,8 +521,8 @@ namespace SAM.Core
                     break;
 
                 case VirtualInputMethod.PostMessage:
-                    PostMessage(hwnd, WM_KEYDOWN, (IntPtr)VK_RETURN, IntPtr.Zero);
-                    PostMessage(hwnd, WM_KEYUP, (IntPtr)VK_RETURN, IntPtr.Zero);
+                    PostMessage(hwnd, WM_KEYDOWN, VK_RETURN, IntPtr.Zero);
+                    PostMessage(hwnd, WM_KEYUP, VK_RETURN, IntPtr.Zero);
                     break;
 
                 case VirtualInputMethod.SendWait:

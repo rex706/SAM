@@ -1579,6 +1579,8 @@ namespace SAM.Views
 
         private void EnterReact2FA(Process steamProcess, int index, int tryCount)
         {
+            int retry = tryCount + 1;
+
             if (steamProcess.HasExited)
             {
                 return;
@@ -1622,6 +1624,11 @@ namespace SAM.Views
                 {
                     return;
                 }
+                else if (state == LoginWindowState.Login)
+                {
+                    EnterReact2FA(steamProcess, index, retry);
+                    return;
+                }
                 else if (WindowUtils.GetMainSteamClientWindow().IsValid)
                 {
                     PostLogin();
@@ -1643,8 +1650,6 @@ namespace SAM.Views
             }
 
             steamLoginWindow = WindowUtils.GetSteamLoginWindow();
-
-            int retry = tryCount + 1;
 
             if (tryCount < maxRetry && steamLoginWindow.IsValid)
             {
