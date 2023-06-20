@@ -1382,33 +1382,34 @@ namespace SAM.Views
 
             foreach (string parameter in parameters)
             {
-                if (parameter.Equals("-login"))
-                {
-                    if (account.SharedSecret == null || account.SharedSecret.Length == 0)
-                    {
-                        parametersBuilder.Append(parameter).Append(" ");
+                // Not working as of 6/14/2022
+                //if (parameter.Equals("-login"))
+                //{
+                //    if (account.SharedSecret == null || account.SharedSecret.Length == 0)
+                //    {
+                //        parametersBuilder.Append(parameter).Append(" ");
 
-                        StringBuilder passwordBuilder = new StringBuilder();
+                //        StringBuilder passwordBuilder = new StringBuilder();
 
-                        foreach (char c in account.Password)
-                        {
-                            if (c.Equals('"'))
-                            {
-                                passwordBuilder.Append('\\').Append(c);
-                            }
-                            else
-                            {
-                                passwordBuilder.Append(c);
-                            }
-                        }
+                //        foreach (char c in account.Password)
+                //        {
+                //            if (c.Equals('"'))
+                //            {
+                //                passwordBuilder.Append('\\').Append(c);
+                //            }
+                //            else
+                //            {
+                //                passwordBuilder.Append(c);
+                //            }
+                //        }
 
-                        parametersBuilder.Append(account.Name).Append(" \"").Append(passwordBuilder.ToString()).Append("\" ");
-                    }
-                }
-                else
-                {
+                //        parametersBuilder.Append(account.Name).Append(" \"").Append(passwordBuilder.ToString()).Append("\" ");
+                //    }
+                //}
+                //else
+                //{
                     parametersBuilder.Append(parameter).Append(" ");
-                }
+                //}
             }
 
             // Start Steam process with the selected path.
@@ -1431,26 +1432,36 @@ namespace SAM.Views
                 return;
             }
 
-            if (settings.User.Login == true)
-            {
-                if (settings.User.RememberPassword == true)
-                {
-                    AccountUtils.SetRememeberPasswordKeyValue(1, encryptedAccounts[index]);
-                }
+            // Not working as of 6/14/2022
+            //if (settings.User.Login == true)
+            //{
+                //if (settings.User.RememberPassword == true)
+                //{
+                //    AccountUtils.SetRememeberPasswordKeyValue(1, encryptedAccounts[index]);
+                //}
 
-                if (account.SharedSecret != null && account.SharedSecret.Length > 0)
+                if (noReactLogin)
                 {
-                    Handle2FA(steamProcess, index);
+                    TypeCredentials(steamProcess, index, tryCount);
                 }
                 else
                 {
-                    PostLogin();
+                    EnterCredentials(steamProcess, account, 0);
                 }
-            }
-            else
-            {
-                TypeCredentials(steamProcess, index, tryCount);
-            }
+                
+                //if (account.SharedSecret != null && account.SharedSecret.Length > 0)
+                //{
+                //    Handle2FA(steamProcess, index);
+                //}
+                //else
+                //{
+                //    PostLogin();
+                //}
+            //}
+            //else
+            //{
+            //    TypeCredentials(steamProcess, index, tryCount);
+            //}
         }
 
         private void TypeCredentials(Process steamProcess, int index, int tryCount)
@@ -1555,6 +1566,60 @@ namespace SAM.Views
             }
         }
 
+        private void EnterCredentials(Process steamProcess, Account account, int tryCount)
+        {
+            if (steamProcess.HasExited)
+            {
+                return;
+            }
+
+            if (tryCount > 0 && WindowUtils.GetMainSteamClientWindow().IsValid)
+            {
+                PostLogin();
+                return;
+            }
+
+            WindowHandle steamLoginWindow = WindowUtils.GetSteamLoginWindow();
+
+            while (!steamLoginWindow.IsValid)
+            {
+                Thread.Sleep(100);
+                steamLoginWindow = WindowUtils.GetSteamLoginWindow();
+            }
+
+            LoginWindowState state = LoginWindowState.None;
+
+            while (state != LoginWindowState.Success && state != LoginWindowState.Code)
+            {
+                if (steamProcess.HasExited || state == LoginWindowState.Error)
+                {
+                    return;
+                }
+
+                Thread.Sleep(100);
+
+                state = WindowUtils.TryCredentialsEntry(steamLoginWindow, account.Name, account.Password, settings.User.RememberPassword);
+            }
+
+            if (account.SharedSecret != null && account.SharedSecret.Length > 0)
+            {
+                EnterReact2FA(steamProcess, account, tryCount);
+            }
+            else
+            {
+                Thread.Sleep(settings.User.SleepTime);
+                state = LoginWindowState.Loading;
+
+                while (state == LoginWindowState.Loading)
+                {
+                    Thread.Sleep(100);
+                    state = WindowUtils.GetLoginWindowState(steamLoginWindow);
+                }
+
+                PostLogin();
+            }
+        }
+
         private void Copy2FA(int index)
         {
             var key = WindowUtils.Generate2FACode(decryptedAccounts[index].SharedSecret);
@@ -1573,11 +1638,11 @@ namespace SAM.Views
             }
             else
             {
-                EnterReact2FA(steamProcess, index, 0);
+                EnterReact2FA(steamProcess, decryptedAccounts[index], 0);
             }
         }
 
-        private void EnterReact2FA(Process steamProcess, int index, int tryCount)
+        private void EnterReact2FA(Process steamProcess, Account account, int tryCount)
         {
             int retry = tryCount + 1;
 
@@ -1600,23 +1665,8 @@ namespace SAM.Views
                 steamLoginWindow = WindowUtils.GetSteamLoginWindow();
             }
 
-            Account account = decryptedAccounts[index];
             LoginWindowState state = LoginWindowState.None;
-
-            while (state != LoginWindowState.Success && state != LoginWindowState.Code)
-            {
-                if (steamProcess.HasExited || state == LoginWindowState.Error)
-                {
-                    return;
-                }
-
-                Thread.Sleep(100);
-
-                state = WindowUtils.TryCredentialsEntry(steamLoginWindow, account.Name, account.Password);
-            }
-
             string secret = account.SharedSecret;
-            state = LoginWindowState.Code;
 
             while (state != LoginWindowState.Success)
             {
@@ -1626,7 +1676,7 @@ namespace SAM.Views
                 }
                 else if (state == LoginWindowState.Login)
                 {
-                    EnterReact2FA(steamProcess, index, retry);
+                    EnterCredentials(steamProcess, account, retry);
                     return;
                 }
                 else if (WindowUtils.GetMainSteamClientWindow().IsValid)
@@ -1654,7 +1704,7 @@ namespace SAM.Views
             if (tryCount < maxRetry && steamLoginWindow.IsValid)
             {
                 Console.WriteLine("2FA code might have failed, attempting retry " + retry + "...");
-                EnterReact2FA(steamProcess, index, retry);
+                EnterReact2FA(steamProcess, account, retry);
                 return;
             }
             else if (tryCount == maxRetry && steamLoginWindow.IsValid)

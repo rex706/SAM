@@ -191,7 +191,6 @@ namespace SAM.Core
                         return LoginWindowState.Loading;
                     }
 
-
                     if (childNum == 3 || childNum == 4)
                     {
                         return LoginWindowState.Error;
@@ -225,7 +224,7 @@ namespace SAM.Core
             return LoginWindowState.Invalid;
         }
 
-        public static LoginWindowState TryCredentialsEntry(WindowHandle loginWindow, string username, string password)
+        public static LoginWindowState TryCredentialsEntry(WindowHandle loginWindow, string username, string password, bool remember)
         {
             if (!loginWindow.IsValid)
             {
@@ -244,15 +243,14 @@ namespace SAM.Core
                 }
 
                 AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
+                AutomationElement[] children = document.FindAllChildren();
 
-                if (document == null || document.FindAllChildren().Length == 0)
+                if (document == null || children.Length == 0)
                 {
                     return LoginWindowState.Invalid;
                 }
 
-                int childNum = document.FindAllChildren().Length;
-
-                if (childNum == 3 || childNum == 4)
+                if (children.Length == 3 || children.Length == 4)
                 {
                     return LoginWindowState.Error;
                 }
@@ -285,6 +283,12 @@ namespace SAM.Core
                             TextBox passwordBox = elements[1].AsTextBox();
                             passwordBox.WaitUntilEnabled();
                             passwordBox.Text = password;
+
+                            if (remember)
+                            {
+                                SendTab(loginWindow.RawPtr, VirtualInputMethod.SendWait);
+                                SendSpace(loginWindow.RawPtr, VirtualInputMethod.SendWait);
+                            }
 
                             SendEnter(loginWindow.RawPtr, VirtualInputMethod.SendWait);
                         }
@@ -321,22 +325,21 @@ namespace SAM.Core
                 }
 
                 AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
+                AutomationElement[] children = document.FindAllChildren();
 
-                if (document == null || document.FindAllChildren().Length == 0)
+                if (document == null || children.Length == 0)
                 {
                     return LoginWindowState.Invalid;
                 }
 
-                int childNum = document.FindAllChildren().Length;
+                Console.WriteLine(children.Length);
 
-                Console.WriteLine(childNum);
-
-                if (childNum == 2)
+                if (children.Length == 2)
                 {
                     return LoginWindowState.Loading;
                 }
 
-                if (childNum == 3 || childNum == 4)
+                if (children.Length == 3 || children.Length == 4)
                 {
                     return LoginWindowState.Error;
                 }
