@@ -271,7 +271,7 @@ namespace SAM.Core
                         return LoginWindowState.Code;
                     }
 
-                    if (elements.Length == 2 && buttons.Length == 1)
+                    if (elements.Length == 2 && buttons.Length == 1 && buttons[0].IsEnabled)
                     {
                         try
                         {
