@@ -257,6 +257,7 @@ namespace SAM.Core
 
                 AutomationElement[] elements = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
                 AutomationElement[] buttons = document.FindAllChildren(e => e.ByControlType(ControlType.Button));
+                AutomationElement[] groups = document.FindAllChildren(e => e.ByControlType(ControlType.Group));
 
                 if (elements != null)
                 {
@@ -284,7 +285,9 @@ namespace SAM.Core
                             passwordBox.WaitUntilEnabled();
                             passwordBox.Text = password;
 
-                            if (remember)
+                            bool isChecked = groups.Length > 0 && groups[0].FindAllDescendants().Length > 0;
+
+                            if (remember && !isChecked)
                             {
                                 SendTab(loginWindow.RawPtr, VirtualInputMethod.SendWait);
                                 SendSpace(loginWindow.RawPtr, VirtualInputMethod.SendWait);

@@ -240,7 +240,7 @@ namespace SAM.Core
             {
                 localKey = localKey.OpenSubKey(@"Software\\Valve\\Steam", true);
                 localKey.SetValue("RememberPassword", value, RegistryValueKind.DWord);
-                localKey.SetValue("AutoLoginUser", account.Name.ToLower(), RegistryValueKind.String);
+                localKey.SetValue("AutoLoginUser", value == 1 ? account.Name.ToLower() : "", RegistryValueKind.String);
                 localKey.Close();
 
                 string steamPath = new IniFile(SAMSettings.FILE_NAME).Read(SAMSettings.STEAM_PATH, SAMSettings.SECTION_STEAM);
@@ -251,9 +251,9 @@ namespace SAM.Core
                 dynamic usersObject = loginusers.Value;
                 dynamic userObject = usersObject[account.SteamId];
 
-                userObject.RememberPassword = "1";
-                userObject.AllowAutoLogin = "1";
-                //userObject.MostRecent = "1";
+                userObject.RememberPassword = value;
+                userObject.AllowAutoLogin = value;
+                //userObject.MostRecent = value;
 
                 usersObject[account.SteamId] = userObject;
                 loginusers.Value = usersObject;

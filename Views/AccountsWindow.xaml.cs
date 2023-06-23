@@ -1437,7 +1437,7 @@ namespace SAM.Views
             //{
                 //if (settings.User.RememberPassword == true)
                 //{
-                //    AccountUtils.SetRememeberPasswordKeyValue(1, encryptedAccounts[index]);
+                    AccountUtils.SetRememeberPasswordKeyValue(0, account);
                 //}
 
                 if (noReactLogin)
