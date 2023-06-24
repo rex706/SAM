@@ -291,15 +291,15 @@ namespace SAM.Core
 
                                 bool isChecked = groups.Length > 0 && groups[0].FindAllDescendants().Length > 0;
 
+                                SendTab(loginWindow.RawPtr, VirtualInputMethod.SendWait);
+
                                 if (remember && !isChecked)
                                 {
-                                    SendTab(loginWindow.RawPtr, VirtualInputMethod.SendWait);
                                     SendSpace(loginWindow.RawPtr, VirtualInputMethod.SendWait);
                                     SendTab(loginWindow.RawPtr, VirtualInputMethod.SendWait);
                                 }
                                 else
                                 {
-                                    SendTab(loginWindow.RawPtr, VirtualInputMethod.SendWait);
                                     SendTab(loginWindow.RawPtr, VirtualInputMethod.SendWait);
                                 }
 
