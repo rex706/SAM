@@ -444,7 +444,7 @@ namespace SAM.Core
                     string steamId = Convert.ToString(user.Key);
                     string accountName = Convert.ToString(user.Value.AccountName);
 
-                    if (accountName.Equals(userName))
+                    if (accountName.Equals(userName.ToLower()))
                     {
                         return steamId;
                     }
