@@ -275,7 +275,9 @@ namespace SAM.Core
                     {
                         try
                         {
-                            if (buttons[0].AsButton().IsEnabled)
+                            Button signInButton = buttons[0].AsButton();
+
+                            if (signInButton.IsEnabled)
                             {
                                 SetForegroundWindow(loginWindow.RawPtr);
 
@@ -293,9 +295,15 @@ namespace SAM.Core
                                 {
                                     SendTab(loginWindow.RawPtr, VirtualInputMethod.SendWait);
                                     SendSpace(loginWindow.RawPtr, VirtualInputMethod.SendWait);
+                                    SendTab(loginWindow.RawPtr, VirtualInputMethod.SendWait);
+                                }
+                                else
+                                {
+                                    SendTab(loginWindow.RawPtr, VirtualInputMethod.SendWait);
+                                    SendTab(loginWindow.RawPtr, VirtualInputMethod.SendWait);
                                 }
 
-                                SendEnter(loginWindow.RawPtr, VirtualInputMethod.SendWait);
+                                SendSpace(loginWindow.RawPtr, VirtualInputMethod.SendWait);
                             }
                         }
                         catch (Exception e)
