@@ -1355,10 +1355,10 @@ namespace SAM.Views
             }
 
             // Make sure Username field is empty and Remember Password checkbox is unchecked.
-            if (!settings.User.Login)
-            {
+            //if (!settings.User.Login)
+            //{
                 AccountUtils.ClearAutoLoginUserKeyValues();
-            }
+            //}
 
             StringBuilder parametersBuilder = new StringBuilder();
             Account account = decryptedAccounts[index];
@@ -1428,7 +1428,7 @@ namespace SAM.Views
             }
             catch (Exception m)
             {
-                MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("There was an error starting Steam\n\n" + m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -1437,7 +1437,7 @@ namespace SAM.Views
             //{
                 //if (settings.User.RememberPassword == true)
                 //{
-                    AccountUtils.SetRememeberPasswordKeyValue(0, account);
+                    //AccountUtils.SetRememeberPasswordKeyValue(1, account);
                 //}
 
                 if (noReactLogin)

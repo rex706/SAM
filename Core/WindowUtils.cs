@@ -271,29 +271,32 @@ namespace SAM.Core
                         return LoginWindowState.Code;
                     }
 
-                    if (elements.Length == 2 && buttons.Length == 1 && buttons[0].IsEnabled)
+                    if (elements.Length == 2 && buttons.Length == 1)
                     {
                         try
                         {
-                            SetForegroundWindow(loginWindow.RawPtr);
-
-                            TextBox usernameBox = elements[0].AsTextBox();
-                            usernameBox.WaitUntilEnabled();
-                            usernameBox.Text = username;
-
-                            TextBox passwordBox = elements[1].AsTextBox();
-                            passwordBox.WaitUntilEnabled();
-                            passwordBox.Text = password;
-
-                            bool isChecked = groups.Length > 0 && groups[0].FindAllDescendants().Length > 0;
-
-                            if (remember && !isChecked)
+                            if (buttons[0].AsButton().IsEnabled)
                             {
-                                SendTab(loginWindow.RawPtr, VirtualInputMethod.SendWait);
-                                SendSpace(loginWindow.RawPtr, VirtualInputMethod.SendWait);
-                            }
+                                SetForegroundWindow(loginWindow.RawPtr);
 
-                            SendEnter(loginWindow.RawPtr, VirtualInputMethod.SendWait);
+                                TextBox usernameBox = elements[0].AsTextBox();
+                                usernameBox.WaitUntilEnabled();
+                                usernameBox.Text = username;
+
+                                TextBox passwordBox = elements[1].AsTextBox();
+                                passwordBox.WaitUntilEnabled();
+                                passwordBox.Text = password;
+
+                                bool isChecked = groups.Length > 0 && groups[0].FindAllDescendants().Length > 0;
+
+                                if (remember && !isChecked)
+                                {
+                                    SendTab(loginWindow.RawPtr, VirtualInputMethod.SendWait);
+                                    SendSpace(loginWindow.RawPtr, VirtualInputMethod.SendWait);
+                                }
+
+                                SendEnter(loginWindow.RawPtr, VirtualInputMethod.SendWait);
+                            }
                         }
                         catch (Exception e)
                         {

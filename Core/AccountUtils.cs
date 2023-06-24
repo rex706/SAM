@@ -264,7 +264,8 @@ namespace SAM.Core
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Error setting Remember Password values\n\n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Console.WriteLine(e.StackTrace);
             }
         }
 
