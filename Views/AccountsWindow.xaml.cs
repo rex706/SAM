@@ -98,8 +98,8 @@ namespace SAM.Views
 
             LoadSettings();
 
-            this.Loaded += new RoutedEventHandler(MainWindow_Loaded);
-            this.BackgroundBorder.PreviewMouseLeftButtonDown += (s, e) => { DragMove(); };
+            Loaded += new RoutedEventHandler(MainWindow_Loaded);
+            BackgroundBorder.PreviewMouseLeftButtonDown += (s, e) => { DragMove(); };
 
             _Timer.Tick += new EventHandler(Timer_Tick);
             _Timer.Interval = (10);
@@ -111,7 +111,7 @@ namespace SAM.Views
             AssemblyVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             var ver = new MenuItem();
-            var newExistMenuItem = (MenuItem)this.FileMenu.Items[2];
+            var newExistMenuItem = (MenuItem)FileMenu.Items[2];
             ver.Header = "v" + AssemblyVer;
             ver.IsEnabled = false;
             newExistMenuItem.Items.Add(ver);
@@ -1884,13 +1884,13 @@ namespace SAM.Views
         {
             if (_Stop == 0)
             {
-                _RatioHeight = ((this.Height - _Height) / 5) * -1;
-                _RatioWidth = ((this.Width - _Width) / 5) * -1;
+                _RatioHeight = ((Height - _Height) / 5) * -1;
+                _RatioWidth = ((Width - _Width) / 5) * -1;
             }
             _Stop++;
 
-            this.Height += _RatioHeight;
-            this.Width += _RatioWidth;
+            Height += _RatioHeight;
+            Width += _RatioWidth;
 
             if (_Stop == 5)
             {
@@ -1900,8 +1900,8 @@ namespace SAM.Views
 
                 _Stop = 0;
 
-                this.Height = _Height;
-                this.Width = _Width;
+                Height = _Height;
+                Width = _Width;
 
                 SetMainScrollViewerBarsVisibility(ScrollBarVisibility.Auto);
             }
@@ -2287,7 +2287,7 @@ namespace SAM.Views
 
         private void Window_StateChanged(object sender, EventArgs e)
         {
-            switch (this.WindowState)
+            switch (WindowState)
             {
                 case WindowState.Maximized:
                     break;
@@ -2821,10 +2821,16 @@ namespace SAM.Views
             try
             {
                 Process SteamProc = Process.GetProcessesByName("Steam").FirstOrDefault();
+                Process[] WebClientProcs = Process.GetProcessesByName("steamwebhelper");
                 if (SteamProc != null)
                 {
                     Process.Start(stopInfo);
                     SteamProc.WaitForExit();
+
+                    foreach (Process proc in WebClientProcs)
+                    {
+                        proc.WaitForExit();
+                    }
                 }
             }
             catch
