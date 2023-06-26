@@ -81,7 +81,14 @@ namespace SAM.Core
 
         public static WindowHandle GetSteamLoginWindow()
         {
-            Process[] steamProcess = Process.GetProcessesByName("steamwebhelper");
+            WindowHandle window = GetSteamLoginWindow("Steam");
+            if (window.IsValid) { return window; }
+            return GetSteamLoginWindow("steamwebhelper");
+        }
+
+        public static WindowHandle GetSteamLoginWindow(string processName)
+        {
+            Process[] steamProcess = Process.GetProcessesByName(processName);
             foreach (Process process in steamProcess)
             {
                 IEnumerable<IntPtr> windows = EnumerateProcessWindowHandles(process);
@@ -102,7 +109,14 @@ namespace SAM.Core
 
         public static WindowHandle GetMainSteamClientWindow()
         {
-            Process[] steamProcess = Process.GetProcessesByName("steamwebhelper");
+            WindowHandle window = GetMainSteamClientWindow("Steam");
+            if (window.IsValid) { return window; }
+            return GetMainSteamClientWindow("steamwebhelper");
+        }
+
+        public static WindowHandle GetMainSteamClientWindow(string processName)
+        {
+            Process[] steamProcess = Process.GetProcessesByName(processName);
             foreach (Process process in steamProcess)
             {
                 IEnumerable<IntPtr> windows = EnumerateProcessWindowHandles(process);
@@ -286,13 +300,13 @@ namespace SAM.Core
                                 if (remember && !isChecked)
                                 {
                                     checkBoxGroup.Focus();
-                                    Thread.Sleep(50);
+                                    Thread.Sleep(100);
                                     SendSpace(loginWindow.RawPtr, VirtualInputMethod.SendWait);
-                                    Thread.Sleep(50);
+                                    Thread.Sleep(100);
                                 }
 
                                 signInButton.Focus();
-                                Thread.Sleep(50);
+                                Thread.Sleep(100);
                                 SendSpace(loginWindow.RawPtr, VirtualInputMethod.SendWait);
                             }
                          
@@ -321,62 +335,70 @@ namespace SAM.Core
 
             using (var automation = new UIA3Automation())
             {
-                AutomationElement window = automation.FromHandle(loginWindow.RawPtr);
-
-                if (window == null)
+                try
                 {
-                    return LoginWindowState.Invalid;
-                }
+                    AutomationElement window = automation.FromHandle(loginWindow.RawPtr);
 
-                AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
-                AutomationElement[] children = document.FindAllChildren();
-
-                if (document == null || children.Length == 0)
-                {
-                    return LoginWindowState.Invalid;
-                }
-
-                Console.WriteLine(children.Length);
-
-                if (children.Length == 2)
-                {
-                    return LoginWindowState.Loading;
-                }
-
-                AutomationElement[] elements = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
-                AutomationElement[] buttons = document.FindAllChildren(e => e.ByControlType(ControlType.Button));
-
-                if (elements != null)
-                {
-                    if (elements.Length == 0 && buttons.Length == 1)
+                    if (window == null)
                     {
-                        return LoginWindowState.Error;
-                    }
-                    else if (elements.Length == 2 && buttons.Length == 1)
-                    {
-                        return LoginWindowState.Login;
+                        return LoginWindowState.Invalid;
                     }
 
-                    if (elements.Length == 5)
-                    {
-                        string code = Generate2FACode(secret);
+                    AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
+                    AutomationElement[] children = document.FindAllChildren();
 
-                        try
+                    if (document == null || children.Length == 0)
+                    {
+                        return LoginWindowState.Invalid;
+                    }
+
+                    Console.WriteLine(children.Length);
+
+                    if (children.Length == 2)
+                    {
+                        return LoginWindowState.Loading;
+                    }
+
+                    AutomationElement[] elements = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
+                    AutomationElement[] buttons = document.FindAllChildren(e => e.ByControlType(ControlType.Button));
+
+                    if (elements != null)
+                    {
+                        if (elements.Length == 0 && buttons.Length == 1)
                         {
-                            for (int i = 0; i < elements.Length; i++)
+                            return LoginWindowState.Error;
+                        }
+                        else if (elements.Length == 2 && buttons.Length == 1)
+                        {
+                            return LoginWindowState.Login;
+                        }
+
+                        if (elements.Length == 5)
+                        {
+                            string code = Generate2FACode(secret);
+
+                            try
                             {
-                                TextBox textBox = elements[i].AsTextBox();
-                                textBox.Text = code[i].ToString();
+                                for (int i = 0; i < elements.Length; i++)
+                                {
+                                    TextBox textBox = elements[i].AsTextBox();
+                                    textBox.Text = code[i].ToString();
+                                }
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e.Message);
-                            return LoginWindowState.Code;
-                        }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e.Message);
+                                return LoginWindowState.Code;
+                            }
 
-                        return LoginWindowState.Success;
+                            return LoginWindowState.Success;
+                        }
                     }
+                }
+                catch (Exception ex) 
+                {
+                    Console.WriteLine(ex.Message);
+                    return LoginWindowState.Invalid;
                 }
             }
 

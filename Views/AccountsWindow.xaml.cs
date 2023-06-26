@@ -1355,10 +1355,10 @@ namespace SAM.Views
             }
 
             // Make sure Username field is empty and Remember Password checkbox is unchecked.
-            //if (!settings.User.Login)
-            //{
+            if (!settings.User.Login)
+            {
                 AccountUtils.ClearAutoLoginUserKeyValues();
-            //}
+            }
 
             StringBuilder parametersBuilder = new StringBuilder();
             Account account = decryptedAccounts[index];
@@ -1382,42 +1382,42 @@ namespace SAM.Views
 
             foreach (string parameter in parameters)
             {
-                // Not working as of 6/14/2022
-                //if (parameter.Equals("-login"))
-                //{
-                //    if (account.SharedSecret == null || account.SharedSecret.Length == 0)
-                //    {
-                //        parametersBuilder.Append(parameter).Append(" ");
+                // Not working with new UI as of 6/14/2022
+                // Add -vgui parameter to use old UI for now
+                if (parameter.Equals("-login"))
+                {
+                    parametersBuilder.Append(" -vgui ").Append(parameter).Append(" ");
 
-                //        StringBuilder passwordBuilder = new StringBuilder();
+                    StringBuilder passwordBuilder = new StringBuilder();
 
-                //        foreach (char c in account.Password)
-                //        {
-                //            if (c.Equals('"'))
-                //            {
-                //                passwordBuilder.Append('\\').Append(c);
-                //            }
-                //            else
-                //            {
-                //                passwordBuilder.Append(c);
-                //            }
-                //        }
+                    foreach (char c in account.Password)
+                    {
+                        if (c.Equals('"'))
+                        {
+                            passwordBuilder.Append('\\').Append(c);
+                        }
+                        else
+                        {
+                            passwordBuilder.Append(c);
+                        }
+                    }
 
-                //        parametersBuilder.Append(account.Name).Append(" \"").Append(passwordBuilder.ToString()).Append("\" ");
-                //    }
-                //}
-                //else
-                //{
+                    parametersBuilder.Append(account.Name).Append(" \"").Append(passwordBuilder.ToString()).Append("\" ");
+                }
+                else
+                {
                     parametersBuilder.Append(parameter).Append(" ");
-                //}
+                }
             }
+
+            string startParams = parametersBuilder.ToString();
 
             // Start Steam process with the selected path.
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
                 FileName = settings.User.SteamPath + "steam.exe",
                 WorkingDirectory = settings.User.SteamPath,
-                Arguments = parametersBuilder.ToString()
+                Arguments = startParams
             };
 
             Process steamProcess;
@@ -1432,14 +1432,25 @@ namespace SAM.Views
                 return;
             }
 
-            // Not working as of 6/14/2022
-            //if (settings.User.Login == true)
-            //{
+            if (settings.User.Login == true)
+            {
+                // TODO needs more investigation.
                 //if (settings.User.RememberPassword == true)
                 //{
-                    //AccountUtils.SetRememeberPasswordKeyValue(1, account);
+                //    AccountUtils.SetRememeberPasswordKeyValue(1, account);
                 //}
 
+                if (account.SharedSecret != null && account.SharedSecret.Length > 0)
+                {
+                    Handle2FA(steamProcess, index);
+                }
+                else
+                {
+                    PostLogin();
+                }
+            }
+            else
+            {
                 if (noReactLogin)
                 {
                     TypeCredentials(steamProcess, index, tryCount);
@@ -1448,20 +1459,7 @@ namespace SAM.Views
                 {
                     EnterCredentials(steamProcess, account, 0);
                 }
-                
-                //if (account.SharedSecret != null && account.SharedSecret.Length > 0)
-                //{
-                //    Handle2FA(steamProcess, index);
-                //}
-                //else
-                //{
-                //    PostLogin();
-                //}
-            //}
-            //else
-            //{
-            //    TypeCredentials(steamProcess, index, tryCount);
-            //}
+            }
         }
 
         private void TypeCredentials(Process steamProcess, int index, int tryCount)
