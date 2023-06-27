@@ -23,7 +23,7 @@ namespace SAM.Core
         /// Check program for updates with the given text url.
         /// Returns 1 if the user chose not to update or 0 if there is no update available.
         /// </summary>
-        public static async Task<int> CheckForUpdate(string updateUrl, string releasesUrl)
+        public static async Task<UpdateResponse> CheckForUpdate(string updateUrl, string releasesUrl)
         {
             // Allows downloading files directly from GitHub repositories. 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -93,24 +93,22 @@ namespace SAM.Core
                                 // Open browser to releases page.
                                 Process.Start(releasesUrl);
                             }
-                            
-                            Environment.Exit(0);
 
-                            return 2;
+                            return UpdateResponse.Update;
                         }
 
                         // Update is available, but user chose not to update just yet.
-                        return 1;
+                        return UpdateResponse.Later;
                     }
                 }
 
                 // No update available.
-                return 0;
+                return UpdateResponse.NoUpdate;
             }
             catch
             {
                 // Some error occured or there is no internet connection.
-                return -1;
+                return UpdateResponse.Error;
             }
         }
 

@@ -122,13 +122,22 @@ namespace SAM.Views
                 File.Delete("Updater.exe");
             }
 
-            // Check for a new version if enabled.
-            if (settings.User.CheckForUpdates && await UpdateCheck.CheckForUpdate(updateCheckUrl, releasesUrl) == 1)
+            if (settings.User.CheckForUpdates)
             {
-                // An update is available, but user has chosen not to update.
-                ver.Header = "Update Available!";
-                ver.Click += Ver_Click;
-                ver.IsEnabled = true;
+                UpdateResponse response = await UpdateCheck.CheckForUpdate(updateCheckUrl, releasesUrl);
+
+                switch (response)
+                {
+                    case UpdateResponse.Later:
+                        ver.Header = "Update Available!";
+                        ver.Click += Ver_Click;
+                        ver.IsEnabled = true;
+                        break;
+
+                    case UpdateResponse.Update:
+                        Close();
+                        return;
+                }
             }
 
             loginThreads = new List<Thread>();
@@ -2137,7 +2146,7 @@ namespace SAM.Views
 
         private async void Ver_Click(object sender, RoutedEventArgs e)
         {
-            if (await UpdateCheck.CheckForUpdate(updateCheckUrl, repositoryUrl) < 1)
+            if (await UpdateCheck.CheckForUpdate(updateCheckUrl, repositoryUrl) == UpdateResponse.NoUpdate)
             {
                 MessageBox.Show(Process.GetCurrentProcess().ProcessName + " is up to date!");
             }
@@ -2839,10 +2848,13 @@ namespace SAM.Views
 
         private void AccountsWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            foreach (Thread thread in loginThreads)
+            if (loginThreads != null)
             {
-                Console.WriteLine("Aborting thread...");
-                thread.Abort();
+                foreach (Thread thread in loginThreads)
+                {
+                    Console.WriteLine("Aborting thread...");
+                    thread.Abort();
+                }
             }
         }
     }
