@@ -116,12 +116,6 @@ namespace SAM.Views
             ver.IsEnabled = false;
             newExistMenuItem.Items.Add(ver);
 
-            // Delete updater if exists.
-            if (File.Exists("Updater.exe"))
-            {
-                File.Delete("Updater.exe");
-            }
-
             if (settings.User.CheckForUpdates)
             {
                 UpdateResponse response = await UpdateCheck.CheckForUpdate(updateCheckUrl);

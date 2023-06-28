@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -21,7 +22,6 @@ namespace SAM.Core
 
         /// <summary>
         /// Check program for updates with the given text url.
-        /// Returns 1 if the user chose not to update or 0 if there is no update available.
         /// </summary>
         public static async Task<UpdateResponse> CheckForUpdate(string updateUrl)
         {
@@ -29,6 +29,8 @@ namespace SAM.Core
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
             // Nkosi Note: Always use asynchronous versions of network and IO methods.
+
+            await Task.Run(() => DeleteUpdater());
 
             // Check for version updates
             try
@@ -125,6 +127,44 @@ namespace SAM.Core
         private static async Task DownloadUpdater(string url)
         {
             await new WebClient().DownloadFileTaskAsync(url, AppDomain.CurrentDomain.BaseDirectory + updaterFileName);
+        }
+
+        private static void DeleteUpdater()
+        {
+            string path = AppDomain.CurrentDomain.BaseDirectory + updaterFileName;
+
+            if (File.Exists(path))
+            {
+                while (IsFileLocked(path))
+                {
+                    Console.WriteLine("Waiting for updater to close...");
+                    Thread.Sleep(1000);
+                }
+
+                File.Delete(path);
+            }
+        }
+
+        private static bool IsFileLocked(string filePath)
+        {
+            try
+            {
+                using (FileStream stream = new FileStream(filePath, FileMode.Open))
+                {
+                    stream.Close();
+                }
+            }
+            catch (IOException)
+            {
+                //the file is unavailable because it is:
+                //still being written to
+                //or being processed by another thread
+                //or does not exist (has already been processed)
+                return true;
+            }
+
+            //file is not locked
+            return false;
         }
     }
 }
