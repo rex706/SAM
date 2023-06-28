@@ -49,16 +49,16 @@ namespace SAM.Views
         {
             InitializeComponent();
 
-            settings = new SAMSettings();
-
-            Loaded += SettingsWindow_Loaded;
             Decrypt = false;
-
-            InputMethodSelectBox.ItemsSource = Enum.GetValues(typeof(VirtualInputMethod)).Cast<VirtualInputMethod>();
+            settings = new SAMSettings();
+            
+            Loaded += SettingsWindow_Loaded;
         }
 
         private void SettingsWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            InputMethodSelectBox.ItemsSource = Enum.GetValues(typeof(VirtualInputMethod)).Cast<VirtualInputMethod>();
+
             if (File.Exists(SAMSettings.FILE_NAME))
             {
                 try
