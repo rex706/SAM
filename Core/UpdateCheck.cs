@@ -23,7 +23,7 @@ namespace SAM.Core
         /// Check program for updates with the given text url.
         /// Returns 1 if the user chose not to update or 0 if there is no update available.
         /// </summary>
-        public static async Task<UpdateResponse> CheckForUpdate(string updateUrl, string releasesUrl)
+        public static async Task<UpdateResponse> CheckForUpdate(string updateUrl)
         {
             // Allows downloading files directly from GitHub repositories. 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -31,74 +31,43 @@ namespace SAM.Core
             // Nkosi Note: Always use asynchronous versions of network and IO methods.
 
             // Check for version updates
-            var client = new HttpClient();
-            client.Timeout = new TimeSpan(0, 0, 1, 0);
-
             try
             {
-                // Open the text file using a stream reader.
-                using (Stream stream = await client.GetStreamAsync(updateUrl))
+                using (HttpClient client = new HttpClient())
                 {
-                    StreamReader reader = new StreamReader(stream);
+                    client.Timeout = new TimeSpan(0, 0, 1, 0);
 
-                    // Get current and latest versions of program.
-                    Version current = Assembly.GetExecutingAssembly().GetName().Version;
-                    Version latest = Version.Parse(await reader.ReadLineAsync());
-
-                    // Update latest version string class member.
-                    latestVersion = latest.ToString();
-
-                    // If the version from the online text is newer than the current version,
-                    // ask user if they would like to download and install update now.
-                    if (latest > current)
+                    // Open the text file using a stream reader.
+                    using (Stream stream = await client.GetStreamAsync(updateUrl))
                     {
-                        // Show message box that an update is available.
-                        MessageBoxResult answer = MessageBox.Show("A new version of " +
-                            AppDomain.CurrentDomain.FriendlyName.Substring(0, AppDomain.CurrentDomain.FriendlyName.IndexOf('.')) +
-                            " is available!\n\nCurrent Version     " + current + "\nLatest Version        " + latest +
-                            "\n\nUpdate now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                        StreamReader reader = new StreamReader(stream);
 
-                        // Update is available, and user wants to update. Requires app to close.
-                        if (answer == MessageBoxResult.Yes)
+                        // Get current and latest versions of program.
+                        Version current = Assembly.GetExecutingAssembly().GetName().Version;
+                        Version latest = Version.Parse(await reader.ReadLineAsync());
+
+                        // Update latest version string class member.
+                        latestVersion = latest.ToString();
+
+                        // If the version from the online text is newer than the current version,
+                        // ask user if they would like to download and install update now.
+                        if (latest > current)
                         {
-                            // Delete updater if exists.
-                            if (File.Exists(updaterFileName))
+                            // Show message box that an update is available.
+                            MessageBoxResult answer = MessageBox.Show("A new version of " +
+                                AppDomain.CurrentDomain.FriendlyName.Substring(0, AppDomain.CurrentDomain.FriendlyName.IndexOf('.')) +
+                                " is available!\n\nCurrent Version     " + current + "\nLatest Version        " + latest +
+                                "\n\nUpdate now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
+
+                            // Update is available, and user wants to update. Requires app to close.
+                            if (answer == MessageBoxResult.Yes)
                             {
-                                File.Delete(updaterFileName);
+                                return UpdateResponse.Update;
                             }
 
-                            // Download latest updater.
-                            using (Stream updaterStream = await client.GetStreamAsync(latestUpdaterVersionUrl))
-                            {
-                                reader = new StreamReader(updaterStream);
-                                string latestUpdaterUrl = await reader.ReadLineAsync();
-                                await DownloadUpdater(latestUpdaterUrl);
-                            }
-
-                            // Setup update process information.
-                            ProcessStartInfo startInfo = new ProcessStartInfo();
-                            startInfo.UseShellExecute = true;
-                            startInfo.FileName = updaterFileName;
-                            startInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                            startInfo.Arguments = updateUrl;
-                            startInfo.Verb = "runas";
-
-                            // Launch updater and exit.
-                            try
-                            {
-                                Process.Start(startInfo);
-                            }
-                            catch
-                            {
-                                // Open browser to releases page.
-                                Process.Start(releasesUrl);
-                            }
-
-                            return UpdateResponse.Update;
+                            // Update is available, but user chose not to update just yet.
+                            return UpdateResponse.Later;
                         }
-
-                        // Update is available, but user chose not to update just yet.
-                        return UpdateResponse.Later;
                     }
                 }
 
@@ -109,6 +78,47 @@ namespace SAM.Core
             {
                 // Some error occured or there is no internet connection.
                 return UpdateResponse.Error;
+            }
+        }
+
+        public static async Task StartUpdate(string updateUrl, string releasesUrl)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                client.Timeout = new TimeSpan(0, 0, 1, 0);
+
+                // Delete updater if exists.
+                if (File.Exists(updaterFileName))
+                {
+                    File.Delete(updaterFileName);
+                }
+
+                // Download latest updater.
+                using (Stream updaterStream = await client.GetStreamAsync(latestUpdaterVersionUrl))
+                {
+                    StreamReader reader = new StreamReader(updaterStream);
+                    string latestUpdaterUrl = await reader.ReadLineAsync();
+                    await DownloadUpdater(latestUpdaterUrl);
+                }
+
+                // Setup update process information.
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.UseShellExecute = true;
+                startInfo.FileName = updaterFileName;
+                startInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                startInfo.Arguments = updateUrl;
+                startInfo.Verb = "runas";
+
+                // Launch updater and exit.
+                try
+                {
+                    Process.Start(startInfo);
+                }
+                catch
+                {
+                    // Open browser to releases page.
+                    Process.Start(releasesUrl);
+                }
             }
         }
 

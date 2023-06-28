@@ -102,7 +102,7 @@ namespace SAM.Views
             BackgroundBorder.PreviewMouseLeftButtonDown += (s, e) => { DragMove(); };
 
             _Timer.Tick += new EventHandler(Timer_Tick);
-            _Timer.Interval = (10);
+            _Timer.Interval = 10;
         }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -124,7 +124,7 @@ namespace SAM.Views
 
             if (settings.User.CheckForUpdates)
             {
-                UpdateResponse response = await UpdateCheck.CheckForUpdate(updateCheckUrl, releasesUrl);
+                UpdateResponse response = await UpdateCheck.CheckForUpdate(updateCheckUrl);
 
                 switch (response)
                 {
@@ -135,6 +135,27 @@ namespace SAM.Views
                         break;
 
                     case UpdateResponse.Update:
+
+                        if (eKey == "PRIVATE_KEY")
+                        {
+                            MessageBoxResult result = MessageBox.Show(
+                                "An update for SAM is available!\n\n" +
+                                "Please pull the latest changes and rebuild.\n\n" +
+                                "Do you understand?", 
+                                "Update Available", MessageBoxButton.YesNo);
+
+                            if (result == MessageBoxResult.No)
+                            {
+                                // TODO: wiki for #176
+                                Process.Start("https://github.com/rex706/SAM/issues/176");
+                            }
+
+                            Close();
+                            return;
+                        }
+
+                        await UpdateCheck.StartUpdate(updateCheckUrl, releasesUrl);
+
                         Close();
                         return;
                 }
@@ -2146,9 +2167,18 @@ namespace SAM.Views
 
         private async void Ver_Click(object sender, RoutedEventArgs e)
         {
-            if (await UpdateCheck.CheckForUpdate(updateCheckUrl, repositoryUrl) == UpdateResponse.NoUpdate)
+            UpdateResponse response = await UpdateCheck.CheckForUpdate(updateCheckUrl);
+
+            switch (response)
             {
-                MessageBox.Show(Process.GetCurrentProcess().ProcessName + " is up to date!");
+                case UpdateResponse.NoUpdate:
+                    MessageBox.Show(Process.GetCurrentProcess().ProcessName + " is up to date!");
+                    break;
+
+                case UpdateResponse.Update:
+                    await UpdateCheck.StartUpdate(updateCheckUrl, releasesUrl);
+                    Close();
+                    return;
             }
         }
 
