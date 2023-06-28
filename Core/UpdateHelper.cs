@@ -89,11 +89,7 @@ namespace SAM.Core
             {
                 client.Timeout = new TimeSpan(0, 0, 1, 0);
 
-                // Delete updater if exists.
-                if (File.Exists(updaterFileName))
-                {
-                    File.Delete(updaterFileName);
-                }
+                await Task.Run(() => DeleteUpdater());
 
                 // Download latest updater.
                 using (Stream updaterStream = await client.GetStreamAsync(latestUpdaterVersionUrl))

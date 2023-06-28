@@ -41,18 +41,18 @@ namespace SAM.Views
 
         public bool Decrypt { get; set; }
 
-        private SAMSettings settings;
+        private readonly SAMSettings settings;
 
-        private string SAMshortcut = @"\SAM.lnk";
-        private string SAMexe = @"\SAM.exe";
+        private readonly string SAMshortcut = @"\SAM.lnk";
+        private readonly string SAMexe = @"\SAM.exe";
         public SettingsWindow()
         {
-            settings = new SAMSettings();
-
             InitializeComponent();
 
-            this.Loaded += new RoutedEventHandler(SettingsWindow_Loaded);
-            this.Decrypt = false;
+            settings = new SAMSettings();
+
+            Loaded += SettingsWindow_Loaded;
+            Decrypt = false;
 
             InputMethodSelectBox.ItemsSource = Enum.GetValues(typeof(VirtualInputMethod)).Cast<VirtualInputMethod>();
         }
