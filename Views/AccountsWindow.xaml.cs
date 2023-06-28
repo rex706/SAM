@@ -118,7 +118,7 @@ namespace SAM.Views
 
             if (settings.User.CheckForUpdates)
             {
-                UpdateResponse response = await UpdateCheck.CheckForUpdate(updateCheckUrl);
+                UpdateResponse response = await UpdateHelper.CheckForUpdate(updateCheckUrl);
 
                 switch (response)
                 {
@@ -148,7 +148,7 @@ namespace SAM.Views
                             return;
                         }
 
-                        await UpdateCheck.StartUpdate(updateCheckUrl, releasesUrl);
+                        await UpdateHelper.StartUpdate(updateCheckUrl, releasesUrl);
 
                         Close();
                         return;
@@ -1441,6 +1441,7 @@ namespace SAM.Views
             {
                 FileName = settings.User.SteamPath + "steam.exe",
                 WorkingDirectory = settings.User.SteamPath,
+                UseShellExecute = true,
                 Arguments = startParams
             };
 
@@ -2161,7 +2162,7 @@ namespace SAM.Views
 
         private async void Ver_Click(object sender, RoutedEventArgs e)
         {
-            UpdateResponse response = await UpdateCheck.CheckForUpdate(updateCheckUrl);
+            UpdateResponse response = await UpdateHelper.CheckForUpdate(updateCheckUrl);
 
             switch (response)
             {
@@ -2170,7 +2171,7 @@ namespace SAM.Views
                     break;
 
                 case UpdateResponse.Update:
-                    await UpdateCheck.StartUpdate(updateCheckUrl, releasesUrl);
+                    await UpdateHelper.StartUpdate(updateCheckUrl, releasesUrl);
                     Close();
                     return;
             }

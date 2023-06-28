@@ -142,7 +142,7 @@
     <Compile Include="Core\InterceptKeys.cs" />
     <Compile Include="Core\SAMSettings.cs" />
     <Compile Include="Core\StringCipher.cs" />
-    <Compile Include="Core\UpdateCheck.cs" />
+    <Compile Include="Core\UpdateHelper.cs" />
     <Compile Include="Core\UserSettings.cs" />
     <Compile Include="Core\VirtualInputMethod.cs" />
     <Page Include="Views\PasswordWindow.xaml">
