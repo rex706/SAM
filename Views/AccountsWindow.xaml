@@ -116,7 +116,7 @@
                     </Style>
                 </Grid.Resources>
                 <Border x:Name="BackgroundBorder" Background="Transparent" Margin="0,20,0,0" Padding="0,20,0,0"/>
-                <DataGrid x:Name="AccountsDataGrid" Margin="0,20,0,0" AutoGenerateColumns="False" Visibility="Collapsed" IsReadOnly="True" MouseDoubleClick="AccountsDataGrid_MouseDoubleClick" ContextMenuOpening="AccountsDataGrid_ContextMenuOpening" GridLinesVisibility="Horizontal" PreviewMouseRightButtonDown="AccountsDataGrid_PreviewMouseRightButtonDown" SelectionMode="Single" ColumnReordered="AccountsDataGrid_ColumnReordered">
+                <DataGrid x:Name="AccountsDataGrid" Margin="0,20,0,0" AutoGenerateColumns="False" Visibility="Collapsed" IsReadOnly="True" MouseDoubleClick="AccountsDataGrid_MouseDoubleClick" ContextMenuOpening="AccountsDataGrid_ContextMenuOpening" GridLinesVisibility="Horizontal" PreviewMouseRightButtonDown="AccountsDataGrid_PreviewMouseRightButtonDown" SelectionMode="Single" ColumnReordered="AccountsDataGrid_ColumnReordered" PreviewKeyDown="AccountsDataGrid_PreviewKeyDown">
                     <DataGrid.ColumnHeaderStyle>
                         <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MetroDataGridColumnHeader}">
                             <Setter Property="HorizontalContentAlignment" Value="Center" />

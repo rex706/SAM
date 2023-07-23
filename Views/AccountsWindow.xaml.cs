@@ -19,6 +19,7 @@ using SAM.Core;
 using MahApps.Metro.Controls;
 using MahApps.Metro;
 using System.Media;
+using System.Windows.Input;
 
 namespace SAM.Views
 {
@@ -900,10 +901,10 @@ namespace SAM.Views
                         }
 
                         accountButton.Click += new RoutedEventHandler(AccountButton_Click);
-                        accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
-                        accountButton.PreviewMouseLeftButtonUp += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
-                        //accountButton.PreviewMouseMove += new System.Windows.Input.MouseEventHandler(AccountButton_MouseMove);
-                        accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+                        accountButton.PreviewMouseLeftButtonDown += new MouseButtonEventHandler(AccountButton_MouseDown);
+                        accountButton.PreviewMouseLeftButtonUp += new MouseButtonEventHandler(AccountButton_MouseUp);
+                        //accountButton.PreviewMouseMove += new MouseEventHandler(AccountButton_MouseMove);
+                        accountButton.MouseLeave += new MouseEventHandler(AccountButton_MouseLeave);
                         accountButton.MouseEnter += delegate { AccountButton_MouseEnter(accountButton, accountText); };
                         accountButton.MouseLeave += delegate { AccountButton_MouseLeave(accountButton, accountText); };
 
@@ -1934,7 +1935,7 @@ namespace SAM.Views
 
         #region Click Events
 
-        private void AccountButton_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void AccountButton_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is Button btn)
             {
@@ -1960,7 +1961,7 @@ namespace SAM.Views
             }
         }
 
-        private void AccountButton_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void AccountButton_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (sender is Button btn)
             {
@@ -1970,7 +1971,7 @@ namespace SAM.Views
             }
         }
 
-        private void AccountButton_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        private void AccountButton_MouseLeave(object sender, MouseEventArgs e)
         {
             if (sender is Button btn)
             {
@@ -1990,7 +1991,7 @@ namespace SAM.Views
             accountText.Visibility = Visibility.Visible;
         }
 
-        private void AccountButton_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        private void AccountButton_MouseMove(object sender, MouseEventArgs e)
         {
             if (sender is Button btn)
             {
@@ -2514,9 +2515,9 @@ namespace SAM.Views
                     accountButton.Style = (Style)Resources["ExportButtonStyle"];
                     accountButton.Click -= new RoutedEventHandler(AccountButton_Click);
                     accountButton.Click += new RoutedEventHandler(AccountButtonExport_Click);
-                    accountButton.PreviewMouseLeftButtonDown -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
-                    accountButton.PreviewMouseLeftButtonUp -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
-                    accountButton.MouseLeave -= new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+                    accountButton.PreviewMouseLeftButtonDown -= new MouseButtonEventHandler(AccountButton_MouseDown);
+                    accountButton.PreviewMouseLeftButtonUp -= new MouseButtonEventHandler(AccountButton_MouseUp);
+                    accountButton.MouseLeave -= new MouseEventHandler(AccountButton_MouseLeave);
                 }
             }
         }
@@ -2606,9 +2607,9 @@ namespace SAM.Views
                     accountButton.Style = (Style)Resources["DeleteButtonStyle"];
                     accountButton.Click -= new RoutedEventHandler(AccountButton_Click);
                     accountButton.Click += new RoutedEventHandler(AccountButtonDelete_Click);
-                    accountButton.PreviewMouseLeftButtonDown -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
-                    accountButton.PreviewMouseLeftButtonUp -= new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
-                    accountButton.MouseLeave -= new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+                    accountButton.PreviewMouseLeftButtonDown -= new MouseButtonEventHandler(AccountButton_MouseDown);
+                    accountButton.PreviewMouseLeftButtonUp -= new MouseButtonEventHandler(AccountButton_MouseUp);
+                    accountButton.MouseLeave -= new MouseEventHandler(AccountButton_MouseLeave);
                 }
             }
         }
@@ -2701,9 +2702,9 @@ namespace SAM.Views
                     accountButton.Click -= new RoutedEventHandler(AccountButtonExport_Click);
                     accountButton.Click -= new RoutedEventHandler(AccountButtonDelete_Click);
                     accountButton.Click += new RoutedEventHandler(AccountButton_Click);
-                    accountButton.PreviewMouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseDown);
-                    accountButton.PreviewMouseLeftButtonUp += new System.Windows.Input.MouseButtonEventHandler(AccountButton_MouseUp);
-                    accountButton.MouseLeave += new System.Windows.Input.MouseEventHandler(AccountButton_MouseLeave);
+                    accountButton.PreviewMouseLeftButtonDown += new MouseButtonEventHandler(AccountButton_MouseDown);
+                    accountButton.PreviewMouseLeftButtonUp += new MouseButtonEventHandler(AccountButton_MouseUp);
+                    accountButton.MouseLeave += new MouseEventHandler(AccountButton_MouseLeave);
 
                     accountButton.Opacity = 1;
                 }
@@ -2713,7 +2714,7 @@ namespace SAM.Views
             exporting = false;
         }
 
-        private void AccountsDataGrid_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void AccountsDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (AccountsDataGrid.SelectedItem != null && deleting == false)
             {
@@ -2741,7 +2742,7 @@ namespace SAM.Views
             }
         }
 
-        private void AccountsDataGrid_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void AccountsDataGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             DependencyObject DepObject = (DependencyObject)e.OriginalSource;
 
@@ -2766,7 +2767,7 @@ namespace SAM.Views
             }
         }
 
-        private void MainScrollViewer_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        private void MainScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             ScrollViewer scv = (ScrollViewer)sender;
             scv.ScrollToVerticalOffset(scv.VerticalOffset - e.Delta);
@@ -2880,6 +2881,20 @@ namespace SAM.Views
                     Console.WriteLine("Aborting thread...");
                     thread.Abort();
                 }
+            }
+        }
+
+        private void AccountsDataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter || e.Key == Key.Return)
+            {
+                object selectedItem = AccountsDataGrid.SelectedItem;
+                if (selectedItem != null)
+                {
+                    Login(AccountsDataGrid.SelectedIndex);
+                }
+
+                e.Handled = true;
             }
         }
     }
