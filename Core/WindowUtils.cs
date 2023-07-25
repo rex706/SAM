@@ -297,7 +297,7 @@ namespace SAM.Core
 
                                 bool isChecked = checkBoxGroup.FindAllDescendants().Length > 0;
 
-                                if (remember && !isChecked)
+                                if (remember != isChecked)
                                 {
                                     checkBoxGroup.Focus();
                                     Thread.Sleep(100);
