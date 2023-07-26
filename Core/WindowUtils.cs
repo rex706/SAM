@@ -295,14 +295,13 @@ namespace SAM.Core
 
                                 AutomationElement checkBoxGroup = groups[0];
 
-                                bool isChecked = checkBoxGroup.FindAllDescendants().Length > 0;
+                                bool isChecked = checkBoxGroup.AsButton().FindFirstChild(e => e.ByControlType(ControlType.Image)) != null;
 
-                                if (remember && !isChecked)
+                                if (remember != isChecked)
                                 {
-                                    checkBoxGroup.Focus();
-                                    Thread.Sleep(100);
-                                    SendSpace(loginWindow.RawPtr, VirtualInputMethod.SendWait);
-                                    Thread.Sleep(100);
+                                    checkBoxGroup.AsButton().Focus();
+                                    checkBoxGroup.AsButton().WaitUntilEnabled();
+                                    checkBoxGroup.AsButton().Invoke();
                                 }
 
                                 signInButton.Focus();
