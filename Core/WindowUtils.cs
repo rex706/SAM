@@ -293,20 +293,19 @@ namespace SAM.Core
                                 passwordBox.WaitUntilEnabled();
                                 passwordBox.Text = password;
 
-                                AutomationElement checkBoxGroup = groups[0];
-
-                                bool isChecked = checkBoxGroup.AsButton().FindFirstChild(e => e.ByControlType(ControlType.Image)) != null;
+                                Button checkBoxButton = groups[0].AsButton();
+                                bool isChecked = checkBoxButton.FindFirstChild(e => e.ByControlType(ControlType.Image)) != null;
 
                                 if (remember != isChecked)
                                 {
-                                    checkBoxGroup.AsButton().Focus();
-                                    checkBoxGroup.AsButton().WaitUntilEnabled();
-                                    checkBoxGroup.AsButton().Invoke();
+                                    checkBoxButton.Focus();
+                                    checkBoxButton.WaitUntilEnabled();
+                                    checkBoxButton.Invoke();
                                 }
 
                                 signInButton.Focus();
-                                Thread.Sleep(100);
-                                SendSpace(loginWindow.RawPtr, VirtualInputMethod.SendWait);
+                                signInButton.WaitUntilEnabled();
+                                signInButton.Invoke();
                             }
                          
                             return LoginWindowState.Success;
