@@ -1380,6 +1380,7 @@ namespace SAM.Views
             }
 
             // Make sure Username field is empty and Remember Password checkbox is unchecked.
+
             AccountUtils.ClearAutoLoginUserKeyValues();
 
             StringBuilder parametersBuilder = new StringBuilder();
@@ -1404,31 +1405,32 @@ namespace SAM.Views
 
             foreach (string parameter in parameters)
             {
-                if (parameter.Equals("-login"))
-                {
+                // Not working with new Steam UI
+                //if (parameter.Equals("-login"))
+                //{
                     // Not working as of August 2023
                     //parametersBuilder.Append(" -vgui ").Append(parameter).Append(" ");
 
-                    StringBuilder passwordBuilder = new StringBuilder();
+                //    StringBuilder passwordBuilder = new StringBuilder();
 
-                    foreach (char c in account.Password)
-                    {
-                        if (c.Equals('"'))
-                        {
-                            passwordBuilder.Append('\\').Append(c);
-                        }
-                        else
-                        {
-                            passwordBuilder.Append(c);
-                        }
-                    }
+                //    foreach (char c in account.Password)
+                //    {
+                //        if (c.Equals('"'))
+                //        {
+                //            passwordBuilder.Append('\\').Append(c);
+                //        }
+                //        else
+                //        {
+                //            passwordBuilder.Append(c);
+                //        }
+                //    }
 
-                    parametersBuilder.Append(account.Name).Append(" \"").Append(passwordBuilder.ToString()).Append("\" ");
-                }
-                else
-                {
+                //    parametersBuilder.Append(account.Name).Append(" \"").Append(passwordBuilder.ToString()).Append("\" ");
+                //}
+                //else
+                //{
                     parametersBuilder.Append(parameter).Append(" ");
-                }
+                //}
             }
 
             string startParams = parametersBuilder.ToString();
@@ -1454,25 +1456,25 @@ namespace SAM.Views
                 return;
             }
 
-            if (settings.User.Login == true)
-            {
+            //if (settings.User.Login == true)
+            //{
                 // TODO needs more investigation.
                 //if (settings.User.RememberPassword == true)
                 //{
                 //    AccountUtils.SetRememeberPasswordKeyValue(1, account);
                 //}
 
-                if (account.SharedSecret != null && account.SharedSecret.Length > 0)
-                {
-                    Handle2FA(steamProcess, index);
-                }
-                else
-                {
-                    PostLogin();
-                }
-            }
-            else
-            {
+            //    if (account.SharedSecret != null && account.SharedSecret.Length > 0)
+            //    {
+            //        Handle2FA(steamProcess, index);
+            //    }
+            //    else
+            //    {
+            //        PostLogin();
+            //    }
+            //}
+            //else
+            //{
                 // -noreactlogin parameter has been depecrated as of January 2023
                 if (noReactLogin)
                 {
@@ -1482,7 +1484,7 @@ namespace SAM.Views
                 {
                     EnterCredentials(steamProcess, account, 0);
                 }
-            }
+            //}
         }
 
         private void TypeCredentials(Process steamProcess, int index, int tryCount)
