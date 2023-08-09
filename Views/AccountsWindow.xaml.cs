@@ -1407,11 +1407,10 @@ namespace SAM.Views
 
             foreach (string parameter in parameters)
             {
-                // Not working with new UI as of 6/14/2022
-                // Add -vgui parameter to use old UI for now
                 if (parameter.Equals("-login"))
                 {
-                    parametersBuilder.Append(" -vgui ").Append(parameter).Append(" ");
+                    // Not working as of August 2023
+                    //parametersBuilder.Append(" -vgui ").Append(parameter).Append(" ");
 
                     StringBuilder passwordBuilder = new StringBuilder();
 
@@ -1477,6 +1476,7 @@ namespace SAM.Views
             }
             else
             {
+                // -noreactlogin parameter has been depecrated as of January 2023
                 if (noReactLogin)
                 {
                     TypeCredentials(steamProcess, index, tryCount);
@@ -1698,7 +1698,7 @@ namespace SAM.Views
                 {
                     return;
                 }
-                else if (state == LoginWindowState.Login)
+                else if (state == LoginWindowState.Login || state == LoginWindowState.Selection)
                 {
                     EnterCredentials(steamProcess, account, retry);
                     return;

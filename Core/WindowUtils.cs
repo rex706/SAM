@@ -205,20 +205,26 @@ namespace SAM.Core
                         return LoginWindowState.Loading;
                     }
 
-                    AutomationElement[] elements = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
+                    AutomationElement[] inputs = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
                     AutomationElement[] buttons = document.FindAllChildren(e => e.ByControlType(ControlType.Button));
+                    AutomationElement[] groups = document.FindAllChildren(e => e.ByControlType(ControlType.Group));
+                    AutomationElement[] images = document.FindAllChildren(e => e.ByControlType(ControlType.Image));
 
-                    if (elements != null)
+                    if (inputs != null)
                     {
-                        if (elements.Length == 0 && buttons.Length == 1)
+                        if (inputs.Length == 0 && images.Length > 0 && images[0].AutomationId == "Layer_2")
+                        {
+                            return LoginWindowState.Selection;
+                        }
+                        if (inputs.Length == 0 && buttons.Length == 1)
                         {
                             return LoginWindowState.Error;
                         }
-                        else if (elements.Length == 5)
+                        else if (inputs.Length == 5)
                         {
                             return LoginWindowState.Code;
                         }
-                        else if (elements.Length == 2 && buttons.Length == 1)
+                        else if (inputs.Length == 2 && buttons.Length == 1)
                         {
                             return LoginWindowState.Login;
                         }
@@ -264,16 +270,27 @@ namespace SAM.Core
                     AutomationElement[] inputs = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
                     AutomationElement[] buttons = document.FindAllChildren(e => e.ByControlType(ControlType.Button));
                     AutomationElement[] groups = document.FindAllChildren(e => e.ByControlType(ControlType.Group));
+                    AutomationElement[] images = document.FindAllChildren(e => e.ByControlType(ControlType.Image));
 
                     if (inputs != null)
                     {
+                        if (inputs.Length == 0 && images.Length > 0 && images[0].AutomationId == "Layer_2")
+                        {
+                            Button addAccountButton = groups[groups.Length - 1].AsButton();
+                            addAccountButton.Invoke();
+
+                            Console.WriteLine("Window State: Selection");
+                            return LoginWindowState.Selection;
+                        }
                         if (inputs.Length == 0 && buttons.Length == 1)
                         {
+                            Console.WriteLine("Window State: Error");
                             return LoginWindowState.Error;
                         }
 
                         if (inputs.Length == 5)
                         {
+                            Console.WriteLine("Window State: Code");
                             return LoginWindowState.Code;
                         }
 
@@ -357,29 +374,31 @@ namespace SAM.Core
                         return LoginWindowState.Loading;
                     }
 
-                    AutomationElement[] elements = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
+                    AutomationElement[] inputs = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
                     AutomationElement[] buttons = document.FindAllChildren(e => e.ByControlType(ControlType.Button));
+                    AutomationElement[] groups = document.FindAllChildren(e => e.ByControlType(ControlType.Group));
+                    AutomationElement[] images = document.FindAllChildren(e => e.ByControlType(ControlType.Image));
 
-                    if (elements != null)
+                    if (inputs != null)
                     {
-                        if (elements.Length == 0 && buttons.Length == 1)
+                        if (inputs.Length == 0 && buttons.Length == 1)
                         {
                             return LoginWindowState.Error;
                         }
-                        else if (elements.Length == 2 && buttons.Length == 1)
+                        else if (inputs.Length == 2 && buttons.Length == 1)
                         {
                             return LoginWindowState.Login;
                         }
 
-                        if (elements.Length == 5)
+                        if (inputs.Length == 5)
                         {
                             string code = Generate2FACode(secret);
 
                             try
                             {
-                                for (int i = 0; i < elements.Length; i++)
+                                for (int i = 0; i < inputs.Length; i++)
                                 {
-                                    TextBox textBox = elements[i].AsTextBox();
+                                    TextBox textBox = inputs[i].AsTextBox();
                                     textBox.Text = code[i].ToString();
                                 }
                             }

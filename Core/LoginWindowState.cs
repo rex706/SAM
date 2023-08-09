@@ -5,6 +5,7 @@
         None,
         Invalid,
         Error,
+        Selection,
         Login,
         Code,
         Loading,
