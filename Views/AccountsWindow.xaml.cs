@@ -1380,10 +1380,7 @@ namespace SAM.Views
             }
 
             // Make sure Username field is empty and Remember Password checkbox is unchecked.
-            if (!settings.User.Login)
-            {
-                AccountUtils.ClearAutoLoginUserKeyValues();
-            }
+            AccountUtils.ClearAutoLoginUserKeyValues();
 
             StringBuilder parametersBuilder = new StringBuilder();
             Account account = decryptedAccounts[index];
