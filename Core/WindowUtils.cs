@@ -191,9 +191,13 @@ namespace SAM.Core
                         return LoginWindowState.Invalid;
                     }
 
+                    window.Focus();
+#if DEBUG
+                    AutomationElement[] descendants = window.FindAllChildren();
+#endif
                     AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
 
-                    if (document == null || document.FindAllChildren().Length == 0)
+                    if (document.FindAllChildren().Length == 0)
                     {
                         return LoginWindowState.Invalid;
                     }
@@ -210,28 +214,26 @@ namespace SAM.Core
                     AutomationElement[] groups = document.FindAllChildren(e => e.ByControlType(ControlType.Group));
                     AutomationElement[] images = document.FindAllChildren(e => e.ByControlType(ControlType.Image));
 
-                    if (inputs != null)
+                    if (inputs.Length == 0 && images.Length > 0 && buttons.Length > 0)
                     {
-                        if (inputs.Length == 0 && images.Length > 0 && images[0].AutomationId == "Layer_2")
-                        {
-                            return LoginWindowState.Selection;
-                        }
-                        if (inputs.Length == 0 && buttons.Length == 1)
-                        {
-                            return LoginWindowState.Error;
-                        }
-                        else if (inputs.Length == 5)
-                        {
-                            return LoginWindowState.Code;
-                        }
-                        else if (inputs.Length == 2 && buttons.Length == 1)
-                        {
-                            return LoginWindowState.Login;
-                        }
+                        return LoginWindowState.Selection;
+                    }
+                    else if (inputs.Length == 0 && images.Length == 0 && buttons.Length == 1)
+                    {
+                        return LoginWindowState.Error;
+                    }
+                    else if (inputs.Length == 5)
+                    {
+                        return LoginWindowState.Code;
+                    }
+                    else if (inputs.Length == 2 && buttons.Length == 1)
+                    {
+                        return LoginWindowState.Login;
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    Console.WriteLine(e.Message);
                     return LoginWindowState.Error;
                 }
             }
@@ -239,95 +241,23 @@ namespace SAM.Core
             return LoginWindowState.Invalid;
         }
 
-        public static LoginWindowState TryCredentialsEntry(WindowHandle loginWindow, string username, string password, bool remember)
+        public static LoginWindowState HandleAccountSelection(WindowHandle loginWindow)
         {
-            if (!loginWindow.IsValid)
-            {
-                return LoginWindowState.Invalid;
-            }
-
-            SetForegroundWindow(loginWindow.RawPtr);
-
             using (var automation = new UIA3Automation())
             {
                 try
                 {
                     AutomationElement window = automation.FromHandle(loginWindow.RawPtr);
 
-                    if (window == null)
-                    {
-                        return LoginWindowState.Invalid;
-                    }
+                    window.Focus();
 
                     AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
-                    AutomationElement[] children = document.FindAllChildren();
-
-                    if (document == null || children.Length == 0)
-                    {
-                        return LoginWindowState.Invalid;
-                    }
-
-                    AutomationElement[] inputs = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
-                    AutomationElement[] buttons = document.FindAllChildren(e => e.ByControlType(ControlType.Button));
                     AutomationElement[] groups = document.FindAllChildren(e => e.ByControlType(ControlType.Group));
-                    AutomationElement[] images = document.FindAllChildren(e => e.ByControlType(ControlType.Image));
 
-                    if (inputs != null)
-                    {
-                        if (inputs.Length == 0 && images.Length > 0 && images[0].AutomationId == "Layer_2")
-                        {
-                            Button addAccountButton = groups[groups.Length - 1].AsButton();
-                            addAccountButton.Invoke();
+                    Button addAccountButton = groups[groups.Length - 1].AsButton();
+                    addAccountButton.Invoke();
 
-                            Console.WriteLine("Window State: Selection");
-                            return LoginWindowState.Selection;
-                        }
-                        if (inputs.Length == 0 && buttons.Length == 1)
-                        {
-                            Console.WriteLine("Window State: Error");
-                            return LoginWindowState.Error;
-                        }
-
-                        if (inputs.Length == 5)
-                        {
-                            Console.WriteLine("Window State: Code");
-                            return LoginWindowState.Code;
-                        }
-
-                        if (inputs.Length == 2 && buttons.Length == 1 && groups.Length == 1)
-                        {
-                            Button signInButton = buttons[0].AsButton();
-
-                            if (signInButton.IsEnabled)
-                            {
-                                SetForegroundWindow(loginWindow.RawPtr);
-
-                                TextBox usernameBox = inputs[0].AsTextBox();
-                                usernameBox.WaitUntilEnabled();
-                                usernameBox.Text = username;
-
-                                TextBox passwordBox = inputs[1].AsTextBox();
-                                passwordBox.WaitUntilEnabled();
-                                passwordBox.Text = password;
-
-                                Button checkBoxButton = groups[0].AsButton();
-                                bool isChecked = checkBoxButton.FindFirstChild(e => e.ByControlType(ControlType.Image)) != null;
-
-                                if (remember != isChecked)
-                                {
-                                    checkBoxButton.Focus();
-                                    checkBoxButton.WaitUntilEnabled();
-                                    checkBoxButton.Invoke();
-                                }
-
-                                signInButton.Focus();
-                                signInButton.WaitUntilEnabled();
-                                signInButton.Invoke();
-                            }
-                         
-                            return LoginWindowState.Success;
-                        }
-                    }
+                    return LoginWindowState.Login;
                 }
                 catch (Exception e)
                 {
@@ -335,82 +265,93 @@ namespace SAM.Core
                     return LoginWindowState.Invalid;
                 }
             }
-
-            return LoginWindowState.Invalid;
         }
 
-        public static LoginWindowState TryCodeEntry(WindowHandle loginWindow, string secret)
+        public static LoginWindowState TryCredentialsEntry(WindowHandle loginWindow, string username, string password, bool remember)
         {
-            if (!loginWindow.IsValid)
-            {
-                return LoginWindowState.Invalid;
-            }
-
-            SetForegroundWindow(loginWindow.RawPtr);
-
             using (var automation = new UIA3Automation())
             {
                 try
                 {
                     AutomationElement window = automation.FromHandle(loginWindow.RawPtr);
 
-                    if (window == null)
-                    {
-                        return LoginWindowState.Invalid;
-                    }
+                    window.Focus();
 
                     AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
-                    AutomationElement[] children = document.FindAllChildren();
-
-                    if (document == null || children.Length == 0)
-                    {
-                        return LoginWindowState.Invalid;
-                    }
-
-                    Console.WriteLine(children.Length);
-
-                    if (children.Length == 2)
-                    {
-                        return LoginWindowState.Loading;
-                    }
 
                     AutomationElement[] inputs = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
                     AutomationElement[] buttons = document.FindAllChildren(e => e.ByControlType(ControlType.Button));
                     AutomationElement[] groups = document.FindAllChildren(e => e.ByControlType(ControlType.Group));
-                    AutomationElement[] images = document.FindAllChildren(e => e.ByControlType(ControlType.Image));
 
-                    if (inputs != null)
+                    Button signInButton = buttons[0].AsButton();
+
+                    if (signInButton.IsEnabled)
                     {
-                        if (inputs.Length == 0 && buttons.Length == 1)
+                        TextBox usernameBox = inputs[0].AsTextBox();
+                        usernameBox.WaitUntilEnabled();
+                        usernameBox.Text = username;
+
+                        TextBox passwordBox = inputs[1].AsTextBox();
+                        passwordBox.WaitUntilEnabled();
+                        passwordBox.Text = password;
+
+                        Button checkBoxButton = groups[0].AsButton();
+                        bool isChecked = checkBoxButton.FindFirstChild(e => e.ByControlType(ControlType.Image)) != null;
+
+                        if (remember != isChecked)
                         {
-                            return LoginWindowState.Error;
+                            checkBoxButton.Focus();
+                            checkBoxButton.WaitUntilEnabled();
+                            checkBoxButton.Invoke();
                         }
-                        else if (inputs.Length == 2 && buttons.Length == 1)
+
+                        signInButton.Focus();
+                        signInButton.WaitUntilEnabled();
+                        signInButton.Invoke();
+
+                        return LoginWindowState.Success;
+                    }
+
+                    return LoginWindowState.Invalid;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    return LoginWindowState.Invalid;
+                }
+            }
+        }
+
+        public static LoginWindowState TryCodeEntry(WindowHandle loginWindow, string secret)
+        {
+            using (var automation = new UIA3Automation())
+            {
+                try
+                {
+                    AutomationElement window = automation.FromHandle(loginWindow.RawPtr);
+
+                    window.Focus();
+
+                    AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
+                    AutomationElement[] inputs = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
+
+                    string code = Generate2FACode(secret);
+
+                    try
+                    {
+                        for (int i = 0; i < inputs.Length; i++)
                         {
-                            return LoginWindowState.Login;
-                        }
-
-                        if (inputs.Length == 5)
-                        {
-                            string code = Generate2FACode(secret);
-
-                            try
-                            {
-                                for (int i = 0; i < inputs.Length; i++)
-                                {
-                                    TextBox textBox = inputs[i].AsTextBox();
-                                    textBox.Text = code[i].ToString();
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Console.WriteLine(e.Message);
-                                return LoginWindowState.Code;
-                            }
-
-                            return LoginWindowState.Success;
+                            TextBox textBox = inputs[i].AsTextBox();
+                            textBox.Text = code[i].ToString();
                         }
                     }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                        return LoginWindowState.Code;
+                    }
+
+                    return LoginWindowState.Success;
                 }
                 catch (Exception ex) 
                 {
@@ -418,8 +359,6 @@ namespace SAM.Core
                     return LoginWindowState.Invalid;
                 }
             }
-
-            return LoginWindowState.Invalid;
         }
 
         public static Process WaitForSteamProcess(WindowHandle windowHandle)

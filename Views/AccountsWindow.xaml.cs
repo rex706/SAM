@@ -111,11 +111,18 @@ namespace SAM.Views
             // Version number from assembly
             AssemblyVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-            var ver = new MenuItem();
-            var newExistMenuItem = (MenuItem)FileMenu.Items[2];
+            MenuItem ver = new MenuItem();
+            MenuItem newExistMenuItem = (MenuItem)FileMenu.Items[2];
             ver.Header = "v" + AssemblyVer;
             ver.IsEnabled = false;
             newExistMenuItem.Items.Add(ver);
+
+#if DEBUG
+            MenuItem windowStateMenuItem = new MenuItem();
+            windowStateMenuItem.Header = "Get Window State";
+            windowStateMenuItem.Click += WindowStateMenuItem_Click;
+            newExistMenuItem.Items.Add(windowStateMenuItem);
+#endif
 
             if (settings.User.CheckForUpdates)
             {
@@ -177,6 +184,16 @@ namespace SAM.Views
                     Login(settings.User.RecentAccountIndex);
                 else if (settings.User.LoginSelectedAccount == true)
                     Login(settings.User.SelectedAccountIndex);
+            }
+        }
+
+        private void WindowStateMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            WindowHandle windowHandle = WindowUtils.GetSteamLoginWindow();
+
+            if (windowHandle.IsValid)
+            {
+                WindowUtils.GetLoginWindowState(windowHandle);
             }
         }
 
@@ -1621,7 +1638,18 @@ namespace SAM.Views
 
                 Thread.Sleep(100);
 
-                state = WindowUtils.TryCredentialsEntry(steamLoginWindow, account.Name, account.Password, settings.User.RememberPassword);
+                state = WindowUtils.GetLoginWindowState(steamLoginWindow);
+
+                if (state == LoginWindowState.Selection)
+                {
+                    WindowUtils.HandleAccountSelection(steamLoginWindow);
+                    continue;
+                }
+
+                if (state == LoginWindowState.Login)
+                {
+                    state = WindowUtils.TryCredentialsEntry(steamLoginWindow, account.Name, account.Password, settings.User.RememberPassword);
+                }
             }
 
             if (account.SharedSecret != null && account.SharedSecret.Length > 0)
@@ -1710,7 +1738,12 @@ namespace SAM.Views
 
                 Thread.Sleep(100);
 
-                state = WindowUtils.TryCodeEntry(steamLoginWindow, secret);
+                state = WindowUtils.GetLoginWindowState(steamLoginWindow);
+
+                if (state == LoginWindowState.Code)
+                {
+                    state = WindowUtils.TryCodeEntry(steamLoginWindow, secret);
+                }
             }
 
             Thread.Sleep(settings.User.SleepTime);
