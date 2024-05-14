@@ -695,7 +695,7 @@ namespace SAM.Core
             else
             {
                 VdfSerializerSettings vdfSerializerSettings = new VdfSerializerSettings();
-                vdfSerializerSettings.MaximumTokenSize = 4096 * 2;
+                vdfSerializerSettings.MaximumTokenSize = 4096 * 4;
                 vdfSerializerSettings.UsesEscapeSequences = true;
                 localconfig = VdfConvert.Deserialize(File.ReadAllText(configFile),vdfSerializerSettings);
             }
