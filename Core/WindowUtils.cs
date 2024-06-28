@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Management;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -79,11 +80,39 @@ namespace SAM.Core
             return sb.ToString();
         }
 
-        public static WindowHandle GetSteamLoginWindow()
+        public static IEnumerable<Process> GetChildProcesses(Process process)
         {
-            WindowHandle window = GetSteamLoginWindow("Steam");
-            if (window.IsValid) { return window; }
-            return GetSteamLoginWindow("steamwebhelper");
+            List<Process> children = new List<Process>();
+            try
+            {
+                ManagementObjectSearcher mos = new ManagementObjectSearcher(String.Format("Select * From Win32_Process Where ParentProcessID={0}", process.Id));
+
+                foreach (ManagementObject mo in mos.Get())
+                {
+                    children.Add(Process.GetProcessById(Convert.ToInt32(mo["ProcessID"])));
+                }
+            }
+            catch(Exception e) { 
+                Console.WriteLine(e.Message);
+            }
+
+            return children;
+        }
+
+        public static WindowHandle GetSteamLoginWindow(Process steamProcess)
+        {
+            IEnumerable<Process> children = GetChildProcesses(steamProcess);
+
+            foreach (Process childProcess in children)
+            {
+                if (childProcess.ProcessName == "steamwebhelper")
+                {
+                    IEnumerable<IntPtr> windows = EnumerateProcessWindowHandles(childProcess);
+                    return GetSteamLoginWindow(windows);
+                }
+            }
+
+            return WindowHandle.Invalid;
         }
 
         public static WindowHandle GetSteamLoginWindow(string processName)
@@ -91,27 +120,35 @@ namespace SAM.Core
             Process[] steamProcess = Process.GetProcessesByName(processName);
             foreach (Process process in steamProcess)
             {
-                IEnumerable<IntPtr> windows = EnumerateProcessWindowHandles(process);
-
-                foreach (IntPtr windowHandle in windows)
+                WindowHandle handle = GetSteamLoginWindow(process);
+                if (handle.IsValid)
                 {
-                    string text = GetWindowTextRaw(windowHandle);
-
-                    if ((text.Contains("Steam") && text.Length > 5) || text.Equals("蒸汽平台登录"))
-                    {
-                        return new WindowHandle(windowHandle);
-                    }
+                    return handle;
                 }
             }
 
             return WindowHandle.Invalid;
         }
 
-        public static WindowHandle GetMainSteamClientWindow()
+        private static WindowHandle GetSteamLoginWindow(IEnumerable<IntPtr> windows)
         {
-            WindowHandle window = GetMainSteamClientWindow("Steam");
-            if (window.IsValid) { return window; }
-            return GetMainSteamClientWindow("steamwebhelper");
+            foreach (IntPtr windowHandle in windows)
+            {
+                string text = GetWindowTextRaw(windowHandle);
+
+                if ((text.Contains("Steam") && text.Length > 5) || text.Equals("蒸汽平台登录"))
+                {
+                    return new WindowHandle(windowHandle);
+                }
+            }
+
+            return WindowHandle.Invalid;
+        }
+
+        public static WindowHandle GetMainSteamClientWindow(Process steamProcess)
+        {
+            IEnumerable<IntPtr> windows = EnumerateProcessWindowHandles(steamProcess);
+            return GetMainSteamClientWindow(windows);   
         }
 
         public static WindowHandle GetMainSteamClientWindow(string processName)
@@ -121,14 +158,25 @@ namespace SAM.Core
             {
                 IEnumerable<IntPtr> windows = EnumerateProcessWindowHandles(process);
 
-                foreach (IntPtr windowHandle in windows)
+                WindowHandle handle = GetMainSteamClientWindow(windows);
+                if (handle.IsValid)
                 {
-                    string text = GetWindowTextRaw(windowHandle);
+                    return handle;
+                }
+            }
 
-                    if (text.Equals("Steam") || text.Equals("蒸汽平台"))
-                    {
-                        return new WindowHandle(windowHandle);
-                    }
+            return WindowHandle.Invalid;
+        }
+
+        private static WindowHandle GetMainSteamClientWindow(IEnumerable<IntPtr> windows)
+        {
+            foreach (IntPtr windowHandle in windows)
+            {
+                string text = GetWindowTextRaw(windowHandle);
+
+                if (text.Equals("Steam") || text.Equals("蒸汽平台"))
+                {
+                    return new WindowHandle(windowHandle);
                 }
             }
 
@@ -419,7 +467,7 @@ namespace SAM.Core
                     }
                 }
 
-                steamClientWindow = GetMainSteamClientWindow();
+                steamClientWindow = GetMainSteamClientWindow("Steam");
                 Thread.Sleep(100);
                 waitCounter += 1;
             }

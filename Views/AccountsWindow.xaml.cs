@@ -189,7 +189,7 @@ namespace SAM.Views
 
         private void WindowStateMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            WindowHandle windowHandle = WindowUtils.GetSteamLoginWindow();
+            WindowHandle windowHandle = WindowUtils.GetSteamLoginWindow("Steam");
 
             if (windowHandle.IsValid)
             {
@@ -1613,18 +1613,18 @@ namespace SAM.Views
                 return;
             }
 
-            if (tryCount > 0 && WindowUtils.GetMainSteamClientWindow().IsValid)
+            if (tryCount > 0 && WindowUtils.GetMainSteamClientWindow(steamProcess).IsValid)
             {
                 PostLogin();
                 return;
             }
 
-            WindowHandle steamLoginWindow = WindowUtils.GetSteamLoginWindow();
+            WindowHandle steamLoginWindow = WindowUtils.GetSteamLoginWindow(steamProcess);
 
             while (!steamLoginWindow.IsValid)
             {
                 Thread.Sleep(100);
-                steamLoginWindow = WindowUtils.GetSteamLoginWindow();
+                steamLoginWindow = WindowUtils.GetSteamLoginWindow(steamProcess);
             }
 
             LoginWindowState state = LoginWindowState.None;
@@ -1702,18 +1702,18 @@ namespace SAM.Views
                 return;
             }
 
-            if (tryCount > 0 && WindowUtils.GetMainSteamClientWindow().IsValid)
+            if (tryCount > 0 && WindowUtils.GetMainSteamClientWindow(steamProcess).IsValid)
             {
                 PostLogin();
                 return;
             }
 
-            WindowHandle steamLoginWindow = WindowUtils.GetSteamLoginWindow();
+            WindowHandle steamLoginWindow = WindowUtils.GetSteamLoginWindow(steamProcess);
 
             while (!steamLoginWindow.IsValid)
             {
                 Thread.Sleep(100);
-                steamLoginWindow = WindowUtils.GetSteamLoginWindow();
+                steamLoginWindow = WindowUtils.GetSteamLoginWindow(steamProcess);
             }
 
             LoginWindowState state = LoginWindowState.None;
@@ -1730,7 +1730,7 @@ namespace SAM.Views
                     EnterCredentials(steamProcess, account, retry);
                     return;
                 }
-                else if (WindowUtils.GetMainSteamClientWindow().IsValid)
+                else if (WindowUtils.GetMainSteamClientWindow(steamProcess).IsValid)
                 {
                     PostLogin();
                     return;
@@ -1755,7 +1755,7 @@ namespace SAM.Views
                 state = WindowUtils.GetLoginWindowState(steamLoginWindow);
             }
 
-            steamLoginWindow = WindowUtils.GetSteamLoginWindow();
+            steamLoginWindow = WindowUtils.GetSteamLoginWindow(steamProcess);
 
             if (tryCount < maxRetry && steamLoginWindow.IsValid)
             {
