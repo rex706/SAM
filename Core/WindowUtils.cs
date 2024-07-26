@@ -86,7 +86,6 @@ namespace SAM.Core
             try
             {
                 ManagementObjectSearcher mos = new ManagementObjectSearcher(String.Format("Select * From Win32_Process Where ParentProcessID={0}", process.Id));
-
                 foreach (ManagementObject mo in mos.Get())
                 {
                     children.Add(Process.GetProcessById(Convert.ToInt32(mo["ProcessID"])));
@@ -102,7 +101,6 @@ namespace SAM.Core
         public static WindowHandle GetSteamLoginWindow(Process steamProcess)
         {
             IEnumerable<Process> children = GetChildProcesses(steamProcess);
-
             foreach (Process childProcess in children)
             {
                 if (childProcess.ProcessName == "steamwebhelper")
@@ -115,9 +113,19 @@ namespace SAM.Core
             return WindowHandle.Invalid;
         }
 
-        public static WindowHandle GetSteamLoginWindow(string processName)
+        public static Process GetSteamProcess()
         {
-            Process[] steamProcess = Process.GetProcessesByName(processName);
+            Process[] steamProcess = Process.GetProcessesByName("Steam");
+            if (steamProcess.Length > 0)
+            {
+                return steamProcess[0];
+            }
+            return null;
+        }
+
+        public static WindowHandle GetSteamLoginWindow()
+        {
+            Process[] steamProcess = Process.GetProcessesByName("Steam");
             foreach (Process process in steamProcess)
             {
                 WindowHandle handle = GetSteamLoginWindow(process);
@@ -148,7 +156,7 @@ namespace SAM.Core
         public static WindowHandle GetMainSteamClientWindow(Process steamProcess)
         {
             IEnumerable<IntPtr> windows = EnumerateProcessWindowHandles(steamProcess);
-            return GetMainSteamClientWindow(windows);   
+            return GetMainSteamClientWindow(windows);
         }
 
         public static WindowHandle GetMainSteamClientWindow(string processName)
@@ -176,11 +184,43 @@ namespace SAM.Core
 
                 if (text.Equals("Steam") || text.Equals("蒸汽平台"))
                 {
-                    return new WindowHandle(windowHandle);
+                   return new WindowHandle(windowHandle);
                 }
             }
 
             return WindowHandle.Invalid;
+        }
+
+        public static bool IsSteamUpdating(Process process)
+        {
+            WindowHandle windowHandle = GetMainSteamClientWindow(process);
+
+            if (windowHandle.IsValid)
+            {
+                using (var automation = new UIA3Automation())
+                {
+                    try
+                    {
+                        AutomationElement window = automation.FromHandle(windowHandle.RawPtr);
+
+                        if (window == null)
+                        {
+                            return false;
+                        }
+
+                        if (window.Properties.ClassName.Equals("BootstrapUpdateUIClass") && window.Properties.BoundingRectangle.Value.X > 312)
+                        {
+                            return true;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
+                }
+            }
+
+            return false;
         }
 
         public static WindowHandle GetLegacySteamLoginWindow()
@@ -240,41 +280,71 @@ namespace SAM.Core
                     }
 
                     window.Focus();
-#if DEBUG
-                    AutomationElement[] descendants = window.FindAllChildren();
-#endif
-                    AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
 
-                    if (document.FindAllChildren().Length == 0)
+                    AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
+                    AutomationElement[] children = document.FindAllChildren(); 
+
+                    if (children.Length == 0)
                     {
                         return LoginWindowState.Invalid;
                     }
 
-                    int childNum = document.FindAllChildren().Length;
-
-                    if (childNum == 2)
+                    if (children.Length == 2)
                     {
                         return LoginWindowState.Loading;
                     }
 
-                    AutomationElement[] inputs = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
-                    AutomationElement[] buttons = document.FindAllChildren(e => e.ByControlType(ControlType.Button));
-                    AutomationElement[] groups = document.FindAllChildren(e => e.ByControlType(ControlType.Group));
-                    AutomationElement[] images = document.FindAllChildren(e => e.ByControlType(ControlType.Image));
+                    var inputs = new List<AutomationElement>();
+                    var buttons = new List<AutomationElement>();
+                    var groups = new List<AutomationElement>();
+                    var images = new List<AutomationElement>();
+                    var texts = new List<AutomationElement>();
 
-                    if (inputs.Length == 0 && images.Length > 0 && buttons.Length > 0)
-                    {
-                        return LoginWindowState.Selection;
+                    foreach (AutomationElement element in children) {
+                        switch (element.ControlType) {
+                            case ControlType.Edit:
+                                inputs.Add(element);
+                                break;
+                            case ControlType.Button:
+                                buttons.Add(element);
+                                break;
+                            case ControlType.Group:
+                                groups.Add(element);
+                                break;
+                            case ControlType.Image:
+                                images.Add(element); 
+                                break;
+                            case ControlType.Text:
+                                texts.Add(element);
+                                break;
+                        }
                     }
-                    else if (inputs.Length == 0 && images.Length == 0 && buttons.Length == 1)
+
+                    if (inputs.Count == 0 && images.Count == 1 && buttons.Count == 2 && texts.Count > 0)
+                    {
+                        foreach (var text in texts)
+                        {
+                            string content = text.Name.ToLower();
+
+                            if (content.Contains("error") || content.Contains("problem"))
+                            {
+                                return LoginWindowState.Error;
+                            }
+                        }
+                    }
+                    if (inputs.Count == 0 && images.Count == 0 && buttons.Count == 1)
                     {
                         return LoginWindowState.Error;
                     }
-                    else if (inputs.Length == 5)
+                    else if (inputs.Count == 0 && images.Count >= 2 && buttons.Count > 0)
+                    {
+                        return LoginWindowState.Selection;
+                    }
+                    else if (inputs.Count == 5)
                     {
                         return LoginWindowState.Code;
                     }
-                    else if (inputs.Length == 2 && buttons.Length == 1)
+                    else if (inputs.Count == 2 && buttons.Count == 1)
                     {
                         return LoginWindowState.Login;
                     }
@@ -282,7 +352,6 @@ namespace SAM.Core
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
-                    return LoginWindowState.Error;
                 }
             }
 
@@ -310,9 +379,10 @@ namespace SAM.Core
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
-                    return LoginWindowState.Invalid;
                 }
             }
+
+            return LoginWindowState.Invalid;
         }
 
         public static LoginWindowState TryCredentialsEntry(WindowHandle loginWindow, string username, string password, bool remember)
@@ -326,10 +396,27 @@ namespace SAM.Core
                     window.Focus();
 
                     AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
+                    AutomationElement[] children = document.FindAllChildren();
 
-                    AutomationElement[] inputs = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
-                    AutomationElement[] buttons = document.FindAllChildren(e => e.ByControlType(ControlType.Button));
-                    AutomationElement[] groups = document.FindAllChildren(e => e.ByControlType(ControlType.Group));
+                    var inputs = new List<AutomationElement>();
+                    var buttons = new List<AutomationElement>();
+                    var groups = new List<AutomationElement>();
+
+                    foreach (AutomationElement element in children)
+                    {
+                        switch (element.ControlType)
+                        {
+                            case ControlType.Edit:
+                                inputs.Add(element);
+                                break;
+                            case ControlType.Button:
+                                buttons.Add(element);
+                                break;
+                            case ControlType.Group:
+                                groups.Add(element);
+                                break;
+                        }
+                    }
 
                     Button signInButton = buttons[0].AsButton();
 
@@ -359,15 +446,14 @@ namespace SAM.Core
 
                         return LoginWindowState.Success;
                     }
-
-                    return LoginWindowState.Invalid;
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
-                    return LoginWindowState.Invalid;
                 }
             }
+
+            return LoginWindowState.Invalid;
         }
 
         public static LoginWindowState TryCodeEntry(WindowHandle loginWindow, string secret)
@@ -404,9 +490,10 @@ namespace SAM.Core
                 catch (Exception ex) 
                 {
                     Console.WriteLine(ex.Message);
-                    return LoginWindowState.Invalid;
                 }
             }
+
+            return LoginWindowState.Invalid;
         }
 
         public static Process WaitForSteamProcess(WindowHandle windowHandle)

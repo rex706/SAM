@@ -113,7 +113,7 @@
             <TabItem Header="Steam">
                 <Grid>
                     <TextBox x:Name="SteamPathTextBox" Height="23" Text="" Margin="10,38,68,110" IsReadOnly="True"/>
-                    <Button x:Name="ChangePathButton" Content="..." Margin="0,38,38,111" Click="ChangePathButton_Click" HorizontalAlignment="Right" Width="25" Height="23" RenderTransformOrigin="-0.146,0.512"/>
+                    <Button x:Name="ChangePathButton" Content="..." Margin="0,38,38,111" Click="ChangePathButton_Click" HorizontalAlignment="Right" Width="25" Height="23" RenderTransformOrigin="-0.146,0.512" ToolTip="Browse"/>
                     <Button x:Name="AutoPathButton" Content="A" Margin="0,38,8,111" Click="AutoPathButton_Click" Height="23" Width="25" HorizontalAlignment="Right" ToolTip="Auto"/>
                     <TextBlock Text="Steam File Path" Margin="0,13,0,0" VerticalAlignment="Top" TextAlignment="Center"/>
                     <TextBlock Text="API Key" Margin="128,83,126,85" VerticalAlignment="Top" TextAlignment="Center"/>

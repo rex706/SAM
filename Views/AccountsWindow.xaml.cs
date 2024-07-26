@@ -46,6 +46,7 @@ namespace SAM.Views
 
         private static bool isLoadingSettings = true;
         private static bool firstLoad = true;
+        private static bool steamUpdateDetected = false;
 
         private static readonly string dataFile = "info.dat";
         private static readonly string backupFile = dataFile + ".bak";
@@ -189,11 +190,16 @@ namespace SAM.Views
 
         private void WindowStateMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            WindowHandle windowHandle = WindowUtils.GetSteamLoginWindow("Steam");
+            WindowHandle windowHandle = WindowUtils.GetSteamLoginWindow();
 
             if (windowHandle.IsValid)
             {
-                WindowUtils.GetLoginWindowState(windowHandle);
+                LoginWindowState loginWindowState = WindowUtils.GetLoginWindowState(windowHandle);
+                MessageBox.Show(loginWindowState.ToString());
+            }
+            else
+            {
+                MessageBox.Show("Invalid handle");
             }
         }
 
@@ -621,7 +627,7 @@ namespace SAM.Views
 
         public async Task ReloadAccountsAsync()
         {
-            Title = "SAM | Loading";
+            SetWindowTitle("Loading");
 
             List<string> steamIds = new List<string>();
 
@@ -700,7 +706,9 @@ namespace SAM.Views
 
             SerializeAccounts();
 
-            Title = "SAM";
+            if (loginThreads.Count == 0) {
+                ResetWindowTitle();
+            }
         }
 
         private void PostDeserializedRefresh(bool seedAcc)
@@ -1344,7 +1352,8 @@ namespace SAM.Views
             }
 
             MainGrid.IsEnabled = settings.User.SandboxMode;
-            Title = "SAM | Working";
+            SetWindowTitle("Working");
+            MainGridOverlay.Visibility = Visibility.Visible;
 
             new Thread(() => {
                 try
@@ -1353,10 +1362,8 @@ namespace SAM.Views
                 }
                 finally
                 {
-                    Dispatcher.Invoke(delegate () {
-                        MainGrid.IsEnabled = true;
-                        Title = "SAM";
-                    });
+                    ResetWindowTitle();
+                    steamUpdateDetected = false;
                 }
             }).Start();
         }
@@ -1623,10 +1630,34 @@ namespace SAM.Views
 
             while (!steamLoginWindow.IsValid)
             {
+                if (steamProcess.HasExited)
+                {
+                    if (steamUpdateDetected && steamProcess.ExitCode == SteamExitCode.SUCCESS)
+                    {
+                        // Update window creates a new steam process
+                        Process process = WindowUtils.GetSteamProcess();
+                        if (process != null)
+                        {
+                            steamProcess = process;
+                        }
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+
+                if (WindowUtils.IsSteamUpdating(steamProcess))
+                {
+                    steamUpdateDetected = true;
+                    SetWindowTitle("Waiting");
+                }
+
                 Thread.Sleep(100);
                 steamLoginWindow = WindowUtils.GetSteamLoginWindow(steamProcess);
             }
 
+            SetWindowTitle("Working");
             LoginWindowState state = LoginWindowState.None;
 
             while (state != LoginWindowState.Success && state != LoginWindowState.Code)
@@ -2850,6 +2881,9 @@ namespace SAM.Views
                 loginAllSequence = false;
                 loginAllCancelled = false;
             });
+
+            ResetWindowTitle();
+            steamUpdateDetected = false;
         }
 
         private void EscKeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
@@ -2928,6 +2962,27 @@ namespace SAM.Views
 
                 e.Handled = true;
             }
+        }
+
+        private void SetWindowTitle(string title)
+        {
+            string newTitle = "SAM";
+
+            if (title != null)
+            {
+                newTitle += " | " + title;
+            }
+
+            Dispatcher.Invoke(delegate () {
+                MainGrid.IsEnabled = title == null;
+                Title = newTitle;
+                MainGridOverlay.Visibility = title == null ? Visibility.Collapsed : Visibility.Visible;
+            });
+        }
+
+        private void ResetWindowTitle()
+        {
+            SetWindowTitle(null);
         }
     }
 }
