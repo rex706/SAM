@@ -366,7 +366,7 @@ namespace SAM.Views
             }
 
             // Set user theme settings.
-            ThemeManager.Current.ChangeTheme(this, settings.User.Theme + "." + settings.User.Accent);
+            ThemeManager.Current.ChangeTheme(Application.Current, settings.User.Theme + "." + settings.User.Accent);
 
             // Apply theme settings for extended toolkit and tabItem brushes.
             if (settings.User.Theme == SAMSettings.DARK_THEME)

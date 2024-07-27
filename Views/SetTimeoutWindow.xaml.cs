@@ -1,8 +1,6 @@
 ﻿using MahApps.Metro.Controls;
 using System;
 using System.Windows;
-using SAM.Core;
-using ControlzEx.Theming;
 
 namespace SAM.Views
 {
@@ -15,9 +13,6 @@ namespace SAM.Views
 
         public SetTimeoutWindow(DateTime? timeout)
         {
-            SAMSettings settings = new SAMSettings();
-            ThemeManager.Current.ChangeTheme(this, settings.User.Theme + "." + settings.User.Accent);
-
             InitializeComponent();
             this.timeout = timeout;
 

@@ -1,8 +1,6 @@
 ﻿using MahApps.Metro.Controls;
 using System.Windows;
 using System.Windows.Input;
-using SAM.Core;
-using ControlzEx.Theming;
 
 namespace SAM.Views
 {
@@ -19,9 +17,6 @@ namespace SAM.Views
 
         public PasswordWindow()
         {
-            SAMSettings settings = new SAMSettings();
-            ThemeManager.Current.ChangeTheme(this, settings.User.Theme + "." + settings.User.Accent);
-
             InitializeComponent();
             PasswordTextBox.Focus();
         }
