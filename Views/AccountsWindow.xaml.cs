@@ -1825,18 +1825,21 @@ namespace SAM.Views
             }
         }
 
-        private void SortAccounts(int type)
+        private void SortAccounts(SortType sortType)
         {
             if (encryptedAccounts.Count > 0)
             {
-                // Alphabetical sort based on account name.
-                if (type == 0)
+                switch (sortType)
                 {
-                    encryptedAccounts = encryptedAccounts.OrderBy(x => x.Name).ToList();
-                }
-                else if (type == 1)
-                {
-                    encryptedAccounts = encryptedAccounts.OrderBy(x => Guid.NewGuid()).ToList();
+                    case SortType.Username:
+                        encryptedAccounts = encryptedAccounts.OrderBy(x => x.Name).ToList();
+                        break;
+                    case SortType.Alias:
+                        encryptedAccounts = encryptedAccounts.OrderBy(x => x.Alias).ToList();
+                        break;
+                    case SortType.Random:
+                        encryptedAccounts = encryptedAccounts.OrderBy(x => Guid.NewGuid()).ToList();
+                        break;
                 }
 
                 SerializeAccounts();
@@ -2151,14 +2154,19 @@ namespace SAM.Views
             Close();
         }
 
-        private void SortAlphabetical_Click(object sender, RoutedEventArgs e)
+        private void SortUsername_Click(object sender, RoutedEventArgs e)
         {
-            SortAccounts(0);
+            SortAccounts(SortType.Username);
+        }
+
+        private void SortAlias_Click(object sender, RoutedEventArgs e)
+        {
+            SortAccounts(SortType.Alias);
         }
 
         private void ShuffleAccounts_Click(object sender, RoutedEventArgs e)
         {
-            SortAccounts(1);
+            SortAccounts(SortType.Random);
         }
 
         private void ImportFromFileMenuItem_Click(object sender, RoutedEventArgs e)

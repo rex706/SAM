@@ -93,6 +93,7 @@
     <Compile Include="Core\AltActionType.cs" />
     <Compile Include="Core\FriendsLoginStatus.cs" />
     <Compile Include="Core\LoginWindowState.cs" />
+    <Compile Include="Core\SortType.cs" />
     <Compile Include="Core\SteamExitCode.cs" />
     <Compile Include="Core\UpdateResponse.cs" />
     <Compile Include="Core\WindowUtils.cs" />

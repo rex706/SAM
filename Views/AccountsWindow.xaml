@@ -205,8 +205,9 @@
                                 <MenuItem Header="Reload Accounts" Click="ReloadAccounts_Click" ToolTip="Reload account web data"/>
                                 <MenuItem Header="Settings" Click="SettingsButton_Click" />
                                 <MenuItem Header="Sort">
-                                    <MenuItem Header="Alphabetical" Click="SortAlphabetical_Click"/>
-                                    <MenuItem Header="Shuffle" Click="ShuffleAccounts_Click"/>
+                                    <MenuItem Header="Username" Click="SortUsername_Click"/>
+                                    <MenuItem Header="Alias" Click="SortAlias_Click"/>
+                                    <MenuItem Header="Random" Click="ShuffleAccounts_Click"/>
                                 </MenuItem>
                             </MenuItem>
                             <MenuItem Header="Help" Padding="{DynamicResource MenuItemPadding}">
