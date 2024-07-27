@@ -1837,6 +1837,9 @@ namespace SAM.Views
                     case SortType.Alias:
                         encryptedAccounts = encryptedAccounts.OrderBy(x => x.Alias).ToList();
                         break;
+                    case SortType.Banned:
+                        encryptedAccounts = encryptedAccounts.OrderByDescending(x => x.DaysSinceLastBan).ToList();
+                        break;
                     case SortType.Random:
                         encryptedAccounts = encryptedAccounts.OrderBy(x => Guid.NewGuid()).ToList();
                         break;
@@ -2162,6 +2165,11 @@ namespace SAM.Views
         private void SortAlias_Click(object sender, RoutedEventArgs e)
         {
             SortAccounts(SortType.Alias);
+        }
+
+        private void SortBanned_Click(object sender, RoutedEventArgs e)
+        {
+            SortAccounts(SortType.Banned);
         }
 
         private void ShuffleAccounts_Click(object sender, RoutedEventArgs e)

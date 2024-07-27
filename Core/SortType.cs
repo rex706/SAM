@@ -4,6 +4,7 @@
     {
         Username,
         Alias,
+        Banned,
         Random
     }
 }

@@ -207,6 +207,7 @@
                                 <MenuItem Header="Sort">
                                     <MenuItem Header="Username" Click="SortUsername_Click"/>
                                     <MenuItem Header="Alias" Click="SortAlias_Click"/>
+                                    <MenuItem Header="Banned" Click="SortBanned_Click"/>
                                     <MenuItem Header="Random" Click="ShuffleAccounts_Click"/>
                                 </MenuItem>
                             </MenuItem>
