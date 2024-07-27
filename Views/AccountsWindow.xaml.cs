@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,9 +16,9 @@ using Win32Interop.WinHandles;
 using System.Windows.Controls.Primitives;
 using SAM.Core;
 using MahApps.Metro.Controls;
-using MahApps.Metro;
 using System.Media;
 using System.Windows.Input;
+using ControlzEx.Theming;
 
 namespace SAM.Views
 {
@@ -56,8 +55,6 @@ namespace SAM.Views
         private static readonly string eKey = "PRIVATE_KEY";
         private static string ePassword = "";
         private static string account;
-
-        private static List<string> globalParameters;
 
         private static double originalHeight;
         private static double originalWidth;
@@ -295,103 +292,13 @@ namespace SAM.Views
             settings = new SAMSettings();
 
             isLoadingSettings = true;
-            globalParameters = new List<string>();
 
-            settings.HandleDeprecatedSettings();
-
-            foreach (KeyValuePair<string, string> entry in settings.KeyValuePairs)
+            if (settings.User.StartMinimized)
             {
-                if (!settings.File.KeyExists(entry.Key, entry.Value))
-                {
-                    settings.File.Write(entry.Key, settings.Default.KeyValuePairs[entry.Key].ToString(), entry.Value);
-                }
-                else
-                {
-                    switch (entry.Key)
-                    {
-                        case SAMSettings.ACCOUNTS_PER_ROW:
-                            string accountsPerRowString = settings.File.Read(SAMSettings.ACCOUNTS_PER_ROW, SAMSettings.SECTION_GENERAL);
-
-                            if (!Regex.IsMatch(accountsPerRowString, @"^\d+$") || Int32.Parse(accountsPerRowString) < 1)
-                            {
-                                settings.File.Write(SAMSettings.ACCOUNTS_PER_ROW, settings.Default.AccountsPerRow.ToString(), SAMSettings.SECTION_GENERAL);
-                                settings.User.AccountsPerRow = settings.Default.AccountsPerRow;
-                            }
-
-                            settings.User.AccountsPerRow = Int32.Parse(accountsPerRowString);
-                            break;
-
-                        case SAMSettings.SLEEP_TIME:
-                            string sleepTimeString = settings.File.Read(SAMSettings.SLEEP_TIME, SAMSettings.SECTION_GENERAL);
-                            float sleepTime = 0;
-
-                            if (!Single.TryParse(sleepTimeString, out sleepTime) || sleepTime < 0 || sleepTime > 100)
-                            {
-                                settings.File.Write(SAMSettings.SLEEP_TIME, settings.Default.SleepTime.ToString(), SAMSettings.SECTION_GENERAL);
-                                settings.User.SleepTime = settings.Default.SleepTime * 1000;
-                            }
-                            else
-                            {
-                                settings.User.SleepTime = (int)(sleepTime * 1000);
-                            }
-                            break;
-
-                        case SAMSettings.START_MINIMIZED:
-                            settings.User.StartMinimized = Convert.ToBoolean(settings.File.Read(SAMSettings.START_MINIMIZED, SAMSettings.SECTION_GENERAL));
-                            if (settings.User.StartMinimized)
-                            {
-                                WindowState = WindowState.Minimized;
-                            }
-                            break;
-
-                        case SAMSettings.BUTTON_SIZE:
-                            string buttonSizeString = settings.File.Read(SAMSettings.BUTTON_SIZE, SAMSettings.SECTION_CUSTOMIZE);
-                            int buttonSize = 0;
-
-                            if (!Regex.IsMatch(buttonSizeString, @"^\d+$") || !Int32.TryParse(buttonSizeString, out buttonSize) || buttonSize < 50 || buttonSize > 200)
-                            {
-                                settings.File.Write(SAMSettings.BUTTON_SIZE, "100", SAMSettings.SECTION_CUSTOMIZE);
-                                settings.User.ButtonSize = 100;
-                            }
-                            else
-                            {
-                                settings.User.ButtonSize = buttonSize;
-                            }
-                            break;
-
-                        case SAMSettings.INPUT_METHOD:
-                            settings.User.VirtualInputMethod = (VirtualInputMethod)Enum.Parse(typeof(VirtualInputMethod), settings.File.Read(SAMSettings.INPUT_METHOD, SAMSettings.SECTION_AUTOLOG));
-                            break;
-
-                        default:
-                            switch (Type.GetTypeCode(settings.User.KeyValuePairs[entry.Key].GetType()))
-                            {
-                                case TypeCode.Boolean:
-                                    settings.User.KeyValuePairs[entry.Key] = Convert.ToBoolean(settings.File.Read(entry.Key, entry.Value));
-                                    if (entry.Value.Equals(SAMSettings.SECTION_PARAMETERS) && (bool)settings.User.KeyValuePairs[entry.Key] == true && !entry.Key.StartsWith("custom"))
-                                    {
-                                        globalParameters.Add("-" + entry.Key);
-                                    }
-                                    break;
-
-                                case TypeCode.Int32:
-                                    settings.User.KeyValuePairs[entry.Key] = Convert.ToInt32(settings.File.Read(entry.Key, entry.Value));
-                                    break;
-
-                                case TypeCode.Double:
-                                    settings.User.KeyValuePairs[entry.Key] = Convert.ToDouble(settings.File.Read(entry.Key, entry.Value));
-                                    break;
-
-                                default:
-                                    settings.User.KeyValuePairs[entry.Key] = settings.File.Read(entry.Key, entry.Value);
-                                    break;
-                            }
-                            break;
-                    }
-                }
+                WindowState = WindowState.Minimized;
             }
 
-            //Load and validate saved window location.
+            // Load and validate saved window location.
             if (settings.File.KeyExists(SAMSettings.WINDOW_LEFT, SAMSettings.SECTION_LOCATION) && settings.File.KeyExists(SAMSettings.WINDOW_TOP, SAMSettings.SECTION_LOCATION))
             {
                 Left = Double.Parse(settings.File.Read(SAMSettings.WINDOW_LEFT, SAMSettings.SECTION_LOCATION));
@@ -419,6 +326,10 @@ namespace SAM.Views
 
                 AccountsDataGrid.ItemsSource = encryptedAccounts;
                 AccountsDataGrid.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                ResizeMode = ResizeMode.CanMinimize;
             }
 
             if (settings.User.AutoReloadEnabled)
@@ -454,8 +365,8 @@ namespace SAM.Views
                 }
             }
 
-            // Set user's theme settings.
-            ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent(settings.User.Accent), ThemeManager.GetAppTheme(settings.User.Theme));
+            // Set user theme settings.
+            ThemeManager.Current.ChangeTheme(this, settings.User.Theme + "." + settings.User.Accent);
 
             // Apply theme settings for extended toolkit and tabItem brushes.
             if (settings.User.Theme == SAMSettings.DARK_THEME)
@@ -1069,6 +980,7 @@ namespace SAM.Views
         private ContextMenu GenerateAccountContextMenu(Account account, int index)
         {
             ContextMenu accountContext = new ContextMenu();
+            accountContext.FontSize = (double)Application.Current.Resources["MenuFontSize"];
 
             var deleteItem = new MenuItem();
             var editItem = new MenuItem();
@@ -1409,7 +1321,7 @@ namespace SAM.Views
 
             StringBuilder parametersBuilder = new StringBuilder();
             Account account = decryptedAccounts[index];
-            List<string> parameters = globalParameters;
+            List<string> parameters = settings.globalParameters;
 
             if (account.FriendsLoginStatus != FriendsLoginStatus.Unchanged && account.SteamId != null && account.SteamId.Length > 0)
             {
@@ -2103,14 +2015,8 @@ namespace SAM.Views
             if (timeout != null && timeout != new DateTime())
             {
                 encryptedAccounts[index].Timeout = timeout;
+                SerializeAccounts();
             }
-            else
-            {
-                //MessageBox.Show("Error setting account timeout.");
-                return;
-            }
-
-            SerializeAccounts();
         }
 
         private void AccountButtonSetCustomTimeout_Click(int index)
@@ -2121,14 +2027,8 @@ namespace SAM.Views
             if (setTimeoutWindow.timeout != null && setTimeoutWindow.timeout != new DateTime())
             {
                 encryptedAccounts[index].Timeout = setTimeoutWindow.timeout;
+                SerializeAccounts();
             }
-            else
-            {
-                MessageBox.Show("Error setting account timeout.");
-                return;
-            }
-
-            SerializeAccounts();
         }
 
         private void AccountButtonClearTimeout_Click(int index)
@@ -2365,6 +2265,7 @@ namespace SAM.Views
                 Task.Run(() => LoginAllMissing());
             }
         }
+
         #endregion
 
         private void ContextMenu_ContextMenuOpening(object sender, ContextMenuEventArgs e)

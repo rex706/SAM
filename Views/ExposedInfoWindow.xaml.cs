@@ -4,6 +4,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using SAM.Core;
+using ControlzEx.Theming;
 
 namespace SAM.Views
 {
@@ -16,6 +17,9 @@ namespace SAM.Views
 
         public ExposedInfoWindow(List<Account> decryptedAccounts)
         {
+            SAMSettings settings = new SAMSettings();
+            ThemeManager.Current.ChangeTheme(this, settings.User.Theme + "." + settings.User.Accent);
+
             InitializeComponent();
             this.decryptedAccounts = decryptedAccounts;
             RefreshAccountsList();

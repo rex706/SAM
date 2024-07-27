@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace SAM.Core
 {
@@ -17,6 +19,7 @@ namespace SAM.Core
         public IniFile File = new IniFile(FILE_NAME);
         public UserSettings User = new UserSettings();
         public readonly UserSettings Default = new UserSettings();
+        public List<string> globalParameters;
 
         public const string CLEAR_USER_DATA = "ClearUserData";
         public const string HIDE_ADD_BUTTON = "HideAddButton";
@@ -77,8 +80,8 @@ namespace SAM.Core
         public const string LIST_VIEW_HEIGHT = "ListViewHeight";
         public const string LIST_VIEW_WIDTH = "ListViewWidth";
 
-        public const string LIGHT_THEME = "BaseLight";
-        public const string DARK_THEME = "BaseDark";
+        public const string LIGHT_THEME = "Light";
+        public const string DARK_THEME = "Dark";
 
         public const string NAME_COLUMN_INDEX = "NameColumnIndex";
         public const string DESCRIPTION_COLUMN_INDEX = "DescriptionColumnIndex";
@@ -166,6 +169,11 @@ namespace SAM.Core
             { "Economy Ban", ECO_BAN_COLUMN_INDEX },
             { "Last Ban (Days)", LAST_BAN_COLUMN_INDEX }
         };
+        public SAMSettings()
+        {
+            HandleDeprecatedSettings();
+            ReadSettingsFile();
+        }
 
         public void HandleDeprecatedSettings()
         {
@@ -210,6 +218,106 @@ namespace SAM.Core
             {
                 File.Write(DEVELOPER_PARAMETER, File.Read("developer", SECTION_PARAMETERS), SECTION_PARAMETERS);
                 File.DeleteKey("developer", SECTION_PARAMETERS);
+            }
+
+            // Remove 'Base' prefix from theme value.
+            if (File.KeyExists(THEME, SECTION_CUSTOMIZE))
+            {
+                string value = File.Read(THEME, SECTION_CUSTOMIZE);
+                if (value.StartsWith("Base"))
+                {
+                    File.Write(THEME, value.Substring(4), SECTION_CUSTOMIZE);
+                }
+            }
+        }
+
+        public void ReadSettingsFile()
+        {
+            globalParameters = new List<string>();
+
+            foreach (KeyValuePair<string, string> entry in KeyValuePairs)
+            {
+                if (!File.KeyExists(entry.Key, entry.Value))
+                {
+                    File.Write(entry.Key, Default.KeyValuePairs[entry.Key].ToString(), entry.Value);
+                }
+                else
+                {
+                    switch (entry.Key)
+                    {
+                        case SAMSettings.ACCOUNTS_PER_ROW:
+                            string accountsPerRowString = File.Read(SAMSettings.ACCOUNTS_PER_ROW, SAMSettings.SECTION_GENERAL);
+
+                            if (!Regex.IsMatch(accountsPerRowString, @"^\d+$") || Int32.Parse(accountsPerRowString) < 1)
+                            {
+                                File.Write(SAMSettings.ACCOUNTS_PER_ROW, Default.AccountsPerRow.ToString(), SAMSettings.SECTION_GENERAL);
+                                User.AccountsPerRow = Default.AccountsPerRow;
+                            }
+
+                            User.AccountsPerRow = Int32.Parse(accountsPerRowString);
+                            break;
+
+                        case SAMSettings.SLEEP_TIME:
+                            string sleepTimeString = File.Read(SAMSettings.SLEEP_TIME, SAMSettings.SECTION_GENERAL);
+                            float sleepTime = 0;
+
+                            if (!Single.TryParse(sleepTimeString, out sleepTime) || sleepTime < 0 || sleepTime > 100)
+                            {
+                                File.Write(SAMSettings.SLEEP_TIME, Default.SleepTime.ToString(), SAMSettings.SECTION_GENERAL);
+                                User.SleepTime = Default.SleepTime * 1000;
+                            }
+                            else
+                            {
+                                User.SleepTime = (int)(sleepTime * 1000);
+                            }
+                            break;
+
+                        case SAMSettings.START_MINIMIZED:
+                            User.StartMinimized = Convert.ToBoolean(File.Read(SAMSettings.START_MINIMIZED, SAMSettings.SECTION_GENERAL));
+                            break;
+
+                        case SAMSettings.BUTTON_SIZE:
+                            string buttonSizeString = File.Read(SAMSettings.BUTTON_SIZE, SAMSettings.SECTION_CUSTOMIZE);
+                            int buttonSize = 0;
+
+                            if (!Regex.IsMatch(buttonSizeString, @"^\d+$") || !Int32.TryParse(buttonSizeString, out buttonSize) || buttonSize < 50 || buttonSize > 200)
+                            {
+                                File.Write(SAMSettings.BUTTON_SIZE, "100", SAMSettings.SECTION_CUSTOMIZE);
+                                User.ButtonSize = 100;
+                            }
+                            else
+                            {
+                                User.ButtonSize = buttonSize;
+                            }
+                            break;
+                        case SAMSettings.INPUT_METHOD:
+                            User.VirtualInputMethod = (VirtualInputMethod)Enum.Parse(typeof(VirtualInputMethod), File.Read(SAMSettings.INPUT_METHOD, SAMSettings.SECTION_AUTOLOG));
+                            break;
+
+                        default:
+                            switch (Type.GetTypeCode(User.KeyValuePairs[entry.Key].GetType()))
+                            {
+                                case TypeCode.Boolean:
+                                    User.KeyValuePairs[entry.Key] = Convert.ToBoolean(File.Read(entry.Key, entry.Value));
+                                    if (entry.Value.Equals(SAMSettings.SECTION_PARAMETERS) && (bool)User.KeyValuePairs[entry.Key] == true && !entry.Key.StartsWith("custom"))
+                                    {
+                                        globalParameters.Add("-" + entry.Key);
+                                    }
+                                    break;
+                                case TypeCode.Int32:
+                                    User.KeyValuePairs[entry.Key] = Convert.ToInt32(File.Read(entry.Key, entry.Value));
+                                    break;
+                                case TypeCode.Double:
+                                    User.KeyValuePairs[entry.Key] = Convert.ToDouble(File.Read(entry.Key, entry.Value));
+                                    break;
+
+                                default:
+                                    User.KeyValuePairs[entry.Key] = File.Read(entry.Key, entry.Value);
+                                    break;
+                            }
+                            break;
+                    }
+                }
             }
         }
     }

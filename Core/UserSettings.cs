@@ -143,7 +143,7 @@ namespace SAM.Core
             { SAMSettings.AUTO_RELOAD_INTERVAL, 30 },
             { SAMSettings.LAST_AUTO_RELOAD, string.Empty },
 
-            { SAMSettings.THEME, "BaseDark" },
+            { SAMSettings.THEME, "Dark" },
             { SAMSettings.ACCENT, "Blue" },
             { SAMSettings.BUTTON_SIZE, 100 },
             { SAMSettings.BUTTON_COLOR, "#FFDDDDDD" },

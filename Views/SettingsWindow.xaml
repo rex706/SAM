@@ -24,9 +24,8 @@
         <Button x:Name="DefaultButton" Content="Default" Margin="35,0,0,10" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="85" Click="DefaultButton_Click" />
         <Button x:Name="OKButton" Content="OK" Margin="0,0,0,10" Click="OKButton_Click" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="85" />
         <Button x:Name="CancelButton" Content="Cancel"  Click="CancelButton_Click" Margin="0,0,35,10" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="85" />
-        <Border Height="21" Margin="0,0,0,0" VerticalAlignment="Top"/>
         <TabControl Background="{x:Null}" VerticalAlignment="Top" Height="210">
-            <TabItem Header="General" Foreground="{DynamicResource xctkForegoundBrush}">
+            <TabItem Header="General" Foreground="{DynamicResource xctkForegoundBrush}" mah:HeaderedControlHelper.HeaderFontSize="{DynamicResource MenuFontSize}" >
                 <Grid>
                     <Label x:Name="NumPerRowLabel" Content="Accounts Per Row" HorizontalAlignment="Left" Margin="228,7,0,0" VerticalAlignment="Top"/>
                     <xctk:IntegerUpDown x:Name="accountsPerRowSpinBox" Minimum="1" Maximum="999" HorizontalAlignment="Left" Height="23" Margin="175,10,0,0" VerticalAlignment="Top" Width="50" TextAlignment="Center" ToolTip="Number of accounts displayed per row" Foreground="{DynamicResource xctkForegoundBrush}"/>
@@ -45,7 +44,7 @@
                     <CheckBox x:Name="SandboxModeCheckBox" Content="Sandbox Mode" HorizontalAlignment="Left" Margin="175,146,0,0" VerticalAlignment="Top" ToolTip="Prevent Steam shutdown before each login attempt."/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Auto-Login">
+            <TabItem Header="Auto-Login" mah:HeaderedControlHelper.HeaderFontSize="{DynamicResource TabItemFontSize}">
                 <Grid>
                     <CheckBox x:Name="mostRecentCheckBox" Content="Most recent:" HorizontalAlignment="Left" Margin="17,38,0,0" VerticalAlignment="Top" Checked="AutologRecentCheckBox_Checked" Unchecked="AutologRecentCheckBox_Unchecked" ToolTip="Log in the most recently used account when SAM starts if Steam is closed."/>
                     <TextBlock x:Name="recentAccountLabel" Text="" HorizontalAlignment="Left" Margin="121,38,0,0" VerticalAlignment="Top"/>
@@ -59,7 +58,7 @@
                     <CheckBox x:Name="SteamGuardOnlyCheckBox" Content="Steam Guard Only" HorizontalAlignment="Left" Margin="193,153,0,0" VerticalAlignment="Top" ToolTip="Only toggle Caps-Lock for the Steam Guard 2FA window." IsEnabled="False"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Customize" mah:ControlsHelper.HeaderFontSize="{DynamicResource TabItemFontSize}">
+            <TabItem Header="Customize" mah:HeaderedControlHelper.HeaderFontSize="{DynamicResource TabItemFontSize}">
                 <Grid>
                     <xctk:IntegerUpDown x:Name="buttonSizeSpinBox" Minimum="50" Maximum="200" HorizontalAlignment="Left" Height="23" Margin="10,66,0,0" VerticalAlignment="Top" Width="45" TextAlignment="Center" ToolTip="Account button size in pixels." Foreground="{DynamicResource xctkForegoundBrush}"/>
                     <Label x:Name="ButtonSizeLabel" Content="Size (px)" HorizontalAlignment="Left" Margin="55,64,0,0" VerticalAlignment="Top"/>
@@ -77,11 +76,11 @@
                     <xctk:ColorPicker x:Name="BannerFontColorPicker" HorizontalAlignment="Left" Height="23" Margin="170,150,0,0" VerticalAlignment="Top" Width="45" ToolTip="Hover over banner font color." Background="{DynamicResource xctkColorPickerBackground}" DropDownBackground="{DynamicResource xctkColorPickerBackground}" TabBackground="{DynamicResource xctkColorPickerBackground}" TabForeground="{DynamicResource xctkForegoundBrush}" HeaderBackground="{DynamicResource xctkColorPickerBackground}" HeaderForeground="{DynamicResource xctkForegoundBrush}" />
                     <Label x:Name="BannerFontColorPickerLabel" Content="Banner Font Color" HorizontalAlignment="Left" Margin="215,148,0,0" VerticalAlignment="Top"/>
                     <CheckBox x:Name="HideBanIconsCheckBox" Content="Hide Ban Icons" HorizontalAlignment="Left" Margin="170,69,0,0" VerticalAlignment="Top" ToolTip="Prevent ban icons from being displayed while not in list view."/>
-                    <ComboBox x:Name="ThemeSelectBox" HorizontalAlignment="Left" Margin="51,9,0,0" VerticalAlignment="Top" Width="100">
-                        <ComboBoxItem Content="BaseLight"/>
-                        <ComboBoxItem Content="BaseDark"/>
+                    <ComboBox x:Name="ThemeSelectBox" HorizontalAlignment="Left" Margin="51,9,0,0" VerticalAlignment="Top" Width="100" SelectionChanged="ThemeSelectBox_SelectionChanged">
+                        <ComboBoxItem Content="Light"/>
+                        <ComboBoxItem Content="Dark"/>
                     </ComboBox>
-                    <ComboBox x:Name="AccentSelectBox" HorizontalAlignment="Left" Margin="215,9,0,0" VerticalAlignment="Top" Width="100">
+                    <ComboBox x:Name="AccentSelectBox" HorizontalAlignment="Left" Margin="215,9,0,0" VerticalAlignment="Top" Width="100" SelectionChanged="AccentSelectBox_SelectionChanged">
                         <ComboBoxItem Content="Blue"/>
                         <ComboBoxItem Content="Red"/>
                         <ComboBoxItem Content="Green"/>
@@ -110,7 +109,7 @@
                     <Label x:Name="ApplicationTrimLabel" Content="Accent&#xD;&#xA;" HorizontalAlignment="Left" Margin="167,9,0,0" VerticalAlignment="Top" Height="26"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Steam">
+            <TabItem Header="Steam" mah:HeaderedControlHelper.HeaderFontSize="{DynamicResource TabItemFontSize}">
                 <Grid>
                     <TextBox x:Name="SteamPathTextBox" Height="23" Text="" Margin="10,38,68,110" IsReadOnly="True"/>
                     <Button x:Name="ChangePathButton" Content="..." Margin="0,38,38,111" Click="ChangePathButton_Click" HorizontalAlignment="Right" Width="25" Height="23" RenderTransformOrigin="-0.146,0.512" ToolTip="Browse"/>
@@ -124,7 +123,7 @@
                     <Label Content="Interval (minutes)" HorizontalAlignment="Left" Margin="200,149,0,0" VerticalAlignment="Top" Width="121"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Parameters">
+            <TabItem Header="Parameters" mah:HeaderedControlHelper.HeaderFontSize="{DynamicResource TabItemFontSize}">
                 <Grid>
                     <CheckBox x:Name="CafeAppLaunchCheckBox" Content="-cafeapplaunch" HorizontalAlignment="Left" Margin="12,6,0,0" VerticalAlignment="Top" ToolTip="Launch apps in a cyber cafe context (Forces apps to be verified / validated before launch)."/>
                     <CheckBox x:Name="ClearBetaCheckBox" Content="-clearbeta" HorizontalAlignment="Left" Margin="12,29,0,0" VerticalAlignment="Top" ToolTip="Opts out of beta participation (in case for some reason it can't be done via settings)."/>

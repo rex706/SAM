@@ -10,6 +10,8 @@ using System.Windows;
 using System.Windows.Media;
 using IWshRuntimeLibrary;
 using File = System.IO.File;
+using ControlzEx.Theming;
+using System.Windows.Controls;
 
 namespace SAM.Views
 {
@@ -35,8 +37,6 @@ namespace SAM.Views
             }
         }
 
-        public int buttonSize { get; set; }
-
         public string Password { get; set; }
 
         public bool Decrypt { get; set; }
@@ -45,13 +45,19 @@ namespace SAM.Views
 
         private readonly string SAMshortcut = @"\SAM.lnk";
         private readonly string SAMexe = @"\SAM.exe";
+
+        private string Theme;
+        private string Accent;
+
         public SettingsWindow()
         {
+            settings = new SAMSettings();
+            Theme = settings.User.Theme;
+            Accent = settings.User.Accent;
+
             InitializeComponent();
 
             Decrypt = false;
-            settings = new SAMSettings();
-            
             Loaded += SettingsWindow_Loaded;
         }
 
@@ -362,9 +368,6 @@ namespace SAM.Views
 
         private void ChangePathButton_Click(object sender, RoutedEventArgs e)
         {
-            // Prompt user to find steam install
-            string path = "";
-
             // Create OpenFileDialog 
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog
             {
@@ -380,8 +383,7 @@ namespace SAM.Views
             if (result == true)
             {
                 // Save path to settings file.
-                path = Path.GetDirectoryName(dlg.FileName) + "\\";
-                SteamPathTextBox.Text = path;
+                SteamPathTextBox.Text = Path.GetDirectoryName(dlg.FileName) + "\\";
             }
         }
 
@@ -509,6 +511,31 @@ namespace SAM.Views
         {
             SteamGuardOnlyCheckBox.IsEnabled = false;
             SteamGuardOnlyCheckBox.IsChecked = false;
+        }
+
+        private void ThemeSelectBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Theme = ((ComboBoxItem)ThemeSelectBox.SelectedItem).Content.ToString();
+            ThemeManager.Current.ChangeTheme(this, Theme + "." + Accent);
+
+            if (Theme == SAMSettings.DARK_THEME)
+            {
+                Resources["xctkForegoundBrush"] = Brushes.White;
+                Resources["xctkColorPickerBackground"] = new BrushConverter().ConvertFromString("#303030");
+                Resources["GrayNormalBrush"] = Brushes.White;
+            }
+            else
+            {
+                Resources["xctkForegoundBrush"] = Brushes.Black;
+                Resources["xctkColorPickerBackground"] = Brushes.White;
+                Resources["GrayNormalBrush"] = Brushes.Black;
+            }
+        }
+
+        private void AccentSelectBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Accent = ((ComboBoxItem)AccentSelectBox.SelectedItem).Content.ToString();
+            ThemeManager.Current.ChangeTheme(this, Theme + "." + Accent);
         }
     }
 }

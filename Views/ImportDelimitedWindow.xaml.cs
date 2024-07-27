@@ -5,6 +5,7 @@ using System.Windows;
 using SAM.Core;
 using Microsoft.Win32;
 using System.IO;
+using ControlzEx.Theming;
 
 namespace SAM.Views
 {
@@ -13,10 +14,13 @@ namespace SAM.Views
     /// </summary>
     public partial class ImportDelimited : MetroWindow
     {
-        private string eKey;
+        private readonly string eKey;
 
         public ImportDelimited(string eKey)
         {
+            SAMSettings settings = new SAMSettings();
+            ThemeManager.Current.ChangeTheme(this, settings.User.Theme + "." + settings.User.Accent);
+
             this.eKey = eKey;
             InitializeComponent();
         }

@@ -118,7 +118,7 @@
                 <Border x:Name="BackgroundBorder" Background="Transparent" Margin="0,20,0,0" Padding="0,20,0,0"/>
                 <DataGrid x:Name="AccountsDataGrid" Margin="0,20,0,0" AutoGenerateColumns="False" Visibility="Collapsed" IsReadOnly="True" MouseDoubleClick="AccountsDataGrid_MouseDoubleClick" ContextMenuOpening="AccountsDataGrid_ContextMenuOpening" GridLinesVisibility="Horizontal" PreviewMouseRightButtonDown="AccountsDataGrid_PreviewMouseRightButtonDown" SelectionMode="Single" ColumnReordered="AccountsDataGrid_ColumnReordered" PreviewKeyDown="AccountsDataGrid_PreviewKeyDown">
                     <DataGrid.ColumnHeaderStyle>
-                        <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MetroDataGridColumnHeader}">
+                        <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader}">
                             <Setter Property="HorizontalContentAlignment" Value="Center" />
                         </Style>
                     </DataGrid.ColumnHeaderStyle>
@@ -179,7 +179,7 @@
                 </Grid>
                 <DockPanel>
                     <Border DockPanel.Dock="Top" Height="20" VerticalAlignment="Top">
-                        <Menu x:Name="FileMenu" Margin="0,1,0,0">
+                        <Menu x:Name="FileMenu" Margin="0,1,0,0" FontSize="{DynamicResource MenuFontSize}">
                             <MenuItem x:Name="FileMenuItem" Header="File" Padding="{DynamicResource MenuItemPadding}">
                                 <MenuItem Header="Add" Click="AddButton_Click" />
                                 <MenuItem Header="Import">
@@ -222,7 +222,7 @@
         </ScrollViewer>
         <tb:TaskbarIcon IconSource="/Resources/steam.ico" ToolTipText="SAM" TrayLeftMouseUp="TaskbarIcon_TrayLeftMouseUp">
             <tb:TaskbarIcon.ContextMenu>
-                <ContextMenu x:Name="TaskbarIconContextMenu">
+                <ContextMenu x:Name="TaskbarIconContextMenu" FontSize="{DynamicResource MenuFontSize}">
                     <MenuItem Header="New Account" Click="AddButton_Click"/>
                     <MenuItem x:Name="TaskBarIconLoginContextMenu" Header="Login" IsEnabled="False">
                     </MenuItem>
