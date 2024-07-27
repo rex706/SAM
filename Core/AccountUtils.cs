@@ -722,14 +722,7 @@ namespace SAM.Core
 
                 dynamic prefsJson = JsonConvert.DeserializeObject(friendStorePrefs.Value);
 
-                if (loginMode == FriendsLoginStatus.Online)
-                {
-                    prefsJson.ePersonaState.Value = 1;
-                }
-                else if (loginMode == FriendsLoginStatus.Invisible)
-                {
-                    prefsJson.ePersonaState.Value = 7;
-                }
+                prefsJson.ePersonaState.Value = (int)loginMode;
 
                 friendStorePrefs.Value = JsonConvert.SerializeObject(prefsJson);
                 webStorageObject[localPrefsKey] = friendStorePrefs;

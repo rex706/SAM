@@ -1,6 +1,8 @@
 ﻿using MahApps.Metro.Controls;
 using System.Windows;
 using SAM.Core;
+using System;
+using System.Linq;
 
 namespace SAM.Views
 {
@@ -14,6 +16,8 @@ namespace SAM.Views
         public AccountInfoDialog()
         {
             InitializeComponent();
+
+            FriendsOnlineStatusComboBox.ItemsSource = Enum.GetValues(typeof(FriendsLoginStatus)).Cast<FriendsLoginStatus>();
         }
 
         public string AccountText
@@ -62,8 +66,8 @@ namespace SAM.Views
 
         public FriendsLoginStatus FriendsLoginStatus
         {
-            get { return (FriendsLoginStatus)FriendsOnlineStatusComboBox.SelectedIndex; }
-            set { FriendsOnlineStatusComboBox.SelectedIndex = (int)value; }
+            get { return (FriendsLoginStatus)FriendsOnlineStatusComboBox.SelectedItem; }
+            set { FriendsOnlineStatusComboBox.SelectedItem = value; }
         }
 
         public bool AutoLogAccountIndex { get; set; }

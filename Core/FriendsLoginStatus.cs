@@ -3,8 +3,9 @@
     public enum FriendsLoginStatus
     {
         Unchanged,
-        Online,
-        Invisible,
+        Online = 1,
+        Away = 3,
+        Invisible = 7,
         Offline
     }
 }
