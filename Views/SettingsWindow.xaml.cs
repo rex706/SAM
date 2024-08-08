@@ -20,16 +20,18 @@ namespace SAM.Views
     /// </summary>
     public partial class SettingsWindow : MetroWindow
     {
-        public int AutoAccIdx { get; set; }
-
         public int AccountsPerRow
         {
             get
             {
-                if (!Regex.IsMatch(accountsPerRowSpinBox.Text, @"^\d+$") || Int32.Parse(accountsPerRowSpinBox.Text) < 1)
+                if (!Int32.TryParse(accountsPerRowSpinBox.Text, out int buttonColumns) || buttonColumns < 1)
+                {
                     return 1;
+                }
                 else
-                    return Int32.Parse(accountsPerRowSpinBox.Text);
+                {
+                    return buttonColumns;
+                }
             }
             set
             {
@@ -87,14 +89,35 @@ namespace SAM.Views
                     // AutoLog
                     if (Convert.ToBoolean(settings.File.Read(SAMSettings.LOGIN_RECENT_ACCOUNT, SAMSettings.SECTION_AUTOLOG)) == true)
                     {
-                        mostRecentCheckBox.IsChecked = true;
-                        recentAccountLabel.Text = AccountsWindow.encryptedAccounts[Int32.Parse(settings.File.Read(SAMSettings.RECENT_ACCOUNT_INDEX, SAMSettings.SECTION_AUTOLOG))].Name;
+                        try
+                        {
+                            mostRecentCheckBox.IsChecked = true;
+                            string recentAccountIndex = settings.File.Read(SAMSettings.RECENT_ACCOUNT_INDEX, SAMSettings.SECTION_AUTOLOG);
+                            int index = Int32.Parse(recentAccountIndex);
+                            recentAccountLabel.Text = AccountsWindow.accounts[index].Name;
+                        }
+                        catch (Exception ex)
+                        {
+                            mostRecentCheckBox.IsChecked = false;
+                            settings.File.Write(SAMSettings.RECENT_ACCOUNT_INDEX, string.Empty, SAMSettings.SECTION_AUTOLOG);
+                        }
                     }
                     else if (Convert.ToBoolean(settings.File.Read(SAMSettings.LOGIN_SELECTED_ACCOUNT, SAMSettings.SECTION_AUTOLOG)) == true)
                     {
-                        selectedAccountCheckBox.IsChecked = true;
-                        selectedAccountLabel.Text = AccountsWindow.encryptedAccounts[Int32.Parse(settings.File.Read(SAMSettings.SELECTED_ACCOUNT_INDEX, SAMSettings.SECTION_AUTOLOG))].Name;
+                        try
+                        {
+                            selectedAccountCheckBox.IsChecked = true;
+                            string selectedAccountIndex = settings.File.Read(SAMSettings.SELECTED_ACCOUNT_INDEX, SAMSettings.SECTION_AUTOLOG);
+                            int index = Int32.Parse(selectedAccountIndex);
+                            selectedAccountLabel.Text = AccountsWindow.accounts[index].Name;
+                        }
+                        catch (Exception ex) 
+                        {
+                            selectedAccountCheckBox.IsChecked = false;
+                            settings.File.Write(SAMSettings.SELECTED_ACCOUNT_INDEX, string.Empty, SAMSettings.SECTION_AUTOLOG);
+                        }
                     }
+
                     InputMethodSelectBox.SelectedItem = (VirtualInputMethod)Enum.Parse(typeof(VirtualInputMethod), settings.File.Read(SAMSettings.INPUT_METHOD, SAMSettings.SECTION_AUTOLOG));
                     HandleImeCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.HANDLE_IME, SAMSettings.SECTION_AUTOLOG));
                     SteamGuardOnlyCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.IME_2FA_ONLY, SAMSettings.SECTION_AUTOLOG));
@@ -291,7 +314,7 @@ namespace SAM.Views
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!Regex.IsMatch(accountsPerRowSpinBox.Text, @"^\d+$") || Int32.Parse(accountsPerRowSpinBox.Text) < 1)
+            if (!Int32.TryParse(accountsPerRowSpinBox.Text, out int buttonColumns) || buttonColumns < 1)
                 SaveSettings("1");
             else
                 SaveSettings(accountsPerRowSpinBox.Text);
@@ -303,20 +326,10 @@ namespace SAM.Views
         {
             try
             {
-                int idx = Int32.Parse(settings.File.Read(SAMSettings.RECENT_ACCOUNT_INDEX, SAMSettings.SECTION_AUTOLOG));
-
-                // If index is invalid, uncheck box.
-                if (idx < 0)
-                {
-                    mostRecentCheckBox.IsChecked = false;
-                }
-                else
-                {
-                    AutoAccIdx = idx;
-                    recentAccountLabel.Text = AccountsWindow.encryptedAccounts[idx].Name;
-                    selectedAccountCheckBox.IsChecked = false;
-                    selectedAccountLabel.Text = "";
-                }
+                int index = Int32.Parse(settings.File.Read(SAMSettings.RECENT_ACCOUNT_INDEX, SAMSettings.SECTION_AUTOLOG));
+                recentAccountLabel.Text = AccountsWindow.accounts[index].Name;
+                selectedAccountCheckBox.IsChecked = false;
+                selectedAccountLabel.Text = "";
             }
             catch (Exception ex)
             {
@@ -335,9 +348,9 @@ namespace SAM.Views
             try
             {
                 bool selectedEnabled = Convert.ToBoolean(settings.File.Read(SAMSettings.LOGIN_SELECTED_ACCOUNT, SAMSettings.SECTION_AUTOLOG));
-                int idx = Int32.Parse(settings.File.Read(SAMSettings.SELECTED_ACCOUNT_INDEX, SAMSettings.SECTION_AUTOLOG));
+                int index = Int32.Parse(settings.File.Read(SAMSettings.SELECTED_ACCOUNT_INDEX, SAMSettings.SECTION_AUTOLOG));
 
-                if (selectedEnabled == false || idx < 0)
+                if (selectedEnabled == false || index < 0)
                 {
                     selectedAccountCheckBox.IsChecked = false;
                 }
@@ -345,8 +358,7 @@ namespace SAM.Views
                 {
                     mostRecentCheckBox.IsChecked = false;
                     recentAccountLabel.Text = "";
-                    AutoAccIdx = idx;
-                    selectedAccountLabel.Text = AccountsWindow.encryptedAccounts[idx].Name;
+                    selectedAccountLabel.Text = AccountsWindow.accounts[index].Name;
                 }
             }
             catch (Exception ex)

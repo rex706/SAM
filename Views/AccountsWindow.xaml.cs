@@ -19,6 +19,7 @@ using MahApps.Metro.Controls;
 using System.Media;
 using System.Windows.Input;
 using ControlzEx.Theming;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace SAM.Views
 {
@@ -29,10 +30,8 @@ namespace SAM.Views
     {
         #region Globals
 
-        public static List<Account> encryptedAccounts;
-        private static List<Account> decryptedAccounts;
-        private static Dictionary<int, Account> exportAccounts;
-        private static Dictionary<int, Account> deleteAccounts;
+        public static List<Account> accounts;
+        private static Dictionary<int, Account> actionAccounts;
 
         private static SAMSettings settings;
 
@@ -54,13 +53,10 @@ namespace SAM.Views
         // Keys are changed before releases/updates
         private static readonly string eKey = "PRIVATE_KEY";
         private static string ePassword = "";
-        private static string account;
 
         private static double originalHeight;
         private static double originalWidth;
         private static Thickness initialAddButtonGridMargin;
-
-        private static string AssemblyVer;
 
         private static bool exporting = false;
         private static bool deleting = false;
@@ -89,6 +85,7 @@ namespace SAM.Views
         public AccountsWindow()
         {
             InitializeComponent();
+
             // If no settings file exists, create one and initialize values.
             if (!File.Exists(SAMSettings.FILE_NAME))
             {
@@ -106,12 +103,9 @@ namespace SAM.Views
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            // Version number from assembly
-            AssemblyVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
             MenuItem ver = new MenuItem();
             MenuItem newExistMenuItem = (MenuItem)FileMenu.Items[2];
-            ver.Header = "v" + AssemblyVer;
+            ver.Header = "v" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
             ver.IsEnabled = false;
             newExistMenuItem.Items.Add(ver);
 
@@ -178,10 +172,14 @@ namespace SAM.Views
 
             if (SteamProc.Length == 0)
             {
-                if (settings.User.LoginRecentAccount == true)
+                if (settings.User.LoginRecentAccount)
+                {
                     Login(settings.User.RecentAccountIndex);
-                else if (settings.User.LoginSelectedAccount == true)
+                }
+                else if (settings.User.LoginSelectedAccount)
+                {
                     Login(settings.User.SelectedAccountIndex);
+                }
             }
         }
 
@@ -200,7 +198,7 @@ namespace SAM.Views
             }
         }
 
-        private string VerifyAndSetPassword()
+        private bool VerifyAndSetPassword()
         {
             MessageBoxResult messageBoxResult = MessageBoxResult.No;
 
@@ -208,19 +206,19 @@ namespace SAM.Views
             {
                 var passwordDialog = new PasswordWindow();
 
-                if (passwordDialog.ShowDialog() == true && passwordDialog.PasswordText != "")
+                if (passwordDialog.ShowDialog() == true && !string.IsNullOrEmpty(passwordDialog.PasswordText))
                 {
                     ePassword = passwordDialog.PasswordText;
 
-                    return true.ToString();
+                    return true;
                 }
-                else if (passwordDialog.PasswordText == "")
+                else if (string.IsNullOrEmpty(passwordDialog.PasswordText))
                 {
                     messageBoxResult = MessageBox.Show("No password detected, are you sure?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 }
             }
 
-            return false.ToString();
+            return false;
         }
 
         private bool VerifyPassword()
@@ -231,11 +229,11 @@ namespace SAM.Views
             {
                 var passwordDialog = new PasswordWindow();
 
-                if (passwordDialog.ShowDialog() == true && passwordDialog.PasswordText != "")
+                if (passwordDialog.ShowDialog() == true && !string.IsNullOrEmpty(passwordDialog.PasswordText))
                 {
                     try
                     {
-                        encryptedAccounts = AccountUtils.PasswordDeserialize(dataFile, passwordDialog.PasswordText);
+                        accounts = AccountUtils.PasswordDeserialize(dataFile, passwordDialog.PasswordText);
                         messageBoxResult = MessageBoxResult.None;
                     }
                     catch (Exception e)
@@ -255,7 +253,7 @@ namespace SAM.Views
 
                     return true;
                 }
-                else if (passwordDialog.PasswordText == "")
+                else if (string.IsNullOrEmpty(passwordDialog.PasswordText))
                 {
                     messageBoxResult = MessageBox.Show("No password detected, are you sure?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 }
@@ -268,22 +266,17 @@ namespace SAM.Views
         {
             settings = new SAMSettings();
 
-            settings.File.Write("Version", AssemblyVer, "System");
-
-            foreach (KeyValuePair<string, string> entry in settings.KeyValuePairs)
-            {
-                settings.File.Write(entry.Key, settings.Default.KeyValuePairs[entry.Key].ToString(), entry.Value);
-            }
+            settings.GenerateSettings();
 
             MessageBoxResult messageBoxResult = MessageBox.Show("Do you want to password protect SAM?", "Protect", MessageBoxButton.YesNo, MessageBoxImage.Information);
 
             if (messageBoxResult == MessageBoxResult.Yes)
             {
-                settings.File.Write(SAMSettings.PASSWORD_PROTECT, VerifyAndSetPassword(), SAMSettings.SECTION_GENERAL);
+                settings.SetPasswordProtect(VerifyAndSetPassword());
             }
             else
             {
-                settings.File.Write(SAMSettings.PASSWORD_PROTECT, false.ToString(), SAMSettings.SECTION_GENERAL);
+                settings.SetPasswordProtect(false);
             }
         }
 
@@ -310,9 +303,10 @@ namespace SAM.Views
                 SetWindowToCenter();
             }
 
-            if (settings.User.ListView == true)
+            if (settings.User.ListView)
             {
                 AddButtonGrid.Visibility = Visibility.Collapsed;
+                buttonGrid.Visibility = Visibility.Collapsed;
 
                 Height = settings.User.ListViewHeight;
                 Width = settings.User.ListViewWidth;
@@ -324,11 +318,16 @@ namespace SAM.Views
                     column.DisplayIndex = (int)settings.User.KeyValuePairs[settings.ListViewColumns[column.Header.ToString()]];
                 }
 
-                AccountsDataGrid.ItemsSource = encryptedAccounts;
+                AccountsDataGrid.ItemsSource = accounts;
                 AccountsDataGrid.Visibility = Visibility.Visible;
+
+                SetMainScrollViewerBarsVisibility(ScrollBarVisibility.Auto);
             }
             else
             {
+                AddButtonGrid.Visibility = Visibility.Visible;
+                buttonGrid.Visibility = Visibility.Visible;
+                AccountsDataGrid.Visibility = Visibility.Collapsed;
                 ResizeMode = ResizeMode.CanMinimize;
             }
 
@@ -336,7 +335,7 @@ namespace SAM.Views
             {
                 int interval = settings.User.AutoReloadInterval;
 
-                if (settings.User.LastAutoReload.HasValue == true)
+                if (settings.User.LastAutoReload.HasValue)
                 {
                     double minutesSince = (DateTime.Now - settings.User.LastAutoReload.Value).TotalMinutes;
 
@@ -382,13 +381,12 @@ namespace SAM.Views
                 Application.Current.Resources["GrayNormalBrush"] = Brushes.Black;
             }
 
-            if (settings.User.PasswordProtect && ePassword.Length == 0)
+            if (settings.User.PasswordProtect && string.IsNullOrEmpty(ePassword))
             {
                 VerifyAndSetPassword();
             }
 
             AccountUtils.CheckSteamPath();
-            settings.File.Write("Version", AssemblyVer, "System");
             isLoadingSettings = false;
         }
 
@@ -403,8 +401,6 @@ namespace SAM.Views
         public void RefreshWindow(string file)
         {
             loadSource = file;
-
-            decryptedAccounts = new List<Account>();
 
             buttonGrid.Children.Clear();
 
@@ -426,7 +422,7 @@ namespace SAM.Views
                     {
                         try
                         {
-                            encryptedAccounts = AccountUtils.PasswordDeserialize(file, ePassword);
+                            accounts = AccountUtils.PasswordDeserialize(file, ePassword);
                             messageBoxResult = MessageBoxResult.None;
                         }
                         catch (Exception e)
@@ -449,7 +445,7 @@ namespace SAM.Views
                 {
                     try
                     {
-                        encryptedAccounts = AccountUtils.Deserialize(file);
+                        accounts = AccountUtils.Deserialize(file);
                     }
                     catch (Exception e)
                     {
@@ -484,13 +480,13 @@ namespace SAM.Views
             }
             else
             {
-                encryptedAccounts = new List<Account>();
+                accounts = new List<Account>();
                 SerializeAccounts();
             }
 
-            AccountsDataGrid.ItemsSource = encryptedAccounts;
+            AccountsDataGrid.ItemsSource = accounts;
 
-            if (firstLoad == true && settings.User.AutoReloadEnabled == true && AccountUtils.ShouldAutoReload(settings.User.LastAutoReload, settings.User.AutoReloadInterval))
+            if (firstLoad && settings.User.AutoReloadEnabled && AccountUtils.ShouldAutoReload(settings.User.LastAutoReload, settings.User.AutoReloadInterval))
             {
                 firstLoad = false;
                 ReloadAccountsAsync();
@@ -542,7 +538,7 @@ namespace SAM.Views
 
             List<string> steamIds = new List<string>();
 
-            foreach (Account account in encryptedAccounts)
+            foreach (Account account in accounts)
             {
                 if (account.SteamId != null && account.SteamId.Length > 0)
                 {
@@ -579,7 +575,7 @@ namespace SAM.Views
             {
                 foreach (dynamic userInfoJson in userInfosJson.response.players)
                 {
-                    Account account = encryptedAccounts.Find(a => a.SteamId == Convert.ToString(userInfoJson.steamid));
+                    Account account = accounts.FirstOrDefault(a => a.SteamId == Convert.ToString(userInfoJson.steamid));
 
                     if (account != null)
                     {
@@ -597,7 +593,7 @@ namespace SAM.Views
                 {
                     foreach (dynamic userBanJson in userBansJson.players)
                     {
-                        Account account = encryptedAccounts.Find(a => a.SteamId == Convert.ToString(userBanJson.SteamId));
+                        Account account = accounts.FirstOrDefault(a => a.SteamId == Convert.ToString(userBanJson.SteamId));
 
                         if (account != null)
                         {
@@ -612,8 +608,7 @@ namespace SAM.Views
                 }
             }
 
-            settings.File.Write(SAMSettings.LAST_AUTO_RELOAD, DateTime.Now.ToString(), SAMSettings.SECTION_STEAM);
-            settings.User.LastAutoReload = DateTime.Now;
+            settings.SetLastAutoReload(DateTime.Now);
 
             SerializeAccounts();
 
@@ -638,9 +633,15 @@ namespace SAM.Views
 
             timeoutTimers = new List<System.Timers.Timer>();
 
-            if (encryptedAccounts != null)
+            int bCounter = 0;
+            int xCounter = 0;
+            int yCounter = 0;
+
+            int buttonOffset = settings.User.ButtonSize + 5;
+
+            if (accounts != null)
             {
-                foreach (var account in encryptedAccounts)
+                foreach (var account in accounts)
                 {
                     string tempPass = StringCipher.Decrypt(account.Password, eKey);
 
@@ -657,35 +658,12 @@ namespace SAM.Views
                         {
                             steamId = account.SteamId;
                         }
-
-                        decryptedAccounts.Add(new Account() {
-                            Name = account.Name,
-                            Alias = account.Alias,
-                            Password = tempPass,
-                            SharedSecret = temp2fa,
-                            ProfUrl = account.ProfUrl,
-                            AviUrl = account.AviUrl,
-                            SteamId = steamId,
-                            Timeout = account.Timeout,
-                            Parameters = account.Parameters,
-                            Description = account.Description,
-                            FriendsLoginStatus = account.FriendsLoginStatus
-                        });
                     }
-                }
 
-                if (settings.User.ListView == true)
-                {
-                    SetMainScrollViewerBarsVisibility(ScrollBarVisibility.Auto);
-
-                    for (int i = 0; i < encryptedAccounts.Count; i++)
+                    if (settings.User.ListView)
                     {
-                        Account account = encryptedAccounts[i];
-
-                        int index = i;
-
                         TaskBarIconLoginContextMenu.IsEnabled = true;
-                        TaskBarIconLoginContextMenu.Items.Add(GenerateTaskBarMenuItem(index, account));
+                        TaskBarIconLoginContextMenu.Items.Add(GenerateTaskBarMenuItem(account));
 
                         if (AccountUtils.AccountHasActiveTimeout(account))
                         {
@@ -699,27 +677,14 @@ namespace SAM.Views
                             {
                                 Dispatcher.Invoke(() =>
                                 {
-                                    TimeoutTimer_Tick(index, timeoutTimer);
+                                    TimeoutTimer_Tick(account, timeoutTimer);
                                 });
                             };
                             timeoutTimer.Interval = 1000;
                             timeoutTimer.Enabled = true;
                         }
                     }
-                }
-                else
-                {
-                    AccountsDataGrid.Visibility = Visibility.Collapsed;
-                    AddButtonGrid.Visibility = Visibility.Visible;
-
-                    int bCounter = 0;
-                    int xCounter = 0;
-                    int yCounter = 0;
-
-                    int buttonOffset = settings.User.ButtonSize + 5;
-
-                    // Create new button and textblock for each account
-                    foreach (var account in encryptedAccounts)
+                    else
                     {
                         Grid accountButtonGrid = new Grid();
 
@@ -730,7 +695,7 @@ namespace SAM.Views
                         Border accountImage = new Border();
 
                         accountButton.Style = (Style)Resources["SAMButtonStyle"];
-                        accountButton.Tag = bCounter.ToString();
+                        accountButton.Tag = account;
 
                         if (account.Alias != null && account.Alias.Length > 0)
                         {
@@ -846,8 +811,6 @@ namespace SAM.Views
 
                         accountButtonGrid.Children.Add(accountImage);
 
-                        int buttonIndex = Int32.Parse(accountButton.Tag.ToString());
-
                         if (AccountUtils.AccountHasActiveTimeout(account))
                         {
                             // Set up timer event to update timeout label
@@ -860,7 +823,7 @@ namespace SAM.Views
                             {
                                 Dispatcher.Invoke(() =>
                                 {
-                                    TimeoutTimer_Tick(buttonIndex, timeoutTextBlock, timeoutTimer);
+                                    TimeoutTimer_Tick(account, timeoutTextBlock, timeoutTimer);
                                 });
                             };
                             timeoutTimer.Interval = 1000;
@@ -874,7 +837,7 @@ namespace SAM.Views
                         accountButtonGrid.Children.Add(accountText);
                         accountButtonGrid.Children.Add(accountButton);
 
-                        if (settings.User.HideBanIcons == false && (account.NumberOfVACBans > 0 || account.NumberOfGameBans > 0))
+                        if (!settings.User.HideBanIcons && (account.NumberOfVACBans > 0 || account.NumberOfGameBans > 0))
                         {
                             Image banInfoImage = new Image();
 
@@ -894,24 +857,27 @@ namespace SAM.Views
                             accountButtonGrid.Children.Add(banInfoImage);
                         }
 
-                        accountButton.ContextMenu = GenerateAccountContextMenu(account, buttonIndex);
+                        accountButton.ContextMenu = GenerateAccountContextMenu(account);
                         accountButton.ContextMenuOpening += new ContextMenuEventHandler(ContextMenu_ContextMenuOpening);
 
                         buttonGrid.Children.Add(accountButtonGrid);
 
                         TaskBarIconLoginContextMenu.IsEnabled = true;
-                        TaskBarIconLoginContextMenu.Items.Add(GenerateTaskBarMenuItem(bCounter, account));
+                        TaskBarIconLoginContextMenu.Items.Add(GenerateTaskBarMenuItem(account));
 
                         bCounter++;
                         xCounter++;
 
-                        if (bCounter % settings.User.AccountsPerRow == 0 && (!settings.User.HideAddButton || (settings.User.HideAddButton && bCounter != encryptedAccounts.Count)))
+                        if (bCounter % settings.User.AccountsPerRow == 0 && (!settings.User.HideAddButton || (settings.User.HideAddButton && bCounter != accounts.Count)))
                         {
                             yCounter++;
                             xCounter = 0;
                         }
                     }
+                }
 
+                if (!settings.User.ListView)
+                {
                     if (bCounter > 0)
                     {
                         // Adjust window size and info positions
@@ -959,10 +925,10 @@ namespace SAM.Views
             }
         }
 
-        private MenuItem GenerateTaskBarMenuItem(int index, Account account)
+        private MenuItem GenerateTaskBarMenuItem(Account account)
         {
             var taskBarIconLoginItem = new MenuItem();
-            taskBarIconLoginItem.Tag = index;
+            taskBarIconLoginItem.Tag = account;
             taskBarIconLoginItem.Click += new RoutedEventHandler(TaskbarIconLoginItem_Click);
 
             if (account.Alias != null && account.Alias.Length > 0)
@@ -977,7 +943,7 @@ namespace SAM.Views
             return taskBarIconLoginItem;
         }
 
-        private ContextMenu GenerateAccountContextMenu(Account account, int index)
+        private ContextMenu GenerateAccountContextMenu(Account account)
         {
             ContextMenu accountContext = new ContextMenu();
             accountContext.FontSize = (double)Application.Current.Resources["MenuFontSize"];
@@ -995,6 +961,7 @@ namespace SAM.Views
             var twentyFourHourTimeoutItem = new MenuItem();
             var sevenDayTimeoutItem = new MenuItem();
             var customTimeoutItem = new MenuItem();
+            var clearTimeoutItem = new MenuItem();
 
             thirtyMinuteTimeoutItem.Header = "30 Minutes";
             twoHourTimeoutItem.Header = "2 Hours";
@@ -1002,6 +969,7 @@ namespace SAM.Views
             twentyFourHourTimeoutItem.Header = "24 Hours";
             sevenDayTimeoutItem.Header = "7 Days";
             customTimeoutItem.Header = "Custom";
+            clearTimeoutItem.Header = "Clear";
 
             setTimeoutItem.Items.Add(thirtyMinuteTimeoutItem);
             setTimeoutItem.Items.Add(twoHourTimeoutItem);
@@ -1009,12 +977,13 @@ namespace SAM.Views
             setTimeoutItem.Items.Add(twentyFourHourTimeoutItem);
             setTimeoutItem.Items.Add(sevenDayTimeoutItem);
             setTimeoutItem.Items.Add(customTimeoutItem);
+            setTimeoutItem.Items.Add(clearTimeoutItem);
 
-            var clearTimeoutItem = new MenuItem();
             var copyMenuItem = new MenuItem();
             var copyUsernameItem = new MenuItem();
             var copyPasswordItem = new MenuItem();
             var copyProfileUrlItem = new MenuItem();
+            var copySteamIdItem = new MenuItem();
             var copyMFATokenItem = new MenuItem();
 
             if (!AccountUtils.AccountHasActiveTimeout(account))
@@ -1023,50 +992,59 @@ namespace SAM.Views
             }
 
             deleteItem.Header = "Delete";
+            deleteItem.Foreground = Brushes.Red;
+
             editItem.Header = "Edit";
             exportItem.Header = "Export";
             reloadItem.Header = "Reload";
-            setTimeoutItem.Header = "Set Timeout";
-            clearTimeoutItem.Header = "Clear Timeout";
+            setTimeoutItem.Header = "Timeout";
             copyMenuItem.Header = "Copy";
             copyUsernameItem.Header = "Username";
             copyPasswordItem.Header = "Password";
-            copyProfileUrlItem.Header = "Profile URL";
-            copyMFATokenItem.Header = "2FA/MFA Token";
+            copyProfileUrlItem.Header = "Profile";
+            copySteamIdItem.Header = "SteamID";
+            copyMFATokenItem.Header = "Guard Token";
 
-            deleteItem.Click += delegate { DeleteEntry(index); };
-            editItem.Click += delegate { EditEntryAsync(index); };
-            exportItem.Click += delegate { ExportAccount(index); };
-            reloadItem.Click += async delegate { await ReloadAccount_ClickAsync(index); };
-            thirtyMinuteTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(index, DateTime.Now.AddMinutes(30)); };
-            twoHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(index, DateTime.Now.AddHours(2)); };
-            twentyOneHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(index, DateTime.Now.AddHours(21)); };
-            twentyFourHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(index, DateTime.Now.AddDays(1)); };
-            sevenDayTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(index, DateTime.Now.AddDays(7)); };
-            customTimeoutItem.Click += delegate { AccountButtonSetCustomTimeout_Click(index); };
-            clearTimeoutItem.Click += delegate { AccountButtonClearTimeout_Click(index); };
-            copyUsernameItem.Click += delegate { CopyUsernameToClipboard(index); };
-            copyPasswordItem.Click += delegate { CopyPasswordToClipboard(index); };
-            copyProfileUrlItem.Click += delegate { CopyProfileUrlToClipboard(index); };
+            deleteItem.Click += delegate { DeleteEntry(account); };
+            editItem.Click += delegate { EditEntryAsync(account); };
+            exportItem.Click += delegate { ExportAccount(account); };
+            reloadItem.Click += async delegate { await ReloadAccount_ClickAsync(account); };
+            thirtyMinuteTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(account, DateTime.Now.AddMinutes(30)); };
+            twoHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(account, DateTime.Now.AddHours(2)); };
+            twentyOneHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(account, DateTime.Now.AddHours(21)); };
+            twentyFourHourTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(account, DateTime.Now.AddDays(1)); };
+            sevenDayTimeoutItem.Click += delegate { AccountButtonSetTimeout_Click(account, DateTime.Now.AddDays(7)); };
+            customTimeoutItem.Click += delegate { AccountButtonSetCustomTimeout_Click(account); };
+            clearTimeoutItem.Click += delegate { AccountButtonClearTimeout_Click(account); };
+            copyUsernameItem.Click += delegate { CopyUsernameToClipboard(account); };
+            copyPasswordItem.Click += delegate { CopyPasswordToClipboard(account); };
+            copyProfileUrlItem.Click += delegate { CopyProfileUrlToClipboard(account); };
+            copySteamIdItem.Click += delegate { CopySteamIdToClipboard(account); };
 
             accountContext.Items.Add(editItem);
-            accountContext.Items.Add(deleteItem);
             accountContext.Items.Add(exportItem);
             accountContext.Items.Add(reloadItem);
+            accountContext.Items.Add(copyMenuItem);
             accountContext.Items.Add(setTimeoutItem);
-            accountContext.Items.Add(clearTimeoutItem);
 
             copyMenuItem.Items.Add(copyUsernameItem);
             copyMenuItem.Items.Add(copyPasswordItem);
             copyMenuItem.Items.Add(copyProfileUrlItem);
-            if (decryptedAccounts[index]?.SharedSecret != null && decryptedAccounts[index].SharedSecret.Length > 0)
-                copyMFATokenItem.Click += delegate { Copy2FA(index); };
+            copyMenuItem.Items.Add(copySteamIdItem);
+
+            string sharedSecret = StringCipher.Decrypt(account.SharedSecret, eKey);
+
+            if (!string.IsNullOrEmpty(sharedSecret))
+            {
+                copyMFATokenItem.Click += delegate { Copy2FA(account); };
+            }
             else
+            {
                 copyMFATokenItem.IsEnabled = false;
+            }
 
             copyMenuItem.Items.Add(copyMFATokenItem);
-
-            accountContext.Items.Add(copyMenuItem);
+            accountContext.Items.Add(deleteItem);
 
             return accountContext;
         }
@@ -1102,14 +1080,10 @@ namespace SAM.Views
             // User entered info
             var dialog = new AccountInfoDialog();
 
-            if (dialog.ShowDialog() == true && dialog.AccountText != "" && dialog.PasswordText != "")
+            if (dialog.ShowDialog() == true && !string.IsNullOrEmpty(dialog.AccountText) && !string.IsNullOrEmpty(dialog.PasswordText))
             {
-                account = dialog.AccountText;
-                string password = dialog.PasswordText;
-                string sharedSecret = dialog.SharedSecretText;
-
                 string aviUrl;
-                if (dialog.AviText != null && dialog.AviText.Length > 1)
+                if (!string.IsNullOrEmpty(dialog.AviText))
                 {
                     aviUrl = dialog.AviText;
                 }
@@ -1120,24 +1094,13 @@ namespace SAM.Views
 
                 string steamId = dialog.SteamId;
 
-                // If the auto login checkbox was checked, update settings file and global variables. 
-                if (dialog.AutoLogAccountIndex == true)
-                {
-                    settings.File.Write(SAMSettings.SELECTED_ACCOUNT_INDEX, (encryptedAccounts.Count).ToString(), SAMSettings.SECTION_AUTOLOG);
-                    settings.File.Write(SAMSettings.LOGIN_SELECTED_ACCOUNT, true.ToString(), SAMSettings.SECTION_AUTOLOG);
-                    settings.File.Write(SAMSettings.LOGIN_RECENT_ACCOUNT, false.ToString(), SAMSettings.SECTION_AUTOLOG);
-                    settings.User.LoginSelectedAccount = true;
-                    settings.User.LoginRecentAccount = false;
-                    settings.User.SelectedAccountIndex = encryptedAccounts.Count;
-                }
-
                 try
                 {
                     Account newAccount = new Account() {
                         Name = dialog.AccountText,
                         Alias = dialog.AliasText,
-                        Password = StringCipher.Encrypt(password, eKey),
-                        SharedSecret = StringCipher.Encrypt(sharedSecret, eKey),
+                        Password = StringCipher.Encrypt(dialog.PasswordText, eKey),
+                        SharedSecret = StringCipher.Encrypt(dialog.SharedSecretText, eKey),
                         ProfUrl = dialog.UrlText,
                         AviUrl = aviUrl,
                         SteamId = steamId,
@@ -1148,15 +1111,18 @@ namespace SAM.Views
 
                     await ReloadAccount(newAccount);
 
-                    encryptedAccounts.Add(newAccount);
+                    accounts.Add(newAccount);
+
+                    if (dialog.AutoLogAccountIndex)
+                    {
+                        settings.EnableSelectedAccountIndex(accounts.Count);
+                    }
+
                     SerializeAccounts();
                 }
                 catch (Exception m)
                 {
                     MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                    var itemToRemove = encryptedAccounts.Single(r => r.Name == dialog.AccountText);
-                    encryptedAccounts.Remove(itemToRemove);
 
                     SerializeAccounts();
                     AddAccount();
@@ -1164,16 +1130,14 @@ namespace SAM.Views
             }
         }
 
-        private async Task EditEntryAsync(int index)
+        private async Task EditEntryAsync(Account account)
         {
-            Account account = decryptedAccounts[index];
-
             var dialog = new AccountInfoDialog
             {
                 AccountText = account.Name,
                 AliasText = account.Alias,
-                PasswordText = account.Password,
-                SharedSecretText = account.SharedSecret,
+                PasswordText = StringCipher.Decrypt(account.Password, eKey),
+                SharedSecretText = StringCipher.Decrypt(account.SharedSecret, eKey),
                 UrlText = account.ProfUrl,
                 SteamId = account.SteamId,
                 ParametersText = account.Parameters,
@@ -1181,12 +1145,13 @@ namespace SAM.Views
                 FriendsLoginStatus = account.FriendsLoginStatus
             };
 
-            // Reload slected boolean
-            settings.User.LoginSelectedAccount = settings.File.Read(SAMSettings.LOGIN_SELECTED_ACCOUNT, SAMSettings.SECTION_AUTOLOG) == true.ToString();
+            int index = accounts.FindIndex(a => a.GetHashCode() == account.GetHashCode());
 
-            if (settings.User.LoginSelectedAccount == true && settings.User.SelectedAccountIndex == index)
+            if (settings.IsLoginSelectedEnabled() && settings.User.SelectedAccountIndex == index)
+            {
                 dialog.autoLogCheckBox.IsChecked = true;
-
+            }
+                
             if (dialog.ShowDialog() == true)
             {
                 string aviUrl;
@@ -1199,61 +1164,60 @@ namespace SAM.Views
                     aviUrl = await AccountUtils.HtmlAviScrapeAsync(dialog.UrlText);
                 }
 
-                string steamId = dialog.SteamId;
-
                 // If the auto login checkbox was checked, update settings file and global variables. 
-                if (dialog.AutoLogAccountIndex == true)
+                if (dialog.AutoLogAccountIndex)
                 {
-                    settings.File.Write(SAMSettings.SELECTED_ACCOUNT_INDEX, index.ToString(), SAMSettings.SECTION_AUTOLOG);
-                    settings.File.Write(SAMSettings.LOGIN_SELECTED_ACCOUNT, true.ToString(), SAMSettings.SECTION_AUTOLOG);
-                    settings.File.Write(SAMSettings.LOGIN_RECENT_ACCOUNT, false.ToString(), SAMSettings.SECTION_AUTOLOG);
-                    settings.User.LoginSelectedAccount = true;
-                    settings.User.LoginRecentAccount = false;
-                    settings.User.SelectedAccountIndex = index;
+                    settings.EnableSelectedAccountIndex(index);
                 }
-                else
+                else if (index == settings.User.SelectedAccountIndex)
                 {
-                    settings.File.Write(SAMSettings.SELECTED_ACCOUNT_INDEX, "-1", SAMSettings.SECTION_AUTOLOG);
-                    settings.File.Write(SAMSettings.LOGIN_SELECTED_ACCOUNT, false.ToString(), SAMSettings.SECTION_AUTOLOG);
-                    settings.User.LoginSelectedAccount = false;
-                    settings.User.SelectedAccountIndex = -1;
+                    settings.ResetSelectedAccountIndex();
                 }
 
                 try
                 {
-                    encryptedAccounts[index].Name = dialog.AccountText;
-                    encryptedAccounts[index].Alias = dialog.AliasText;
-                    encryptedAccounts[index].Password = StringCipher.Encrypt(dialog.PasswordText, eKey);
-                    encryptedAccounts[index].SharedSecret = StringCipher.Encrypt(dialog.SharedSecretText, eKey);
-                    encryptedAccounts[index].ProfUrl = dialog.UrlText;
-                    encryptedAccounts[index].AviUrl = aviUrl;
-                    encryptedAccounts[index].SteamId = dialog.SteamId;
-                    encryptedAccounts[index].Parameters = dialog.ParametersText;
-                    encryptedAccounts[index].Description = dialog.DescriptionText;
-                    encryptedAccounts[index].FriendsLoginStatus = dialog.FriendsLoginStatus;
+                    account.Name = dialog.AccountText;
+                    account.Alias = dialog.AliasText;
+                    account.Password = StringCipher.Encrypt(dialog.PasswordText, eKey);
+                    account.SharedSecret = StringCipher.Encrypt(dialog.SharedSecretText, eKey);
+                    account.ProfUrl = dialog.UrlText;
+                    account.AviUrl = aviUrl;
+                    account.SteamId = dialog.SteamId;
+                    account.Parameters = dialog.ParametersText;
+                    account.Description = dialog.DescriptionText;
+                    account.FriendsLoginStatus = dialog.FriendsLoginStatus;
 
                     SerializeAccounts();
                 }
                 catch (Exception m)
                 {
                     MessageBox.Show(m.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    EditEntryAsync(index);
+                    EditEntryAsync(account);
                 }
             }
         }
 
-        private void DeleteEntry(int index)
+        private void DeleteEntry(Account account)
         {
             MessageBoxResult result = MessageBox.Show("Are you sure you want to delete this entry?", "Delete", MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
 
             if (result == MessageBoxResult.Yes)
             {
-                encryptedAccounts.RemoveAt(index);
+                accounts.Remove(account);
                 SerializeAccounts();
             }
         }
 
         private void Login(int index)
+        {
+            if (index >= 0 && index <= accounts.Count)
+            {
+                Login(accounts[index]);
+                settings.UpdateRecentAccountIndex(index);
+            }
+        }
+
+        private void Login(Account account)
         {
             if (!settings.User.SandboxMode)
             {
@@ -1270,7 +1234,11 @@ namespace SAM.Views
             new Thread(() => {
                 try
                 {
-                    Login(index, 0);
+                    Login(account, 0);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
                 }
                 finally
                 {
@@ -1280,7 +1248,7 @@ namespace SAM.Views
             }).Start();
         }
 
-        private void Login(int index, int tryCount)
+        private void Login(Account account, int tryCount)
         {
             if (tryCount == 0)
             {
@@ -1293,7 +1261,7 @@ namespace SAM.Views
                 return;
             }
 
-            if (AccountUtils.AccountHasActiveTimeout(encryptedAccounts[index]))
+            if (AccountUtils.AccountHasActiveTimeout(account))
             {
                 MessageBoxResult result = MessageBox.Show("Account timeout is active!\nLogin anyway?", "Timeout", MessageBoxButton.YesNo, MessageBoxImage.Warning, 0, MessageBoxOptions.DefaultDesktopOnly);
 
@@ -1302,10 +1270,6 @@ namespace SAM.Views
                     return;
                 }
             }
-
-            // Update the most recently used account index.
-            settings.User.RecentAccountIndex = index;
-            settings.File.Write(SAMSettings.RECENT_ACCOUNT_INDEX, index.ToString(), SAMSettings.SECTION_AUTOLOG);
 
             // Verify Steam file path.
             settings.User.SteamPath = AccountUtils.CheckSteamPath();
@@ -1316,11 +1280,9 @@ namespace SAM.Views
             }
 
             // Make sure Username field is empty and Remember Password checkbox is unchecked.
-
             AccountUtils.ClearAutoLoginUserKeyValues();
 
             StringBuilder parametersBuilder = new StringBuilder();
-            Account account = decryptedAccounts[index];
             List<string> parameters = settings.globalParameters;
 
             if (account.FriendsLoginStatus != FriendsLoginStatus.Unchanged && account.SteamId != null && account.SteamId.Length > 0)
@@ -1341,32 +1303,7 @@ namespace SAM.Views
 
             foreach (string parameter in parameters)
             {
-                // Not working with new Steam UI
-                //if (parameter.Equals("-login"))
-                //{
-                    // Not working as of August 2023
-                    //parametersBuilder.Append(" -vgui ").Append(parameter).Append(" ");
-
-                //    StringBuilder passwordBuilder = new StringBuilder();
-
-                //    foreach (char c in account.Password)
-                //    {
-                //        if (c.Equals('"'))
-                //        {
-                //            passwordBuilder.Append('\\').Append(c);
-                //        }
-                //        else
-                //        {
-                //            passwordBuilder.Append(c);
-                //        }
-                //    }
-
-                //    parametersBuilder.Append(account.Name).Append(" \"").Append(passwordBuilder.ToString()).Append("\" ");
-                //}
-                //else
-                //{
-                    parametersBuilder.Append(parameter).Append(" ");
-                //}
+                parametersBuilder.Append(parameter).Append(" ");
             }
 
             string startParams = parametersBuilder.ToString();
@@ -1392,38 +1329,18 @@ namespace SAM.Views
                 return;
             }
 
-            //if (settings.User.Login == true)
-            //{
-                // TODO needs more investigation.
-                //if (settings.User.RememberPassword == true)
-                //{
-                //    AccountUtils.SetRememeberPasswordKeyValue(1, account);
-                //}
-
-            //    if (account.SharedSecret != null && account.SharedSecret.Length > 0)
-            //    {
-            //        Handle2FA(steamProcess, index);
-            //    }
-            //    else
-            //    {
-            //        PostLogin();
-            //    }
-            //}
-            //else
-            //{
-                // -noreactlogin parameter has been depecrated as of January 2023
-                if (noReactLogin)
-                {
-                    TypeCredentials(steamProcess, index, tryCount);
-                }
-                else
-                {
-                    EnterCredentials(steamProcess, account, 0);
-                }
-            //}
+            // -noreactlogin parameter has been depecrated as of January 2023
+            if (noReactLogin)
+            {
+                TypeCredentials(steamProcess, account, tryCount);
+            }
+            else
+            {
+                EnterCredentials(steamProcess, account, 0);
+            }
         }
 
-        private void TypeCredentials(Process steamProcess, int index, int tryCount)
+        private void TypeCredentials(Process steamProcess, Account account, int tryCount)
         {
             WindowHandle steamLoginWindow = WindowUtils.GetLegacySteamLoginWindow();
 
@@ -1447,7 +1364,7 @@ namespace SAM.Views
                 WindowUtils.SendCapsLockGlobally();
             }
 
-            foreach (char c in decryptedAccounts[index].Name.ToCharArray())
+            foreach (char c in account.Name.ToCharArray())
             {
                 WindowUtils.SetForegroundWindow(steamLoginWindow.RawPtr);
                 Thread.Sleep(10);
@@ -1458,7 +1375,7 @@ namespace SAM.Views
             WindowUtils.SendTab(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod);
             Thread.Sleep(100);
 
-            foreach (char c in decryptedAccounts[index].Password.ToCharArray())
+            foreach (char c in account.Password.ToCharArray())
             {
                 WindowUtils.SetForegroundWindow(steamLoginWindow.RawPtr);
                 Thread.Sleep(10);
@@ -1489,7 +1406,7 @@ namespace SAM.Views
             int waitCount = 0;
 
             // Only handle 2FA if shared secret was entered.
-            if (decryptedAccounts[index].SharedSecret != null && decryptedAccounts[index].SharedSecret.Length > 0)
+            if (account.SharedSecret != null && account.SharedSecret.Length > 0)
             {
                 WindowHandle steamGuardWindow = WindowUtils.GetLegacySteamGuardWindow();
 
@@ -1513,11 +1430,11 @@ namespace SAM.Views
                 // 2FA window not found, login probably failed. Try again.
                 if (waitCount == maxRetry)
                 {
-                    Dispatcher.Invoke(delegate () { Login(index, tryCount + 1); });
+                    Dispatcher.Invoke(delegate () { Login(account, tryCount + 1); });
                     return;
                 }
 
-                Handle2FA(steamProcess, index);
+                Handle2FA(steamProcess, account);
             }
             else
             {
@@ -1591,7 +1508,8 @@ namespace SAM.Views
 
                 if (state == LoginWindowState.Login)
                 {
-                    state = WindowUtils.TryCredentialsEntry(steamLoginWindow, account.Name, account.Password, settings.User.RememberPassword);
+                    string password = StringCipher.Decrypt(account.Password, eKey);
+                    state = WindowUtils.TryCredentialsEntry(steamLoginWindow, account.Name, password, settings.User.RememberPassword);
                 }
             }
 
@@ -1614,9 +1532,10 @@ namespace SAM.Views
             }
         }
 
-        private void Copy2FA(int index)
+        private void Copy2FA(Account account)
         {
-            var key = WindowUtils.Generate2FACode(decryptedAccounts[index].SharedSecret);
+            string sharedSecret = StringCipher.Decrypt(account.SharedSecret, eKey);
+            string key = WindowUtils.Generate2FACode(sharedSecret);
             Clipboard.SetText(key);
             Task.Run(() => {
                 SystemSounds.Beep.Play();
@@ -1624,15 +1543,15 @@ namespace SAM.Views
             });
         }
 
-        private void Handle2FA(Process steamProcess, int index)
+        private void Handle2FA(Process steamProcess, Account account)
         {
             if (noReactLogin)
             {
-                Type2FA(steamProcess, index, 0);
+                Type2FA(steamProcess, account, 0);
             }
             else
             {
-                EnterReact2FA(steamProcess, decryptedAccounts[index], 0);
+                EnterReact2FA(steamProcess, account, 0);
             }
         }
 
@@ -1660,7 +1579,7 @@ namespace SAM.Views
             }
 
             LoginWindowState state = LoginWindowState.None;
-            string secret = account.SharedSecret;
+            string secret = StringCipher.Decrypt(account.SharedSecret, eKey);
 
             while (state != LoginWindowState.Success)
             {
@@ -1715,7 +1634,7 @@ namespace SAM.Views
             PostLogin();
         }
 
-        private void Type2FA(Process steamProcess, int index, int tryCount)
+        private void Type2FA(Process steamProcess, Account account, int tryCount)
         {
             if (tryCount > 0 && WindowUtils.GetLegacyMainSteamClientWindow().IsValid)
             {
@@ -1759,7 +1678,9 @@ namespace SAM.Views
 
             Thread.Sleep(100);
 
-            foreach (char c in WindowUtils.Generate2FACode(decryptedAccounts[index].SharedSecret))
+            string sharedSecret = StringCipher.Decrypt(account.SharedSecret, eKey);
+
+            foreach (char c in WindowUtils.Generate2FACode(sharedSecret))
             {
                 WindowUtils.SetForegroundWindow(steamGuardWindow.RawPtr);
                 Thread.Sleep(10);
@@ -1789,7 +1710,7 @@ namespace SAM.Views
             if (tryCount < maxRetry && steamGuardWindow.IsValid)
             {
                 Console.WriteLine("2FA code might have failed, attempting retry " + retry + "...");
-                Type2FA(steamProcess, index, retry);
+                Type2FA(steamProcess, account, retry);
                 return;
             }
             else if (tryCount == maxRetry && steamGuardWindow.IsValid)
@@ -1798,7 +1719,7 @@ namespace SAM.Views
 
                 if (result == MessageBoxResult.OK)
                 {
-                    Type2FA(steamProcess, index, retry);
+                    Type2FA(steamProcess, account, retry);
                 }
             }
             else if (tryCount == maxRetry + 1 && steamGuardWindow.IsValid)
@@ -1812,13 +1733,13 @@ namespace SAM.Views
 
         private void PostLogin()
         {
-            if (loginAllSequence == false)
+            if (!loginAllSequence)
             {
-                if (settings.User.ClearUserData == true)
+                if (settings.User.ClearUserData)
                 {
                     WindowUtils.ClearSteamUserDataFolder(settings.User.SteamPath, settings.User.SleepTime, maxRetry);
                 }
-                if (settings.User.CloseOnLogin == true)
+                if (settings.User.CloseOnLogin)
                 {
                     Dispatcher.Invoke(delegate () { Close(); });
                 }
@@ -1827,22 +1748,48 @@ namespace SAM.Views
 
         private void SortAccounts(SortType sortType)
         {
-            if (encryptedAccounts.Count > 0)
+            if (accounts.Count > 0)
             {
+                int? hash = null;
+                int index = -1;
+
+                if (settings.User.LoginSelectedAccount)
+                {
+                    hash = accounts[settings.User.SelectedAccountIndex].GetHashCode();
+                }
+                else if (settings.User.LoginRecentAccount)
+                {
+                    hash = accounts[settings.User.RecentAccountIndex].GetHashCode();
+                }
+
                 switch (sortType)
                 {
                     case SortType.Username:
-                        encryptedAccounts = encryptedAccounts.OrderBy(x => x.Name).ToList();
+                        accounts = accounts.OrderBy(x => x.Name).ToList();
                         break;
                     case SortType.Alias:
-                        encryptedAccounts = encryptedAccounts.OrderBy(x => x.Alias).ToList();
+                        accounts = accounts.OrderBy(x => x.Alias).ToList();
                         break;
                     case SortType.Banned:
-                        encryptedAccounts = encryptedAccounts.OrderByDescending(x => x.DaysSinceLastBan).ToList();
+                        accounts = accounts.OrderByDescending(x => x.DaysSinceLastBan).ToList();
                         break;
                     case SortType.Random:
-                        encryptedAccounts = encryptedAccounts.OrderBy(x => Guid.NewGuid()).ToList();
+                        accounts = accounts.OrderBy(x => Guid.NewGuid()).ToList();
                         break;
+                }
+
+                if (hash != null)
+                {
+                    index = accounts.FindIndex(a => a.GetHashCode() == hash);
+
+                    if (settings.User.LoginSelectedAccount)
+                    {
+                        settings.EnableSelectedAccountIndex(index);
+                    }
+                    else if (settings.User.LoginRecentAccount)
+                    {
+                        settings.UpdateRecentAccountIndex(index);
+                    }
                 }
 
                 SerializeAccounts();
@@ -1857,21 +1804,21 @@ namespace SAM.Views
                 File.Copy(dataFile, backupFile);
             }
 
-            if (IsPasswordProtected() == true && ePassword.Length > 0)
+            if (IsPasswordProtected() && !string.IsNullOrEmpty(ePassword))
             {
-                AccountUtils.PasswordSerialize(encryptedAccounts, ePassword);
+                AccountUtils.PasswordSerialize(accounts, ePassword);
             }
             else
             {
-                AccountUtils.Serialize(encryptedAccounts);
+                AccountUtils.Serialize(accounts);
             }
 
             RefreshWindow(dataFile);
         }
 
-        private void ExportAccount(int index)
+        private void ExportAccount(Account account)
         {
-            AccountUtils.ExportSelectedAccounts(new List<Account>() { encryptedAccounts[index] });
+            AccountUtils.ExportSelectedAccounts(new List<Account>() { account });
         }
 
         #region Resize and Resize Timer
@@ -1976,7 +1923,7 @@ namespace SAM.Views
         {
             if (sender is Button btn)
             {
-                if (dragging == false)
+                if (!dragging)
                 {
                     return;
                 }
@@ -2001,9 +1948,7 @@ namespace SAM.Views
         {
             if (sender is Button btn)
             {
-                // Login with clicked button's index, which stored in Tag.
-                int index = Int32.Parse(btn.Tag.ToString());
-                Login(index);
+                Login((Account)btn.Tag);
             }
         }
 
@@ -2011,35 +1956,34 @@ namespace SAM.Views
         {
             if (sender is MenuItem item)
             {
-                int index = Int32.Parse(item.Tag.ToString());
-                Login(index);
+                Login((Account)item.Tag);
             }
         }
 
-        private void AccountButtonSetTimeout_Click(int index, DateTime timeout)
+        private void AccountButtonSetTimeout_Click(Account account, DateTime timeout)
         {
             if (timeout != null && timeout != new DateTime())
             {
-                encryptedAccounts[index].Timeout = timeout;
+                account.Timeout = timeout;
                 SerializeAccounts();
             }
         }
 
-        private void AccountButtonSetCustomTimeout_Click(int index)
+        private void AccountButtonSetCustomTimeout_Click(Account account)
         {
-            var setTimeoutWindow = new SetTimeoutWindow(encryptedAccounts[index].Timeout);
+            var setTimeoutWindow = new SetTimeoutWindow(account.Timeout);
             setTimeoutWindow.ShowDialog();
 
             if (setTimeoutWindow.timeout != null && setTimeoutWindow.timeout != new DateTime())
             {
-                encryptedAccounts[index].Timeout = setTimeoutWindow.timeout;
+                account.Timeout = setTimeoutWindow.timeout;
                 SerializeAccounts();
             }
         }
 
-        private void AccountButtonClearTimeout_Click(int index)
+        private void AccountButtonClearTimeout_Click(Account account)
         {
-            encryptedAccounts[index].Timeout = null;
+            account.Timeout = null;
             SerializeAccounts();
         }
 
@@ -2047,26 +1991,27 @@ namespace SAM.Views
         {
             if (sender is Button btn)
             {
-                int index = Int32.Parse(btn.Tag.ToString());
+                Account account = (Account)btn.Tag;
+                int hash = account.GetHashCode();
 
                 // Check if this index has already been added.
                 // Remove if it is, add if it isn't.
-                if (exportAccounts.ContainsKey(index))
+                if (actionAccounts.ContainsKey(hash))
                 {
-                    exportAccounts.Remove(index);
+                    actionAccounts.Remove(hash);
                     btn.Opacity = 1;
                 }
                 else
                 {
-                    exportAccounts.Add(index, encryptedAccounts[index]);
+                    actionAccounts.Add(hash, account);
                     btn.Opacity = 0.5;
                 }
             }
         }
 
-        public async Task ReloadAccount_ClickAsync(int index)
+        public async Task ReloadAccount_ClickAsync(Account account)
         {
-            await ReloadAccount(encryptedAccounts[index]);
+            await ReloadAccount(account);
             SerializeAccounts();
             MessageBox.Show("Done!");
         }
@@ -2080,18 +2025,18 @@ namespace SAM.Views
 
             string previousPass = ePassword;
 
-            if (settingsDialog.Decrypt == true)
+            if (settingsDialog.Decrypt)
             {
-                AccountUtils.Serialize(encryptedAccounts);
+                AccountUtils.Serialize(accounts);
                 ePassword = "";
             }
-            else if (settingsDialog.Password != null)
+            else if (!string.IsNullOrEmpty(settingsDialog.Password))
             {
                 ePassword = settingsDialog.Password;
 
                 if (previousPass != ePassword)
                 {
-                    AccountUtils.PasswordSerialize(encryptedAccounts, ePassword);
+                    AccountUtils.PasswordSerialize(accounts, ePassword);
                 }
             }
 
@@ -2108,7 +2053,7 @@ namespace SAM.Views
             {
                 List<Account> accountsToDelete = new List<Account>();
 
-                foreach (Account account in encryptedAccounts)
+                foreach (Account account in accounts)
                 {
                     if (account.NumberOfVACBans > 0 || account.NumberOfGameBans > 0)
                     {
@@ -2118,7 +2063,7 @@ namespace SAM.Views
 
                 foreach (Account account in accountsToDelete)
                 {
-                    encryptedAccounts.Remove(account);
+                    accounts.Remove(account);
                 }
 
                 SerializeAccounts();
@@ -2192,7 +2137,7 @@ namespace SAM.Views
         {
             if (sender is Button btn)
             {
-                ExportAccount(Int32.Parse(btn.Tag.ToString()));
+                ExportAccount((Account)btn.Tag);
             }
         }
 
@@ -2217,11 +2162,11 @@ namespace SAM.Views
             WindowState = WindowState.Normal;
         }
 
-        private void CopyUsernameToClipboard(int index)
+        private void CopyUsernameToClipboard(Account account)
         {
             try
             {
-                Clipboard.SetText(decryptedAccounts[index].Name);
+                Clipboard.SetText(account.Name);
             }
             catch (Exception e)
             {
@@ -2229,11 +2174,12 @@ namespace SAM.Views
             }
         }
 
-        private void CopyPasswordToClipboard(int index)
+        private void CopyPasswordToClipboard(Account account)
         {
             try
             {
-                Clipboard.SetText(decryptedAccounts[index].Password);
+                string password = StringCipher.Decrypt(account.Password, eKey);
+                Clipboard.SetText(password);
             }
             catch (Exception e)
             {
@@ -2241,11 +2187,23 @@ namespace SAM.Views
             }
         }
 
-        private void CopyProfileUrlToClipboard(int index)
+        private void CopySteamIdToClipboard(Account account)
         {
             try
             {
-                Clipboard.SetText(decryptedAccounts[index].ProfUrl);
+                Clipboard.SetText(account.SteamId);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
+        }
+
+        private void CopyProfileUrlToClipboard(Account account)
+        {
+            try
+            {
+                Clipboard.SetText(account.ProfUrl);
             }
             catch (Exception e)
             {
@@ -2286,12 +2244,12 @@ namespace SAM.Views
 
         private void ContextMenu_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            if (exporting == true)
+            if (exporting)
             {
                 GenerateAltActionContextMenu(AltActionType.EXPORTING).IsOpen = true;
                 e.Handled = true;
             }
-            else if (deleting == true)
+            else if (deleting)
             {
                 GenerateAltActionContextMenu(AltActionType.DELETING).IsOpen = true;
                 e.Handled = true;
@@ -2305,7 +2263,7 @@ namespace SAM.Views
                 case WindowState.Maximized:
                     break;
                 case WindowState.Minimized:
-                    if (settings.User.MinimizeToTray == true)
+                    if (settings.User.MinimizeToTray)
                     {
                         Visibility = Visibility.Hidden;
                         ShowInTaskbar = false;
@@ -2335,13 +2293,13 @@ namespace SAM.Views
                 return;
             }
 
-            var exposedCredentialsWindow = new ExposedInfoWindow(decryptedAccounts);
+            var exposedCredentialsWindow = new ExposedInfoWindow(accounts, eKey);
             exposedCredentialsWindow.ShowDialog();
         }
 
         private bool IsPasswordProtected()
         {
-            if (settings.User.PasswordProtect == true)
+            if (settings.User.PasswordProtect)
             {
                 return true;
             }
@@ -2372,9 +2330,9 @@ namespace SAM.Views
             return false;
         }
 
-        void TimeoutTimer_Tick(int index, TextBlock timeoutLabel, System.Timers.Timer timeoutTimer)
+        void TimeoutTimer_Tick(Account account, TextBlock timeoutLabel, System.Timers.Timer timeoutTimer)
         {
-            var timeLeft = encryptedAccounts[index].Timeout - DateTime.Now;
+            var timeLeft = account.Timeout - DateTime.Now;
 
             if (timeLeft.Value.CompareTo(TimeSpan.Zero) <= 0)
             {
@@ -2382,7 +2340,7 @@ namespace SAM.Views
                 timeoutTimer.Dispose();
 
                 timeoutLabel.Visibility = Visibility.Hidden;
-                AccountButtonClearTimeout_Click(index);
+                AccountButtonClearTimeout_Click(account);
             }
             else
             {
@@ -2391,27 +2349,27 @@ namespace SAM.Views
             }
         }
 
-        void TimeoutTimer_Tick(int index, System.Timers.Timer timeoutTimer)
+        void TimeoutTimer_Tick(Account account, System.Timers.Timer timeoutTimer)
         {
-            var timeLeft = encryptedAccounts[index].Timeout - DateTime.Now;
+            var timeLeft = account.Timeout - DateTime.Now;
 
             if (timeLeft.Value.CompareTo(TimeSpan.Zero) <= 0)
             {
                 timeoutTimer.Stop();
                 timeoutTimer.Dispose();
 
-                encryptedAccounts[index].TimeoutTimeLeft = null;
-                AccountButtonClearTimeout_Click(index);
+                account.TimeoutTimeLeft = null;
+                AccountButtonClearTimeout_Click(account);
             }
             else
             {
-                encryptedAccounts[index].TimeoutTimeLeft = AccountUtils.FormatTimespanString(timeLeft.Value);
+                account.TimeoutTimeLeft = AccountUtils.FormatTimespanString(timeLeft.Value);
             }
         }
 
         private void Window_LocationChanged(object sender, EventArgs e)
         {
-            if (!isLoadingSettings && settings.File != null && IsInBounds() == true)
+            if (!isLoadingSettings && settings.File != null && IsInBounds())
             {
                 settings.File.Write(SAMSettings.WINDOW_LEFT, Left.ToString(), SAMSettings.SECTION_LOCATION);
                 settings.File.Write(SAMSettings.WINDOW_TOP, Top.ToString(), SAMSettings.SECTION_LOCATION);
@@ -2420,7 +2378,7 @@ namespace SAM.Views
 
         private void MetroWindow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (!isLoadingSettings && settings.File != null && settings.User.ListView == true)
+            if (!isLoadingSettings && settings.File != null && settings.User.ListView)
             {
                 settings.User.ListViewHeight = Height;
                 settings.User.ListViewWidth = Width;
@@ -2438,7 +2396,7 @@ namespace SAM.Views
 
         private void SetWindowSettingsIntoScreenArea()
         {
-            if (IsInBounds() == false)
+            if (!IsInBounds())
             {
                 SetWindowToCenter();
             }
@@ -2473,9 +2431,9 @@ namespace SAM.Views
             FileMenuItem.IsEnabled = false;
             EditMenuItem.IsEnabled = false;
 
-            exportAccounts = new Dictionary<int, Account>();
+            actionAccounts = new Dictionary<int, Account>();
 
-            if (settings.User.ListView == true)
+            if (settings.User.ListView)
             {
                 AccountsDataGrid.SelectionMode = DataGridSelectionMode.Extended;
                 Application.Current.Resources["AccountGridActionHighlightColor"] = Brushes.Green;
@@ -2509,17 +2467,18 @@ namespace SAM.Views
 
         private void ExportSelectedAccounts()
         {
-            if (settings.User.ListView == true)
+            if (settings.User.ListView)
             {
                 for (int i = 0; i < AccountsDataGrid.SelectedItems.Count; i++)
                 {
-                    exportAccounts.Add(i, AccountsDataGrid.SelectedItems[i] as Account);
+                    Account account = AccountsDataGrid.SelectedItems[i] as Account;
+                    actionAccounts.Add(account.GetHashCode(), account);
                 }
             }
 
-            if (exportAccounts.Count > 0)
+            if (actionAccounts.Count > 0)
             {
-                AccountUtils.ExportSelectedAccounts(exportAccounts.Values.ToList());
+                AccountUtils.ExportSelectedAccounts(actionAccounts.Values.ToList());
             }
             else
             {
@@ -2536,7 +2495,7 @@ namespace SAM.Views
 
         private void DeleteAllAccountsMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (encryptedAccounts.Count > 0)
+            if (accounts.Count > 0)
             {
                 MessageBoxResult messageBoxResult = MessageBox.Show("Are you sure you want to delete all accounts?\nThis action will perminantly delete the account data file.", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
@@ -2562,12 +2521,12 @@ namespace SAM.Views
         private void DeleteSelectedMenuItem_Click(object sender, RoutedEventArgs e)
         {
             deleting = true;
-            deleteAccounts = new Dictionary<int, Account>();
+            actionAccounts = new Dictionary<int, Account>();
 
             FileMenuItem.IsEnabled = false;
             EditMenuItem.IsEnabled = false;
 
-            if (settings.User.ListView == true)
+            if (settings.User.ListView)
             {
                 AccountsDataGrid.SelectionMode = DataGridSelectionMode.Extended;
                 Application.Current.Resources["AccountGridActionHighlightColor"] = Brushes.Red;
@@ -2598,18 +2557,19 @@ namespace SAM.Views
         {
             if (sender is Button btn)
             {
-                int index = Int32.Parse(btn.Tag.ToString());
+                Account account = (Account)btn.Tag;
+                int hash = account.GetHashCode();
 
                 // Check if this index has already been added.
                 // Remove if it is, add if it isn't.
-                if (deleteAccounts.ContainsKey(index))
+                if (actionAccounts.ContainsKey(hash))
                 {
-                    deleteAccounts.Remove(index);
+                    actionAccounts.Remove(hash);
                     btn.Opacity = 1;
                 }
                 else
                 {
-                    deleteAccounts.Add(index, encryptedAccounts[index]);
+                    actionAccounts.Add(hash, account);
                     btn.Opacity = 0.5;
                 }
             }
@@ -2622,23 +2582,24 @@ namespace SAM.Views
 
         private void DeleteSelectedAccounts()
         {
-            if (settings.User.ListView == true)
+            if (settings.User.ListView)
             {
                 for (int i = 0; i < AccountsDataGrid.SelectedItems.Count; i++)
                 {
-                    deleteAccounts.Add(i, AccountsDataGrid.SelectedItems[i] as Account);
+                    Account account = AccountsDataGrid.SelectedItems[i] as Account;
+                    actionAccounts.Add(account.GetHashCode(), account);
                 }
             }
 
-            if (deleteAccounts.Count > 0)
+            if (actionAccounts.Count > 0)
             {
                 MessageBoxResult messageBoxResult = MessageBox.Show("Are you sure you want to delete the selected accounts?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
                 if (messageBoxResult == MessageBoxResult.Yes)
                 {
-                    foreach (Account account in deleteAccounts.Values.ToList())
+                    foreach (Account account in actionAccounts.Values.ToList())
                     {
-                        encryptedAccounts.Remove(account);
+                        accounts.Remove(account);
                     }
 
                     SerializeAccounts();
@@ -2657,13 +2618,13 @@ namespace SAM.Views
             FileMenuItem.IsEnabled = true;
             EditMenuItem.IsEnabled = true;
 
-            if (settings.User.ListView == true)
+            if (settings.User.ListView)
             {
                 AccountsDataGrid.SelectionMode = DataGridSelectionMode.Single;
             }
             else
             {
-                if (settings.User.HideAddButton == true)
+                if (!settings.User.HideAddButton)
                 {
                     AddButton.Visibility = Visibility.Visible;
                 }
@@ -2696,29 +2657,27 @@ namespace SAM.Views
 
         private void AccountsDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (AccountsDataGrid.SelectedItem != null && deleting == false)
+            if (AccountsDataGrid.SelectedItem != null && !deleting)
             {
                 Account account = AccountsDataGrid.SelectedItem as Account;
-                int index = encryptedAccounts.FindIndex(a => a.Name == account.Name);
-                Login(index);
+                Login(account);
             }
         }
 
         private void AccountsDataGrid_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            if (exporting == true)
+            if (exporting)
             {
                 AccountsDataGrid.ContextMenu = GenerateAltActionContextMenu(AltActionType.EXPORTING);
             }
-            else if (deleting == true)
+            else if (deleting)
             {
                 AccountsDataGrid.ContextMenu = GenerateAltActionContextMenu(AltActionType.DELETING);
             }
             else if (AccountsDataGrid.SelectedItem != null)
             {
                 Account account = AccountsDataGrid.SelectedItem as Account;
-                int index = encryptedAccounts.FindIndex(a => a.Name == account.Name);
-                AccountsDataGrid.ContextMenu = GenerateAccountContextMenu(account, index);
+                AccountsDataGrid.ContextMenu = GenerateAccountContextMenu(account);
             }
         }
 
@@ -2757,17 +2716,17 @@ namespace SAM.Views
         private void LoginAllMissing()
         {
             // Auto login all accounts missing steamId.
-            for (int i = 0; i < encryptedAccounts.Count; i++)
+            foreach (Account account in accounts)
             {
-                if (loginAllCancelled == true)
+                if (loginAllCancelled)
                 {
                     StopLoginAllMissing();
                     return;
                 }
 
-                if (encryptedAccounts[i].SteamId == null || encryptedAccounts[i].SteamId.Length == 0)
+                if (string.IsNullOrEmpty(account.SteamId))
                 {
-                    Login(i);
+                    Login(account);
 
                     // Wait and check if full steam client window is open.
                     WindowUtils.WaitForSteamClientWindow();
@@ -2865,16 +2824,18 @@ namespace SAM.Views
                     thread.Abort();
                 }
             }
+
+            TaskbarIcon.Dispose();
         }
 
         private void AccountsDataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter || e.Key == Key.Return)
             {
-                object selectedItem = AccountsDataGrid.SelectedItem;
-                if (selectedItem != null)
+                if (AccountsDataGrid.SelectedItem != null)
                 {
-                    Login(AccountsDataGrid.SelectedIndex);
+                    Account account = AccountsDataGrid.SelectedItem as Account;
+                    Login(account);
                 }
 
                 e.Handled = true;
@@ -2900,6 +2861,18 @@ namespace SAM.Views
         private void ResetWindowTitle()
         {
             SetWindowTitle(null);
+        }
+
+        private void ShowErrorMessage(string message)
+        {
+            ShowMessage("Error", message);
+        }
+
+        private void ShowMessage(string title, string message)
+        {
+            Dispatcher.Invoke(async delegate () {
+                await this.ShowMessageAsync(title, message);
+            });
         }
     }
 }

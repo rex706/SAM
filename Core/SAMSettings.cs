@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace SAM.Core
 {
@@ -8,6 +8,7 @@ namespace SAM.Core
     {
         public const string FILE_NAME = "SAMSettings.ini";
 
+        public const string SECTION_SYSTEM = "System";
         public const string SECTION_GENERAL = "Settings";
         public const string SECTION_AUTOLOG = "AutoLog";
         public const string SECTION_CUSTOMIZE = "Customize";
@@ -20,6 +21,8 @@ namespace SAM.Core
         public UserSettings User = new UserSettings();
         public readonly UserSettings Default = new UserSettings();
         public List<string> globalParameters;
+
+        public const string VERSION = "Version";
 
         public const string CLEAR_USER_DATA = "ClearUserData";
         public const string HIDE_ADD_BUTTON = "HideAddButton";
@@ -93,6 +96,8 @@ namespace SAM.Core
 
         public Dictionary<string, string> KeyValuePairs = new Dictionary<string, string>()
         {
+            { VERSION, SECTION_SYSTEM },
+
             { CLEAR_USER_DATA, SECTION_GENERAL },
             { HIDE_ADD_BUTTON,  SECTION_GENERAL },
             { PASSWORD_PROTECT, SECTION_GENERAL },
@@ -172,7 +177,16 @@ namespace SAM.Core
         public SAMSettings()
         {
             HandleDeprecatedSettings();
+            UpdateVersion();
             ReadSettingsFile();
+        }
+
+        public void GenerateSettings()
+        {
+            foreach (KeyValuePair<string, string> entry in KeyValuePairs)
+            {
+                File.Write(entry.Key, Default.KeyValuePairs[entry.Key].ToString(), entry.Value);
+            }
         }
 
         public void HandleDeprecatedSettings()
@@ -245,25 +259,26 @@ namespace SAM.Core
                 {
                     switch (entry.Key)
                     {
-                        case SAMSettings.ACCOUNTS_PER_ROW:
-                            string accountsPerRowString = File.Read(SAMSettings.ACCOUNTS_PER_ROW, SAMSettings.SECTION_GENERAL);
+                        case ACCOUNTS_PER_ROW:
+                            string accountsPerRowString = File.Read(ACCOUNTS_PER_ROW, SECTION_GENERAL);
 
-                            if (!Regex.IsMatch(accountsPerRowString, @"^\d+$") || Int32.Parse(accountsPerRowString) < 1)
+                            if (!Int32.TryParse(accountsPerRowString, out int accountsPerRow) || accountsPerRow < 1)
                             {
-                                File.Write(SAMSettings.ACCOUNTS_PER_ROW, Default.AccountsPerRow.ToString(), SAMSettings.SECTION_GENERAL);
+                                File.Write(ACCOUNTS_PER_ROW, Default.AccountsPerRow.ToString(), SECTION_GENERAL);
                                 User.AccountsPerRow = Default.AccountsPerRow;
                             }
-
-                            User.AccountsPerRow = Int32.Parse(accountsPerRowString);
+                            else
+                            {
+                                User.AccountsPerRow = accountsPerRow;
+                            }
                             break;
 
-                        case SAMSettings.SLEEP_TIME:
-                            string sleepTimeString = File.Read(SAMSettings.SLEEP_TIME, SAMSettings.SECTION_GENERAL);
-                            float sleepTime = 0;
+                        case SLEEP_TIME:
+                            string sleepTimeString = File.Read(SLEEP_TIME, SECTION_GENERAL);
 
-                            if (!Single.TryParse(sleepTimeString, out sleepTime) || sleepTime < 0 || sleepTime > 100)
+                            if (!Single.TryParse(sleepTimeString, out float sleepTime) || sleepTime < 0 || sleepTime > 100)
                             {
-                                File.Write(SAMSettings.SLEEP_TIME, Default.SleepTime.ToString(), SAMSettings.SECTION_GENERAL);
+                                File.Write(SLEEP_TIME, Default.SleepTime.ToString(), SECTION_GENERAL);
                                 User.SleepTime = Default.SleepTime * 1000;
                             }
                             else
@@ -272,17 +287,16 @@ namespace SAM.Core
                             }
                             break;
 
-                        case SAMSettings.START_MINIMIZED:
-                            User.StartMinimized = Convert.ToBoolean(File.Read(SAMSettings.START_MINIMIZED, SAMSettings.SECTION_GENERAL));
+                        case START_MINIMIZED:
+                            User.StartMinimized = Convert.ToBoolean(File.Read(START_MINIMIZED, SECTION_GENERAL));
                             break;
 
-                        case SAMSettings.BUTTON_SIZE:
-                            string buttonSizeString = File.Read(SAMSettings.BUTTON_SIZE, SAMSettings.SECTION_CUSTOMIZE);
-                            int buttonSize = 0;
+                        case BUTTON_SIZE:
+                            string buttonSizeString = File.Read(BUTTON_SIZE, SECTION_CUSTOMIZE);
 
-                            if (!Regex.IsMatch(buttonSizeString, @"^\d+$") || !Int32.TryParse(buttonSizeString, out buttonSize) || buttonSize < 50 || buttonSize > 200)
+                            if (!Int32.TryParse(buttonSizeString, out int buttonSize) || buttonSize < 50 || buttonSize > 200)
                             {
-                                File.Write(SAMSettings.BUTTON_SIZE, "100", SAMSettings.SECTION_CUSTOMIZE);
+                                File.Write(BUTTON_SIZE, "100", SECTION_CUSTOMIZE);
                                 User.ButtonSize = 100;
                             }
                             else
@@ -290,8 +304,9 @@ namespace SAM.Core
                                 User.ButtonSize = buttonSize;
                             }
                             break;
-                        case SAMSettings.INPUT_METHOD:
-                            User.VirtualInputMethod = (VirtualInputMethod)Enum.Parse(typeof(VirtualInputMethod), File.Read(SAMSettings.INPUT_METHOD, SAMSettings.SECTION_AUTOLOG));
+
+                        case INPUT_METHOD:
+                            User.VirtualInputMethod = (VirtualInputMethod)Enum.Parse(typeof(VirtualInputMethod), File.Read(INPUT_METHOD, SECTION_AUTOLOG));
                             break;
 
                         default:
@@ -299,7 +314,7 @@ namespace SAM.Core
                             {
                                 case TypeCode.Boolean:
                                     User.KeyValuePairs[entry.Key] = Convert.ToBoolean(File.Read(entry.Key, entry.Value));
-                                    if (entry.Value.Equals(SAMSettings.SECTION_PARAMETERS) && (bool)User.KeyValuePairs[entry.Key] == true && !entry.Key.StartsWith("custom"))
+                                    if (entry.Value.Equals(SECTION_PARAMETERS) && (bool)User.KeyValuePairs[entry.Key] == true && !entry.Key.StartsWith("custom"))
                                     {
                                         globalParameters.Add("-" + entry.Key);
                                     }
@@ -319,6 +334,62 @@ namespace SAM.Core
                     }
                 }
             }
+        }
+
+        public void UpdateVersion()
+        {
+            File.Write(VERSION, Assembly.GetExecutingAssembly().GetName().Version.ToString(), SECTION_SYSTEM);
+        }
+
+        public void EnableSelectedAccountIndex(int index)
+        {
+            File.Write(SELECTED_ACCOUNT_INDEX, index.ToString(), SECTION_AUTOLOG);
+            File.Write(LOGIN_SELECTED_ACCOUNT, true.ToString(), SECTION_AUTOLOG);
+            File.Write(LOGIN_RECENT_ACCOUNT, false.ToString(), SECTION_AUTOLOG);
+            User.LoginSelectedAccount = true;
+            User.LoginRecentAccount = false;
+            User.SelectedAccountIndex = index;
+        }
+
+        public void ResetSelectedAccountIndex()
+        {
+            File.Write(SELECTED_ACCOUNT_INDEX, "-1", SECTION_AUTOLOG);
+            File.Write(LOGIN_SELECTED_ACCOUNT, false.ToString(), SECTION_AUTOLOG);
+            User.LoginSelectedAccount = false;
+            User.SelectedAccountIndex = -1;
+        }
+
+        public void EnableRecentAccountIndex(int index) 
+        {
+            File.Write(SELECTED_ACCOUNT_INDEX, index.ToString(), SECTION_AUTOLOG);
+            File.Write(LOGIN_SELECTED_ACCOUNT, true.ToString(), SECTION_AUTOLOG);
+            File.Write(LOGIN_RECENT_ACCOUNT, false.ToString(), SECTION_AUTOLOG);
+            User.LoginSelectedAccount = true;
+            User.LoginRecentAccount = false;
+            User.SelectedAccountIndex = index;
+        }
+
+        public void UpdateRecentAccountIndex(int index)
+        {
+            File.Write(RECENT_ACCOUNT_INDEX, index.ToString(), SECTION_AUTOLOG);
+            User.RecentAccountIndex = index;
+        }
+
+        public bool IsLoginSelectedEnabled() 
+        {
+            return File.Read(LOGIN_SELECTED_ACCOUNT, SECTION_AUTOLOG) == true.ToString();
+        }
+
+        public void SetPasswordProtect(bool passwordProtect)
+        {
+            File.Write(PASSWORD_PROTECT, passwordProtect.ToString(), SECTION_GENERAL);
+            User.PasswordProtect = passwordProtect;
+        }
+
+        public void SetLastAutoReload(DateTime dateTime)
+        {
+            File.Write(LAST_AUTO_RELOAD, dateTime.ToString(), SECTION_STEAM);
+            User.LastAutoReload = dateTime;
         }
     }
 }

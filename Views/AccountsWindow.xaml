@@ -173,9 +173,9 @@
                             </Style>
                         </Button.Style>
                     </Button>
-                    <Button x:Name="ExportButton" Content="Export" HorizontalAlignment="Center" Margin="0,0,0,25" VerticalAlignment="Center" Height="23" Width="50" Click="ExportButton_Click" Visibility="Hidden"/>
-                    <Button x:Name="DeleteButton" Content="Delete" HorizontalAlignment="Center" Margin="0,0,0,25" VerticalAlignment="Center" Height="23" Width="50" Click="DeleteButton_Click" Visibility="Hidden"/>
-                    <Button x:Name="CancelExportButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,25,0,0" VerticalAlignment="Center" Height="23" Width="50" Click="CancelExportButton_Click" Visibility="Hidden"/>
+                    <Button x:Name="ExportButton" Content="Export" HorizontalAlignment="Center" Margin="0,0,0,30" VerticalAlignment="Center" Height="23" Width="50" Click="ExportButton_Click" Visibility="Hidden"/>
+                    <Button x:Name="DeleteButton" Content="Delete" HorizontalAlignment="Center" Margin="0,0,0,30" VerticalAlignment="Center" Height="23" Width="50" Click="DeleteButton_Click" Visibility="Hidden"/>
+                    <Button x:Name="CancelExportButton" Content="Cancel" HorizontalAlignment="Center" Margin="0,30,0,0" VerticalAlignment="Center" Height="23" Width="50" Click="CancelExportButton_Click" Visibility="Hidden"/>
                 </Grid>
                 <DockPanel>
                     <Border DockPanel.Dock="Top" Height="20" VerticalAlignment="Top">
@@ -195,7 +195,7 @@
                                     <MenuItem Header="Banned" Click="DeleteBannedAccounts_Click" />
                                     <MenuItem Header="Select" Click="DeleteSelectedMenuItem_Click" />
                                 </MenuItem>
-                                <MenuItem Header="Expose Credentials" Click="ExposeCredentialsMenuItem_Click"/>
+                                <MenuItem Header="Expose Details" Click="ExposeCredentialsMenuItem_Click"/>
                                 <Separator />
                                 <MenuItem Header="Exit" Click="ExitMenuItem_Click" />
                             </MenuItem>
@@ -222,12 +222,12 @@
                 </DockPanel>
             </Grid>
         </ScrollViewer>
-        <tb:TaskbarIcon IconSource="/Resources/steam.ico" ToolTipText="SAM" TrayLeftMouseUp="TaskbarIcon_TrayLeftMouseUp">
+        <tb:TaskbarIcon x:Name="TaskbarIcon" IconSource="/Resources/steam.ico" ToolTipText="SAM" TrayLeftMouseUp="TaskbarIcon_TrayLeftMouseUp">
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu x:Name="TaskbarIconContextMenu" FontSize="{DynamicResource MenuFontSize}">
                     <MenuItem Header="New Account" Click="AddButton_Click"/>
-                    <MenuItem x:Name="TaskBarIconLoginContextMenu" Header="Login" IsEnabled="False">
-                    </MenuItem>
+                    <MenuItem x:Name="TaskBarIconLoginContextMenu" Header="Login" IsEnabled="False"/>
+                    <MenuItem Header="Settings" Click="SettingsButton_Click"/>
                     <Separator />
                     <MenuItem Header="Restore" Click="ShowWindowButton_Click" />
                     <MenuItem Header="Exit" Click="ExitMenuItem_Click" />

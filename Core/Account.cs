@@ -27,6 +27,7 @@ namespace SAM.Core
         public DateTime? Timeout { get; set; }
 
         private string timeoutTimeLeft;
+
         public string TimeoutTimeLeft { get { return timeoutTimeLeft; } set { timeoutTimeLeft = value; OnPropertyChanged(); } }
 
         public string Description { get; set; }
@@ -38,6 +39,7 @@ namespace SAM.Core
         public bool VACBanned { get; set; }
 
         public int NumberOfVACBans { get; set; }
+
         public int DaysSinceLastBan { get; set; }
 
         public int NumberOfGameBans { get; set; }

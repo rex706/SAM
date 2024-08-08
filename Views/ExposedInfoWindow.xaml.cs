@@ -12,11 +12,13 @@ namespace SAM.Views
     public partial class ExposedInfoWindow : MetroWindow
     {
         private readonly List<Account> decryptedAccounts;
+        private readonly string eKey;
 
-        public ExposedInfoWindow(List<Account> decryptedAccounts)
+        public ExposedInfoWindow(List<Account> decryptedAccounts, string eKey)
         {
             InitializeComponent();
             this.decryptedAccounts = decryptedAccounts;
+            this.eKey = eKey;
             RefreshAccountsList();
         }
 
@@ -26,14 +28,17 @@ namespace SAM.Views
 
             foreach (Account account in decryptedAccounts)
             {
-                if (account.SharedSecret != null && account.SharedSecret != string.Empty )
+                string password = StringCipher.Decrypt(account.Password, eKey);
+                string sharedSecret = StringCipher.Decrypt(account.SharedSecret, eKey);
+
+                string line = account.Name + DelimiterCharacterTextBox.Text + password;
+
+                if (!string.IsNullOrEmpty(sharedSecret))
                 {
-                    accountListBuilder.AppendLine(account.Name + DelimiterCharacterTextBox.Text + account.Password + DelimiterCharacterTextBox.Text + account.SharedSecret);
+                    line += DelimiterCharacterTextBox.Text +  sharedSecret;
                 }
-                else
-                {
-                    accountListBuilder.AppendLine(account.Name + DelimiterCharacterTextBox.Text + account.Password);
-                }
+
+                accountListBuilder.AppendLine(line);
             }
 
             DelimitedAccountsTextBox.Text = accountListBuilder.ToString();

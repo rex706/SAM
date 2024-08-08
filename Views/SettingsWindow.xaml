@@ -27,13 +27,13 @@
         <TabControl Background="{x:Null}" VerticalAlignment="Top" Height="210">
             <TabItem Header="General" Foreground="{DynamicResource xctkForegoundBrush}" mah:HeaderedControlHelper.HeaderFontSize="{DynamicResource MenuFontSize}" >
                 <Grid>
-                    <Label x:Name="NumPerRowLabel" Content="Accounts Per Row" HorizontalAlignment="Left" Margin="228,7,0,0" VerticalAlignment="Top"/>
+                    <Label x:Name="NumPerRowLabel" Content="Button Columns" HorizontalAlignment="Left" Margin="228,7,0,0" VerticalAlignment="Top"/>
                     <xctk:IntegerUpDown x:Name="accountsPerRowSpinBox" Minimum="1" Maximum="999" HorizontalAlignment="Left" Height="23" Margin="175,10,0,0" VerticalAlignment="Top" Width="50" TextAlignment="Center" ToolTip="Number of accounts displayed per row" Foreground="{DynamicResource xctkForegoundBrush}"/>
                     <CheckBox x:Name="startupCheckBox" Content="Start with Windows" HorizontalAlignment="Left" Margin="10,146,0,0" VerticalAlignment="Top"/>
                     <CheckBox x:Name="startupMinCheckBox" Content="Start Minimized" HorizontalAlignment="Left" Margin="10,123,0,0" VerticalAlignment="Top"/>
                     <CheckBox x:Name="minimizeToTrayCheckBox" Content="Minimize To Tray" HorizontalAlignment="Left" Margin="10,77,0,0" VerticalAlignment="Top"/>
                     <CheckBox x:Name="passwordProtectCheckBox" Content="Password Protect" HorizontalAlignment="Left" Margin="10,54,0,0" VerticalAlignment="Top" ToolTip="Password protect SAM"/>
-                    <CheckBox x:Name="rememberLoginPasswordCheckBox" Content="Remember Password" HorizontalAlignment="Left" Margin="10,100,0,0" VerticalAlignment="Top" ToolTip="Checks the 'Remember my password' checkbox when logging into Steam. (Currently not working with '-login' parameter)"/>
+                    <CheckBox x:Name="rememberLoginPasswordCheckBox" Content="Remember Password" HorizontalAlignment="Left" Margin="10,100,0,0" VerticalAlignment="Top" ToolTip="Checks the 'Remember my password' checkbox when logging into Steam"/>
                     <CheckBox x:Name="clearUserDataCheckBox" Content="Clear User Data" HorizontalAlignment="Left" Margin="10,8,0,0" VerticalAlignment="Top" ToolTip="Deletes all files in the '..\Steam\userdata' folder after every login"/>
                     <xctk:DecimalUpDown x:Name="sleepTimeSpinBox" Minimum="0" Maximum="99" Increment=".1" HorizontalAlignment="Left" Height="23" Margin="175,38,0,0" VerticalAlignment="Top" Width="50" TextAlignment="Center" ToolTip="Sleep time for waiting actions" Foreground="{DynamicResource xctkForegoundBrush}"/>
                     <Label x:Name="sleepTimeLabel" Content="Sleep Time (sec)" HorizontalAlignment="Left" Margin="228,35,0,0" VerticalAlignment="Top" Width="104"/>
@@ -46,11 +46,11 @@
             </TabItem>
             <TabItem Header="Auto-Login" mah:HeaderedControlHelper.HeaderFontSize="{DynamicResource TabItemFontSize}">
                 <Grid>
-                    <CheckBox x:Name="mostRecentCheckBox" Content="Most recent:" HorizontalAlignment="Left" Margin="17,38,0,0" VerticalAlignment="Top" Checked="AutologRecentCheckBox_Checked" Unchecked="AutologRecentCheckBox_Unchecked" ToolTip="Log in the most recently used account when SAM starts if Steam is closed."/>
+                    <CheckBox x:Name="mostRecentCheckBox" Content="Most recent:" HorizontalAlignment="Left" Margin="17,38,0,0" VerticalAlignment="Top" Checked="AutologRecentCheckBox_Checked" Unchecked="AutologRecentCheckBox_Unchecked" ToolTip="Log in the most recently used account when SAM starts if Steam is not open."/>
                     <TextBlock x:Name="recentAccountLabel" Text="" HorizontalAlignment="Left" Margin="121,38,0,0" VerticalAlignment="Top"/>
-                    <CheckBox x:Name="selectedAccountCheckBox" Content="Pre-selected:" HorizontalAlignment="Left" Margin="17,66,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.465,-0.933" Checked="SelectedAccountLabel_Checked" Unchecked="SelectedAccountLabel_Unchecked" ToolTip="Login the selected auto account when SAM starts if Steam is closed."/>
+                    <CheckBox x:Name="selectedAccountCheckBox" Content="Pre-selected:" HorizontalAlignment="Left" Margin="17,66,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.465,-0.933" Checked="SelectedAccountLabel_Checked" Unchecked="SelectedAccountLabel_Unchecked" ToolTip="Login the selected auto account when SAM starts if Steam is not open."/>
                     <TextBlock x:Name="selectedAccountLabel" Text="" HorizontalAlignment="Left" Margin="121,66,0,0" VerticalAlignment="Top"/>
-                    <TextBlock Text="Auto accounts only trigger if Steam is closed" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" TextDecorations="Underline"/>
+                    <TextBlock Text="Auto accounts only trigger if Steam is not open" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" TextDecorations="Underline"/>
                     <TextBlock Text="Automatic Input Method:" HorizontalAlignment="Center" Margin="17,122,187,0" VerticalAlignment="Top"/>
                     <CheckBox x:Name="HandleImeCheckBox" Content="Handle Microsoft IME" HorizontalAlignment="Left" Margin="17,153,0,0" VerticalAlignment="Top" ToolTip="Toggle Caps-Lock when automatically entering characters to handle IME for international keyboard settings." Checked="HandleImeCheckBox_Checked" Unchecked="HandleImeCheckBox_Unchecked"/>
                     <ComboBox x:Name="InputMethodSelectBox" HorizontalAlignment="Left" Margin="159,118,0,0" VerticalAlignment="Top" Width="154"/>
@@ -139,7 +139,7 @@
                     <CheckBox x:Name="TenFootCheckBox" Content="-tenfoot" HorizontalAlignment="Left" Margin="203,121,0,0" VerticalAlignment="Top" ToolTip="Start Steam in Big Picture Mode."/>
                     <CheckBox x:Name="CustomParametersCheckBox" Content="" HorizontalAlignment="Left" Margin="12,150,0,0" VerticalAlignment="Top" Foreground="#FFD1D1D1" Checked="CustomParametersCheckBox_Checked" Unchecked="CustomParametersCheckBox_Unchecked" ToolTip="Toggle custom parameters"/>
                     <TextBox x:Name="CustomParametersTextBox" HorizontalAlignment="Center" Height="19" Margin="33,146,35,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="266" IsEnabled="False"/>
-                    <Button x:Name="CustomParamsHelpButton" Content="?" Margin="0,146,8,13" Height="23" Width="25" HorizontalAlignment="Right" ToolTip="Online documentation" Click="CustomParamsHelpButton_Click"/>
+                    <Button x:Name="CustomParamsHelpButton" Content="?" Margin="0,146,8,13" Height="23" Width="25" HorizontalAlignment="Right" ToolTip="Steam parameters documentation" Click="CustomParamsHelpButton_Click"/>
                 </Grid>
             </TabItem>
         </TabControl>

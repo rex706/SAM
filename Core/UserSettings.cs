@@ -7,6 +7,7 @@ namespace SAM.Core
     {
         #region General 
 
+        public string Version { get { return (string)KeyValuePairs[SAMSettings.VERSION];  } set { KeyValuePairs[SAMSettings.VERSION] = value; } }
         public bool ClearUserData { get { return (bool)KeyValuePairs[SAMSettings.CLEAR_USER_DATA]; } set { KeyValuePairs[SAMSettings.CLEAR_USER_DATA] = value; } }
         public bool HideAddButton { get { return (bool)KeyValuePairs[SAMSettings.HIDE_ADD_BUTTON]; } set { KeyValuePairs[SAMSettings.HIDE_ADD_BUTTON] = value; } }
         public bool PasswordProtect { get { return (bool)KeyValuePairs[SAMSettings.PASSWORD_PROTECT]; } set { KeyValuePairs[SAMSettings.PASSWORD_PROTECT] = value; } }
@@ -25,7 +26,7 @@ namespace SAM.Core
 
         #region AutoLog
         
-        public bool LoginRecentAccount { get { return (bool)KeyValuePairs[SAMSettings.LOGIN_RECENT_ACCOUNT] ; } set { KeyValuePairs[SAMSettings.LOGIN_RECENT_ACCOUNT] = value; } }
+        public bool LoginRecentAccount { get { return (bool)KeyValuePairs[SAMSettings.LOGIN_RECENT_ACCOUNT]; } set { KeyValuePairs[SAMSettings.LOGIN_RECENT_ACCOUNT] = value; } }
         public int RecentAccountIndex { get { return (int)KeyValuePairs[SAMSettings.RECENT_ACCOUNT_INDEX]; } set{ KeyValuePairs[SAMSettings.RECENT_ACCOUNT_INDEX] = value; } }
         public bool LoginSelectedAccount { get { return (bool)KeyValuePairs[SAMSettings.LOGIN_SELECTED_ACCOUNT]; } set { KeyValuePairs[SAMSettings.LOGIN_SELECTED_ACCOUNT] = value; } }
         public int SelectedAccountIndex { get { return (int)KeyValuePairs[SAMSettings.SELECTED_ACCOUNT_INDEX]; } set { KeyValuePairs[SAMSettings.SELECTED_ACCOUNT_INDEX] = value; } }
@@ -115,6 +116,7 @@ namespace SAM.Core
 
         public Dictionary<string, object> KeyValuePairs = new Dictionary<string, object>()
         {
+            { SAMSettings.VERSION, string.Empty },
             { SAMSettings.CLEAR_USER_DATA, false },
             { SAMSettings.HIDE_ADD_BUTTON, false },
             { SAMSettings.PASSWORD_PROTECT, false },

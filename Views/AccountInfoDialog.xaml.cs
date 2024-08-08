@@ -3,6 +3,7 @@ using System.Windows;
 using SAM.Core;
 using System;
 using System.Linq;
+using System.Diagnostics;
 
 namespace SAM.Views
 {
@@ -133,9 +134,9 @@ namespace SAM.Views
                     SteamId = steamId;
                     AviText = avatarUrl;
                 }
-                catch
+                catch (Exception ex)
                 {
-
+                    Console.WriteLine(ex.Message);
                 }
             }
             else
@@ -178,8 +179,18 @@ namespace SAM.Views
             else
             {
                 FriendsOnlineStatusComboBox.IsEnabled = false;
-                FriendsOnlineStatusComboBox.SelectedIndex= 0;
+                FriendsOnlineStatusComboBox.SelectedItem = FriendsLoginStatus.Unchanged;
             }
+        }
+
+        private void CustomParamsHelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://developer.valvesoftware.com/wiki/Command_Line_Options#Steam_.28Windows.29");
+        }
+
+        private void SharedSecretHelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://github.com/Jessecar96/SteamDesktopAuthenticator");
         }
     }
 }

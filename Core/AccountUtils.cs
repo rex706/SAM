@@ -47,13 +47,13 @@ namespace SAM.Core
 
         public static List<Account> Deserialize(string file)
         {
-            object obj = null;
+            List<Account> accounts = new List<Account>();
 
             try
             {
                 var stream = new StreamReader(file);
-                var ser = new XmlSerializer(typeof(List<Account>));
-                obj = ser.Deserialize(stream);
+                var serializer = new XmlSerializer(typeof(List<Account>));
+                accounts = (List<Account>)serializer.Deserialize(stream);
                 stream.Close();
             }
             catch (Exception e)
@@ -61,12 +61,12 @@ namespace SAM.Core
                 MessageBox.Show(e.Message);
             }
 
-            return (List<Account>)obj;
+            return accounts;
         }
 
         public static List<Account> PasswordDeserialize(string file, string password)
         {
-            object obj = null;
+            List<Account> accounts = new List<Account>();
 
             try
             {
@@ -74,10 +74,8 @@ namespace SAM.Core
                 contents = StringCipher.Decrypt(contents, password);
 
                 var stream = new MemoryStream(Encoding.UTF8.GetBytes(contents));
-
-                var ser = new XmlSerializer(typeof(List<Account>));
-                obj = ser.Deserialize(stream);
-
+                var serializer = new XmlSerializer(typeof(List<Account>));
+                accounts = (List<Account>)serializer.Deserialize(stream);
                 stream.Close();
             }
             catch (Exception e)
@@ -85,15 +83,15 @@ namespace SAM.Core
                 MessageBox.Show(e.Message);
             }
 
-            return (List<Account>)obj;
+            return accounts;
         }
 
         public static void ImportAccountsFromList(List<Account> accounts)
         {
             try
             {
-                AccountsWindow.encryptedAccounts = AccountsWindow.encryptedAccounts.Concat(accounts).ToList();
-                Serialize(AccountsWindow.encryptedAccounts);
+                AccountsWindow.accounts = AccountsWindow.accounts.Concat(accounts).ToList();
+                Serialize(AccountsWindow.accounts);
                 MessageBox.Show("Account(s) imported!");
             }
             catch (Exception m)
@@ -117,8 +115,8 @@ namespace SAM.Core
                 try
                 {
                     var tempAccounts = Deserialize(dialog.FileName);
-                    AccountsWindow.encryptedAccounts = AccountsWindow.encryptedAccounts.Concat(tempAccounts).ToList();
-                    Serialize(AccountsWindow.encryptedAccounts);
+                    AccountsWindow.accounts = AccountsWindow.accounts.Concat(tempAccounts).ToList();
+                    Serialize(AccountsWindow.accounts);
                     MessageBox.Show("Accounts imported!");
                 }
                 catch (Exception e)
