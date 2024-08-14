@@ -85,6 +85,8 @@ namespace SAM.Views
                     CloseOnLoginCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.CLOSE_ON_LOGIN, SAMSettings.SECTION_GENERAL));
                     ListViewCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.LIST_VIEW, SAMSettings.SECTION_GENERAL));
                     SandboxModeCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.SANDBOX_MODE, SAMSettings.SECTION_GENERAL));
+                    HeaderlessCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.HEADERLESS_WINDOW, SAMSettings.SECTION_GENERAL));
+                    TransparentCheckBox.IsChecked = Convert.ToBoolean(settings.File.Read(SAMSettings.TRANSPARENT_WINDOW, SAMSettings.SECTION_GENERAL));
 
                     // AutoLog
                     if (Convert.ToBoolean(settings.File.Read(SAMSettings.LOGIN_RECENT_ACCOUNT, SAMSettings.SECTION_AUTOLOG)) == true)
@@ -269,6 +271,8 @@ namespace SAM.Views
             settings.File.Write(SAMSettings.CLOSE_ON_LOGIN, CloseOnLoginCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
             settings.File.Write(SAMSettings.LIST_VIEW, ListViewCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
             settings.File.Write(SAMSettings.SANDBOX_MODE, SandboxModeCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
+            settings.File.Write(SAMSettings.HEADERLESS_WINDOW, HeaderlessCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
+            settings.File.Write(SAMSettings.TRANSPARENT_WINDOW, TransparentCheckBox.IsChecked.ToString(), SAMSettings.SECTION_GENERAL);
 
             // Customize
             settings.File.Write(SAMSettings.THEME, ThemeSelectBox.Text, SAMSettings.SECTION_CUSTOMIZE);

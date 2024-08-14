@@ -364,6 +364,30 @@ namespace SAM.Views
                 }
             }
 
+            if (settings.User.HeaderlessWindow)
+            {
+                ShowTitleBar = false;
+                MainGrid.Margin = new Thickness(0, 10, 0, 0);
+            }
+            else
+            {
+                ShowTitleBar = true;
+                MainGrid.Margin = new Thickness(0);
+            }
+
+            if (settings.User.TransparentWindow)
+            {
+                FileMenu.Visibility = Visibility.Hidden;
+                Background = Brushes.Transparent;
+                BorderBrush = Brushes.Transparent;
+            }
+            else
+            {
+                FileMenu.Visibility = Visibility.Visible;
+                ClearValue(BackgroundProperty);
+                ClearValue(BorderBrushProperty);
+            }
+
             // Set user theme settings.
             ThemeManager.Current.ChangeTheme(Application.Current, settings.User.Theme + "." + settings.User.Accent);
 
@@ -722,6 +746,7 @@ namespace SAM.Views
                         accountButton.HorizontalAlignment = HorizontalAlignment.Center;
                         accountButton.VerticalAlignment = VerticalAlignment.Center;
                         accountButton.Background = Brushes.Transparent;
+                        accountButton.Cursor = Cursors.Hand;
 
                         accountText.Width = settings.User.ButtonSize;
                         if (settings.User.ButtonFontSize > 0)
@@ -1213,7 +1238,10 @@ namespace SAM.Views
             if (index >= 0 && index <= accounts.Count)
             {
                 Login(accounts[index]);
-                settings.UpdateRecentAccountIndex(index);
+            }
+            else
+            {
+                MessageBox.Show("Index " + index + " is out of bounds!");
             }
         }
 
@@ -1244,6 +1272,8 @@ namespace SAM.Views
                 {
                     ResetWindowTitle();
                     steamUpdateDetected = false;
+                    int index = accounts.FindIndex(a => a.GetHashCode() == account.GetHashCode());
+                    settings.UpdateRecentAccountIndex(index);
                 }
             }).Start();
         }

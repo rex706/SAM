@@ -7,7 +7,9 @@
         xmlns:tb="http://www.hardcodet.net/taskbar" 
         xmlns:local="clr-namespace:SAM.Views"
         xmlns:wpf="clr-namespace:SAM.Wpf" xmlns:core="clr-namespace:SAM.Core" d:DataContext="{d:DesignInstance Type=core:Account}"
-                  mc:Ignorable="d" Height="180" Width="138" WindowStartupLocation="Manual" ResizeMode="CanMinimize" Title="SAM" StateChanged="Window_StateChanged" TextOptions.TextFormattingMode="Display" LocationChanged="Window_LocationChanged" SizeChanged="MetroWindow_SizeChanged" Closing="AccountsWindow_Closing">
+                 mc:Ignorable="d" Height="180" Width="138" WindowStartupLocation="Manual" ResizeMode="CanMinimize" Title="SAM" 
+                 StateChanged="Window_StateChanged" TextOptions.TextFormattingMode="Display" LocationChanged="Window_LocationChanged" 
+                 SizeChanged="MetroWindow_SizeChanged" Closing="AccountsWindow_Closing" AllowsTransparency="True">
     <mah:MetroWindow.IconTemplate>
         <DataTemplate>
             <Grid Width="20" Height="20" Background="Transparent" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality">
@@ -115,7 +117,7 @@
                         </Style.Triggers>
                     </Style>
                 </Grid.Resources>
-                <Border x:Name="BackgroundBorder" Background="Transparent" Margin="0,20,0,0" Padding="0,20,0,0"/>
+                <Border x:Name="BackgroundBorder" Background="Transparent" Margin="0,20,0,0" Padding="0,20,0,0" Cursor="ScrollAll" />
                 <DataGrid x:Name="AccountsDataGrid" Margin="0,20,0,0" AutoGenerateColumns="False" Visibility="Collapsed" IsReadOnly="True" MouseDoubleClick="AccountsDataGrid_MouseDoubleClick" ContextMenuOpening="AccountsDataGrid_ContextMenuOpening" GridLinesVisibility="Horizontal" PreviewMouseRightButtonDown="AccountsDataGrid_PreviewMouseRightButtonDown" SelectionMode="Single" ColumnReordered="AccountsDataGrid_ColumnReordered" PreviewKeyDown="AccountsDataGrid_PreviewKeyDown">
                     <DataGrid.ColumnHeaderStyle>
                         <Style TargetType="{x:Type DataGridColumnHeader}" BasedOn="{StaticResource MahApps.Styles.DataGridColumnHeader}">
@@ -147,7 +149,7 @@
                     </DataGrid.Columns>
                 </DataGrid>
                 <Grid x:Name="AddButtonGrid" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,0">
-                    <Button x:Name="AddButton" Margin="0" Width="64" Click="AddButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="63" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{x:Null}" RenderTransformOrigin="0.5,0.5">
+                    <Button x:Name="AddButton" Margin="0" Width="64" Click="AddButton_Click" BorderBrush="{x:Null}" Foreground="{x:Null}" BorderThickness="0" UseLayoutRounding="True" Height="63" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{x:Null}" RenderTransformOrigin="0.5,0.5" Cursor="Hand">
                         <Button.Style>
                             <Style TargetType="{x:Type Button}">
                                 <Setter Property="VerticalContentAlignment" Value="Stretch"/>

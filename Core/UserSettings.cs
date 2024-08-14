@@ -21,6 +21,8 @@ namespace SAM.Core
         public bool CloseOnLogin { get { return (bool)KeyValuePairs[SAMSettings.CLOSE_ON_LOGIN]; } set { KeyValuePairs[SAMSettings.CHECK_FOR_UPDATES] = value; } }
         public bool ListView { get { return (bool)KeyValuePairs[SAMSettings.LIST_VIEW]; } set { KeyValuePairs[SAMSettings.LIST_VIEW] = value; } }
         public bool SandboxMode { get { return (bool)KeyValuePairs[SAMSettings.SANDBOX_MODE]; } set { KeyValuePairs[SAMSettings.SANDBOX_MODE] = value; } }
+        public bool HeaderlessWindow { get { return (bool)KeyValuePairs[SAMSettings.HEADERLESS_WINDOW]; } set { KeyValuePairs[SAMSettings.HEADERLESS_WINDOW] = value; } }
+        public bool TransparentWindow { get { return (bool)KeyValuePairs[SAMSettings.TRANSPARENT_WINDOW]; } set { KeyValuePairs[SAMSettings.TRANSPARENT_WINDOW] = value; } }
 
         #endregion
 
@@ -130,6 +132,8 @@ namespace SAM.Core
             { SAMSettings.CLOSE_ON_LOGIN, false },
             { SAMSettings.LIST_VIEW, false },
             { SAMSettings.SANDBOX_MODE, false },
+            { SAMSettings.HEADERLESS_WINDOW, false },
+            { SAMSettings.TRANSPARENT_WINDOW, false },
 
             { SAMSettings.LOGIN_RECENT_ACCOUNT, false },
             { SAMSettings.RECENT_ACCOUNT_INDEX, -1 },

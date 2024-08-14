@@ -24,7 +24,7 @@
         <Button x:Name="DefaultButton" Content="Default" Margin="35,0,0,10" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="85" Click="DefaultButton_Click" />
         <Button x:Name="OKButton" Content="OK" Margin="0,0,0,10" Click="OKButton_Click" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="85" />
         <Button x:Name="CancelButton" Content="Cancel"  Click="CancelButton_Click" Margin="0,0,35,10" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="85" />
-        <TabControl Background="{x:Null}" VerticalAlignment="Top" Height="210">
+        <TabControl Background="{x:Null}" VerticalAlignment="Top" Height="215">
             <TabItem Header="General" Foreground="{DynamicResource xctkForegoundBrush}" mah:HeaderedControlHelper.HeaderFontSize="{DynamicResource MenuFontSize}" >
                 <Grid>
                     <Label x:Name="NumPerRowLabel" Content="Button Columns" HorizontalAlignment="Left" Margin="228,7,0,0" VerticalAlignment="Top"/>
@@ -42,6 +42,8 @@
                     <CheckBox x:Name="CloseOnLoginCheckBox" Content="Close on Login" HorizontalAlignment="Left" Margin="175,100,0,0" VerticalAlignment="Top" ToolTip="Close SAM after every login."/>
                     <CheckBox x:Name="ListViewCheckBox" Content="List View" HorizontalAlignment="Left" Margin="175,77,0,0" VerticalAlignment="Top" ToolTip="Render accounts in list view instead of buttons."/>
                     <CheckBox x:Name="SandboxModeCheckBox" Content="Sandbox Mode" HorizontalAlignment="Left" Margin="175,146,0,0" VerticalAlignment="Top" ToolTip="Prevent Steam shutdown before each login attempt."/>
+                    <CheckBox x:Name="HeaderlessCheckBox" Content="Headerless Window" HorizontalAlignment="Left" Margin="10,169,0,0" VerticalAlignment="Top" ToolTip="Hide the window title bar."/>
+                    <CheckBox x:Name="TransparentCheckBox" Content="Transparent Window" HorizontalAlignment="Left" Margin="175,169,0,0" VerticalAlignment="Top" ToolTip="Make the background of the window to transparent."/>
                 </Grid>
             </TabItem>
             <TabItem Header="Auto-Login" mah:HeaderedControlHelper.HeaderFontSize="{DynamicResource TabItemFontSize}">
@@ -69,7 +71,7 @@
                     <xctk:ColorPicker x:Name="ButtonFontColorPicker" HorizontalAlignment="Left" Height="23" Margin="10,150,0,0" VerticalAlignment="Top" Width="45" ToolTip="Account button font size for when profile images are not used." Background="{DynamicResource xctkColorPickerBackground}" DropDownBackground="{DynamicResource xctkColorPickerBackground}" TabBackground="{DynamicResource xctkColorPickerBackground}" TabForeground="{DynamicResource xctkForegoundBrush}" HeaderBackground="{DynamicResource xctkColorPickerBackground}" HeaderForeground="{DynamicResource xctkForegoundBrush}"/>
                     <Label x:Name="ButtonFontColorLabel" Content="Font Color" HorizontalAlignment="Left" Margin="55,148,0,0" VerticalAlignment="Top"/>
                     <xctk:ColorPicker x:Name="BannerColorPicker" HorizontalAlignment="Left" Height="23" Margin="170,93,0,0" VerticalAlignment="Top" Width="45" ToolTip="Hover over banner background color." Background="{DynamicResource xctkColorPickerBackground}" DropDownBackground="{DynamicResource xctkColorPickerBackground}" TabBackground="{DynamicResource xctkColorPickerBackground}" TabForeground="{DynamicResource xctkForegoundBrush}" HeaderBackground="{DynamicResource xctkColorPickerBackground}" HeaderForeground="{DynamicResource xctkForegoundBrush}" />
-                    <Label x:Name="BannerColorPickerLabel" Content="Banner Color" HorizontalAlignment="Left" Margin="215,91,0,0" VerticalAlignment="Top" ToolTip="When profile images are not used."/>
+                    <Label x:Name="BannerColorPickerLabel" Content="Banner Color" HorizontalAlignment="Left" Margin="215,91,0,0" VerticalAlignment="Top" ToolTip="Hover over banner background color."/>
                     <TextBlock Text="Account Buttons" Margin="10,44,10,0" VerticalAlignment="Top"/>
                     <xctk:IntegerUpDown x:Name="BannerFontSizeSpinBox" Text="Auto" Minimum="0" Maximum="99" HorizontalAlignment="Left" Height="23" Margin="170,122,0,0" VerticalAlignment="Top" Width="45" TextAlignment="Center" ToolTip="Hover over text font size." Foreground="{DynamicResource xctkForegoundBrush}"/>
                     <Label x:Name="BannerFontSizeLabel" Content="Banner Font Size" HorizontalAlignment="Left" Margin="215,120,0,0" VerticalAlignment="Top"/>
