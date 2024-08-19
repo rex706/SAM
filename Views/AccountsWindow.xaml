@@ -236,6 +236,5 @@
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
-        <Border x:Name="MainGridOverlay" Background="Black" Opacity="0.3" Visibility="Collapsed"/>
     </Grid>
 </mah:MetroWindow>

@@ -378,7 +378,7 @@ namespace SAM.Views
             if (settings.User.TransparentWindow)
             {
                 FileMenu.Visibility = Visibility.Hidden;
-                Background = Brushes.Transparent;
+                Background = (SolidColorBrush)new BrushConverter().ConvertFromString("#01000000");
                 BorderBrush = Brushes.Transparent;
             }
             else
@@ -1257,7 +1257,6 @@ namespace SAM.Views
 
             MainGrid.IsEnabled = settings.User.SandboxMode;
             SetWindowTitle("Working");
-            MainGridOverlay.Visibility = Visibility.Visible;
 
             new Thread(() => {
                 try
@@ -2884,7 +2883,6 @@ namespace SAM.Views
             Dispatcher.Invoke(delegate () {
                 MainGrid.IsEnabled = title == null;
                 Title = newTitle;
-                MainGridOverlay.Visibility = title == null ? Visibility.Collapsed : Visibility.Visible;
             });
         }
 
