@@ -320,6 +320,8 @@ namespace SAM.Core
                         }
                     }
 
+                    Console.WriteLine("Inputs: " + inputs.Count + " Buttons: " + buttons.Count + " Groups: " + groups.Count + " Images: " + images.Count + " Texts: " + texts.Count);
+
                     if (inputs.Count == 0 && images.Count == 1 && buttons.Count == 2 && texts.Count > 0)
                     {
                         foreach (var text in texts)
@@ -332,15 +334,15 @@ namespace SAM.Core
                             }
                         }
                     }
-                    if (inputs.Count == 0 && images.Count == 0 && buttons.Count == 1)
+                    if (texts.Count == 2 && images.Count == 1 && buttons.Count == 1)
                     {
                         return LoginWindowState.Error;
                     }
-                    else if (inputs.Count == 0 && images.Count >= 2 && buttons.Count > 0)
+                    else if (inputs.Count == 0 && images.Count >= 2 && buttons.Count > 0 && texts.Count == 0)
                     {
                         return LoginWindowState.Selection;
                     }
-                    else if (inputs.Count == 5)
+                    else if (inputs.Count == 0 && buttons.Count == 5 && groups.Count == 0 && images.Count == 3 && texts.Count == 5)
                     {
                         return LoginWindowState.Code;
                     }
@@ -467,16 +469,15 @@ namespace SAM.Core
                     window.Focus();
 
                     AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
-                    AutomationElement[] inputs = document.FindAllChildren(e => e.ByControlType(ControlType.Edit));
+                    AutomationElement[] buttons = document.FindAllChildren(e => e.ByControlType(ControlType.Button));
 
                     string code = Generate2FACode(secret);
 
                     try
                     {
-                        for (int i = 0; i < inputs.Length; i++)
+                        for (int i = 0; i < buttons.Length; i++)
                         {
-                            TextBox textBox = inputs[i].AsTextBox();
-                            textBox.Text = code[i].ToString();
+                            SendCharacter(loginWindow.RawPtr, VirtualInputMethod.SendWait, code[i]);
                         }
                     }
                     catch (Exception e)
