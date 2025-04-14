@@ -1,5 +1,7 @@
 ﻿using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
+using FlaUI.Core.Input;
+using FlaUI.Core.Tools;
 using FlaUI.UIA3;
 using SteamAuth;
 using System;
@@ -477,7 +479,9 @@ namespace SAM.Core
                     {
                         for (int i = 0; i < buttons.Length; i++)
                         {
-                            SendCharacter(loginWindow.RawPtr, VirtualInputMethod.SendWait, code[i]);
+                            buttons[i].Focus();
+                            Keyboard.Type(code[i]);
+                            WaitForChildEdit(buttons[i]);
                         }
                     }
                     catch (Exception e)
@@ -495,6 +499,25 @@ namespace SAM.Core
             }
 
             return LoginWindowState.Invalid;
+        }
+
+        public static AutomationElement WaitForChildEdit(AutomationElement parent, int timeoutMs = 10, int intervalMs = 10)
+        {
+            AutomationElement textBox = null;
+            var timeout = TimeSpan.FromMilliseconds(timeoutMs);
+            var retryInterval = TimeSpan.FromMilliseconds(intervalMs);
+            var startTime = DateTime.UtcNow;
+
+            while ((DateTime.UtcNow - startTime) < timeout)
+            {
+                textBox = parent.FindFirstChild(cf => cf.ByControlType(ControlType.Edit));
+                if (textBox != null && textBox.AsTextBox().Text.Length > 0)
+                    break;
+
+                Thread.Sleep(retryInterval);
+            }
+
+            return textBox;
         }
 
         public static Process WaitForSteamProcess(WindowHandle windowHandle)
