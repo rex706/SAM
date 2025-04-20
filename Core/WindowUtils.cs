@@ -1,7 +1,6 @@
 ﻿using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 using FlaUI.Core.Input;
-using FlaUI.Core.Tools;
 using FlaUI.UIA3;
 using SteamAuth;
 using System;
@@ -503,21 +502,18 @@ namespace SAM.Core
 
         public static AutomationElement WaitForChildEdit(AutomationElement parent, int timeoutMs = 10, int intervalMs = 10)
         {
-            AutomationElement textBox = null;
-            var timeout = TimeSpan.FromMilliseconds(timeoutMs);
-            var retryInterval = TimeSpan.FromMilliseconds(intervalMs);
-            var startTime = DateTime.UtcNow;
+            var stopwatch = Stopwatch.StartNew();
 
-            while ((DateTime.UtcNow - startTime) < timeout)
+            while (stopwatch.ElapsedMilliseconds < timeoutMs)
             {
-                textBox = parent.FindFirstChild(cf => cf.ByControlType(ControlType.Edit));
+                var textBox = parent.FindFirstChild(cf => cf.ByControlType(ControlType.Edit));
                 if (textBox != null && textBox.AsTextBox().Text.Length > 0)
-                    break;
+                    return textBox;
 
-                Thread.Sleep(retryInterval);
+                Thread.Sleep(intervalMs);
             }
 
-            return textBox;
+            return null;
         }
 
         public static Process WaitForSteamProcess(WindowHandle windowHandle)

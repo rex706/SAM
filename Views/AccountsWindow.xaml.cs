@@ -70,7 +70,7 @@ namespace SAM.Views
 
         private static System.Timers.Timer autoReloadApiTimer;
 
-        private static readonly int maxRetry = 2;
+        private static readonly int maxRetry = 3;
 
         // Resize animation variables
         private static System.Windows.Forms.Timer _Timer = new System.Windows.Forms.Timer();
