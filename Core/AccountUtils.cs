@@ -490,7 +490,7 @@ namespace SAM.Core
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show(e.Message);
+                    Console.WriteLine(e.Message);
                 }
             }
 
@@ -537,7 +537,7 @@ namespace SAM.Core
                     }
                     catch (Exception e)
                     {
-                        MessageBox.Show(e.Message);
+                        Console.WriteLine(e.Message);
                     }
                 }
             }
@@ -556,7 +556,7 @@ namespace SAM.Core
             {
                 try
                 {
-                    Uri userUri = new Uri("http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + apiKey + "&vanityurl=" + vanity);
+                    Uri userUri = new Uri("https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + apiKey + "&vanityurl=" + vanity);
 
                     using (WebClient client = new WebClient())
                     {
@@ -566,7 +566,7 @@ namespace SAM.Core
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show(e.Message);
+                    Console.WriteLine(e.Message);
                 }
             }
 
@@ -616,7 +616,7 @@ namespace SAM.Core
 
                     try
                     {
-                        Uri userUri = new Uri("http://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=" + apiKey + "&steamids=" + currentIds);
+                        Uri userUri = new Uri("https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=" + apiKey + "&steamids=" + currentIds);
 
                         using (WebClient client = new WebClient())
                         {
@@ -627,7 +627,7 @@ namespace SAM.Core
                     }
                     catch (Exception e)
                     {
-                        MessageBox.Show(e.Message);
+                        Console.WriteLine(e.Message);
                     }
                 }
             }
