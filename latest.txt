@@ -1,4 +1,4 @@
-1.5.4.2
+1.5.4.3
 SAM.exe
-https://github.com/rex706/SAM/releases/download/v1.5.4.2/SAM.exe
+https://github.com/rex706/SAM/releases/download/v1.5.4.3/SAM.exe
 SAM.exe
