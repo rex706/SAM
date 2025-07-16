@@ -73,7 +73,7 @@ namespace SAM.Views
         private static readonly int maxRetry = 3;
 
         // Resize animation variables
-        private static System.Windows.Forms.Timer _Timer = new System.Windows.Forms.Timer();
+        private static readonly System.Windows.Forms.Timer _Timer = new System.Windows.Forms.Timer();
         private int _Stop = 0;
         private double _RatioHeight;
         private double _RatioWidth;
@@ -1358,117 +1358,7 @@ namespace SAM.Views
                 return;
             }
 
-            // -noreactlogin parameter has been depecrated as of January 2023
-            if (noReactLogin)
-            {
-                TypeCredentials(steamProcess, account, tryCount);
-            }
-            else
-            {
-                EnterCredentials(steamProcess, account, 0);
-            }
-        }
-
-        private void TypeCredentials(Process steamProcess, Account account, int tryCount)
-        {
-            WindowHandle steamLoginWindow = WindowUtils.GetLegacySteamLoginWindow();
-
-            while (!steamLoginWindow.IsValid)
-            {
-                Thread.Sleep(100);
-                steamLoginWindow = WindowUtils.GetLegacySteamLoginWindow();
-            }
-
-            Process steamLoginProcess = WindowUtils.WaitForSteamProcess(steamLoginWindow);
-            steamLoginProcess.WaitForInputIdle();
-
-            Thread.Sleep(settings.User.SleepTime);
-            WindowUtils.SetForegroundWindow(steamLoginWindow.RawPtr);
-            Thread.Sleep(100);
-
-            // Enable Caps-Lock, to prevent IME problems.
-            bool capsLockEnabled = System.Windows.Forms.Control.IsKeyLocked(System.Windows.Forms.Keys.CapsLock);
-            if (settings.User.HandleMicrosoftIME && !settings.User.IME2FAOnly && !capsLockEnabled)
-            {
-                WindowUtils.SendCapsLockGlobally();
-            }
-
-            foreach (char c in account.Name.ToCharArray())
-            {
-                WindowUtils.SetForegroundWindow(steamLoginWindow.RawPtr);
-                Thread.Sleep(10);
-                WindowUtils.SendCharacter(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod, c);
-            }
-
-            Thread.Sleep(100);
-            WindowUtils.SendTab(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod);
-            Thread.Sleep(100);
-
-            foreach (char c in account.Password.ToCharArray())
-            {
-                WindowUtils.SetForegroundWindow(steamLoginWindow.RawPtr);
-                Thread.Sleep(10);
-                WindowUtils.SendCharacter(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod, c);
-            }
-
-            if (settings.User.RememberPassword)
-            {
-                WindowUtils.SetForegroundWindow(steamLoginWindow.RawPtr);
-
-                Thread.Sleep(100);
-                WindowUtils.SendTab(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod);
-                Thread.Sleep(100);
-                WindowUtils.SendSpace(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod);
-            }
-
-            WindowUtils.SetForegroundWindow(steamLoginWindow.RawPtr);
-
-            Thread.Sleep(100);
-            WindowUtils.SendEnter(steamLoginWindow.RawPtr, settings.User.VirtualInputMethod);
-
-            // Restore CapsLock back if CapsLock is off before we start typing.
-            if (settings.User.HandleMicrosoftIME && !settings.User.IME2FAOnly && !capsLockEnabled)
-            {
-                WindowUtils.SendCapsLockGlobally();
-            }
-
-            int waitCount = 0;
-
-            // Only handle 2FA if shared secret was entered.
-            if (account.SharedSecret != null && account.SharedSecret.Length > 0)
-            {
-                WindowHandle steamGuardWindow = WindowUtils.GetLegacySteamGuardWindow();
-
-                while (!steamGuardWindow.IsValid && waitCount < maxRetry)
-                {
-                    Thread.Sleep(settings.User.SleepTime);
-
-                    steamGuardWindow = WindowUtils.GetLegacySteamGuardWindow();
-
-                    // Check for Steam warning window.
-                    WindowHandle steamWarningWindow = WindowUtils.GetLegacySteamWarningWindow();
-                    if (steamWarningWindow.IsValid)
-                    {
-                        //Cancel the 2FA process since Steam connection is likely unavailable. 
-                        return;
-                    }
-
-                    waitCount++;
-                }
-
-                // 2FA window not found, login probably failed. Try again.
-                if (waitCount == maxRetry)
-                {
-                    Dispatcher.Invoke(delegate () { Login(account, tryCount + 1); });
-                    return;
-                }
-
-                Handle2FA(steamProcess, account);
-            }
-            else
-            {
-                PostLogin();
-            }
+            EnterCredentials(steamProcess, account, 0);
         }
 
         private void EnterCredentials(Process steamProcess, Account account, int tryCount)
@@ -1542,7 +1432,9 @@ namespace SAM.Views
                 }
             }
 
-            if (account.SharedSecret != null && account.SharedSecret.Length > 0)
+            string secret = StringCipher.Decrypt(account.SharedSecret, eKey);
+
+            if (secret != null && secret.Length > 0)
             {
                 EnterReact2FA(steamProcess, account, tryCount);
             }
@@ -1570,18 +1462,6 @@ namespace SAM.Views
                 SystemSounds.Beep.Play();
                 return Task.CompletedTask;
             });
-        }
-
-        private void Handle2FA(Process steamProcess, Account account)
-        {
-            if (noReactLogin)
-            {
-                Type2FA(steamProcess, account, 0);
-            }
-            else
-            {
-                EnterReact2FA(steamProcess, account, 0);
-            }
         }
 
         private void EnterReact2FA(Process steamProcess, Account account, int tryCount)
@@ -1655,103 +1535,6 @@ namespace SAM.Views
                 return;
             }
             else if (tryCount == maxRetry && steamLoginWindow.IsValid)
-            {
-                MessageBox.Show("2FA Failed\nPlease verify your shared secret is correct!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            PostLogin();
-        }
-
-        private void Type2FA(Process steamProcess, Account account, int tryCount)
-        {
-            if (tryCount > 0 && WindowUtils.GetLegacyMainSteamClientWindow().IsValid)
-            {
-                PostLogin();
-                return;
-            }
-
-            // Need both the Steam Login and Steam Guard windows.
-            // Can't focus the Steam Guard window directly.
-            var steamLoginWindow = WindowUtils.GetLegacySteamLoginWindow();
-            var steamGuardWindow = WindowUtils.GetLegacySteamGuardWindow();
-
-            while (!steamLoginWindow.IsValid || !steamGuardWindow.IsValid)
-            {
-                Thread.Sleep(100);
-                steamLoginWindow = WindowUtils.GetLegacySteamLoginWindow();
-                steamGuardWindow = WindowUtils.GetLegacySteamGuardWindow();
-
-                // Check for Steam warning window.
-                var steamWarningWindow = WindowUtils.GetLegacySteamWarningWindow();
-                if (steamWarningWindow.IsValid)
-                {
-                    //Cancel the 2FA process since Steam connection is likely unavailable. 
-                    return;
-                }
-            }
-
-            Console.WriteLine("Found windows.");
-
-            // Generate 2FA code, then send it to the client.
-            Console.WriteLine("It is idle now, typing code...");
-
-            WindowUtils.SetForegroundWindow(steamGuardWindow.RawPtr);
-
-            // Enable Caps-Lock, to prevent IME problems.
-            bool capsLockEnabled = System.Windows.Forms.Control.IsKeyLocked(System.Windows.Forms.Keys.CapsLock);
-            if (settings.User.HandleMicrosoftIME && !capsLockEnabled)
-            {
-                WindowUtils.SendCapsLockGlobally();
-            }
-
-            Thread.Sleep(100);
-
-            string sharedSecret = StringCipher.Decrypt(account.SharedSecret, eKey);
-
-            foreach (char c in WindowUtils.Generate2FACode(sharedSecret))
-            {
-                WindowUtils.SetForegroundWindow(steamGuardWindow.RawPtr);
-                Thread.Sleep(10);
-
-                // Can also send keys to login window handle, but nothing works unless it is the foreground window.
-                WindowUtils.SendCharacter(steamGuardWindow.RawPtr, settings.User.VirtualInputMethod, c);
-            }
-
-            WindowUtils.SetForegroundWindow(steamGuardWindow.RawPtr);
-            Thread.Sleep(100);
-            WindowUtils.SendEnter(steamGuardWindow.RawPtr, settings.User.VirtualInputMethod);
-            
-            // Restore CapsLock back if CapsLock is off before we start typing.
-            if (settings.User.HandleMicrosoftIME && !capsLockEnabled)
-            {
-                WindowUtils.SendCapsLockGlobally();
-            }
-
-            // Need a little pause here to more reliably check for popup later.
-            Thread.Sleep(settings.User.SleepTime);
-
-            // Check if we still have a 2FA popup, which means the previous one failed.
-            steamGuardWindow = WindowUtils.GetLegacySteamGuardWindow();
-
-            int retry = tryCount + 1;
-
-            if (tryCount < maxRetry && steamGuardWindow.IsValid)
-            {
-                Console.WriteLine("2FA code might have failed, attempting retry " + retry + "...");
-                Type2FA(steamProcess, account, retry);
-                return;
-            }
-            else if (tryCount == maxRetry && steamGuardWindow.IsValid)
-            {
-                MessageBoxResult result = MessageBox.Show("2FA Failed\nPlease wait or bring the Steam Guard\nwindow to the front before clicking OK", "Error", MessageBoxButton.OKCancel, MessageBoxImage.Error);
-
-                if (result == MessageBoxResult.OK)
-                {
-                    Type2FA(steamProcess, account, retry);
-                }
-            }
-            else if (tryCount == maxRetry + 1 && steamGuardWindow.IsValid)
             {
                 MessageBox.Show("2FA Failed\nPlease verify your shared secret is correct!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;

@@ -33,16 +33,6 @@ namespace SAM.Core
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, IntPtr lParam);
 
-        [return: MarshalAs(UnmanagedType.Bool)]
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-
-        [DllImport("user32.dll", EntryPoint = "PostMessageA")]
-        public static extern bool PostMessage(IntPtr hWnd, uint msg, int wParam, IntPtr lParam);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, uint dwExtraInfo);
-
         delegate bool EnumThreadDelegate(IntPtr hWnd, IntPtr lParam);
 
         [DllImport("user32.dll")]
@@ -52,14 +42,7 @@ namespace SAM.Core
 
         public const int WM_GETTEXT = 0xD;
         public const int WM_GETTEXTLENGTH = 0xE;
-        public const int WM_KEYDOWN = 0x0100;
-        public const int WM_KEYUP = 0x0101;
-        public const int WM_CHAR = 0x0102;
-        public const int VK_RETURN = 0x0D;
-        public const int VK_TAB = 0x09;
-        public const int VK_SPACE = 0x20;
 
-        readonly static char[] specialChars = { '{', '}', '(', ')', '[', ']', '+', '^', '%', '~' };
         private static bool loginAllCancelled = false;
 
         private static IEnumerable<IntPtr> EnumerateProcessWindowHandles(Process process)
@@ -222,44 +205,6 @@ namespace SAM.Core
             }
 
             return false;
-        }
-
-        public static WindowHandle GetLegacySteamLoginWindow()
-        {
-            return TopLevelWindowUtils.FindWindow(wh =>
-            wh.GetClassName().Equals("vguiPopupWindow") &&
-            ((wh.GetWindowText().Contains("Steam") &&
-            !wh.GetWindowText().Contains("-") &&
-            !wh.GetWindowText().Contains("—") &&
-             wh.GetWindowText().Length > 5) ||
-             wh.GetWindowText().Equals("蒸汽平台登录")));
-        }
-
-        public static WindowHandle GetLegacySteamGuardWindow()
-        {
-            // Also checking for vguiPopupWindow class name to avoid catching things like browser tabs.
-            WindowHandle windowHandle = TopLevelWindowUtils.FindWindow(wh =>
-            wh.GetClassName().Equals("vguiPopupWindow") &&
-            (wh.GetWindowText().StartsWith("Steam Guard") ||
-             wh.GetWindowText().StartsWith("Steam 令牌") ||
-             wh.GetWindowText().StartsWith("Steam ガード")));
-            return windowHandle;
-        }
-
-        public static WindowHandle GetLegacySteamWarningWindow()
-        {
-            return TopLevelWindowUtils.FindWindow(wh =>
-            wh.GetClassName().Equals("vguiPopupWindow") &&
-            (wh.GetWindowText().StartsWith("Steam - ") ||
-             wh.GetWindowText().StartsWith("Steam — ")));
-        }
-
-        public static WindowHandle GetLegacyMainSteamClientWindow()
-        {
-            return TopLevelWindowUtils.FindWindow(wh =>
-            wh.GetClassName().Equals("vguiPopupWindow") &&
-            (wh.GetWindowText().Equals("Steam") ||
-            wh.GetWindowText().Equals("蒸汽平台")));
         }
 
         public static LoginWindowState GetLoginWindowState(WindowHandle loginWindow)
@@ -589,129 +534,9 @@ namespace SAM.Core
             loginAllCancelled = true;
         }
 
-        /**
-         * Because CapsLock is handled by system directly, thus sending
-         * it to one particular window is invalid - a window could not
-         * respond to CapsLock, only the system can.
-         * 
-         * For this reason, I break into a low-level API, which may cause
-         * an inconsistency to the original `SendWait` method.
-         * 
-         * https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-keybd_event
-         */
-        public static void SendCapsLockGlobally()
-        {
-            // Press key down
-            keybd_event((byte)System.Windows.Forms.Keys.CapsLock, 0, 0, 0);
-            // Press key up
-            keybd_event((byte)System.Windows.Forms.Keys.CapsLock, 0, 0x2, 0);
-        }
-
-        public static void SendCharacter(IntPtr hwnd, VirtualInputMethod inputMethod, char c)
-        {
-            switch (inputMethod)
-            {
-                case VirtualInputMethod.SendMessage:
-                    SendMessage(hwnd, WM_CHAR, c, IntPtr.Zero);
-                    break;
-
-                case VirtualInputMethod.PostMessage:
-                    PostMessage(hwnd, WM_CHAR, (IntPtr)c, IntPtr.Zero);
-                    break;
-
-                default:
-                    if (IsSpecialCharacter(c))
-                    {
-                        if (inputMethod == VirtualInputMethod.SendWait)
-                        {
-                            System.Windows.Forms.SendKeys.SendWait("{" + c.ToString() + "}");
-                        }
-                        else
-                        {
-                            System.Windows.Forms.SendKeys.Send("{" + c.ToString() + "}");
-                        }
-                    }
-                    else
-                    {
-                        if (inputMethod == VirtualInputMethod.SendWait)
-                        {
-                            System.Windows.Forms.SendKeys.SendWait(c.ToString());
-                        }
-                        else
-                        {
-                            System.Windows.Forms.SendKeys.Send(c.ToString());
-                        }
-                    }
-                    break;
-            }
-        }
-
-        public static void SendEnter(IntPtr hwnd, VirtualInputMethod inputMethod)
-        {
-            switch (inputMethod)
-            {
-                case VirtualInputMethod.SendMessage:
-                    SendMessage(hwnd, WM_KEYDOWN, VK_RETURN, IntPtr.Zero);
-                    SendMessage(hwnd, WM_KEYUP, VK_RETURN, IntPtr.Zero);
-                    break;
-
-                case VirtualInputMethod.PostMessage:
-                    PostMessage(hwnd, WM_KEYDOWN, VK_RETURN, IntPtr.Zero);
-                    PostMessage(hwnd, WM_KEYUP, VK_RETURN, IntPtr.Zero);
-                    break;
-
-                case VirtualInputMethod.SendWait:
-                    SetForegroundWindow(hwnd);
-                    System.Windows.Forms.SendKeys.SendWait("{ENTER}");
-                    break;
-            }
-        }
-
-        public static void SendTab(IntPtr hwnd, VirtualInputMethod inputMethod)
-        {
-            switch (inputMethod)
-            {
-                case VirtualInputMethod.SendMessage:
-                    SendMessage(hwnd, WM_KEYDOWN, VK_TAB, IntPtr.Zero);
-                    SendMessage(hwnd, WM_KEYUP, VK_TAB, IntPtr.Zero);
-                    break;
-
-                case VirtualInputMethod.PostMessage:
-                    PostMessage(hwnd, WM_KEYDOWN, (IntPtr)VK_TAB, IntPtr.Zero);
-                    PostMessage(hwnd, WM_KEYUP, (IntPtr)VK_TAB, IntPtr.Zero);
-                    break;
-
-                case VirtualInputMethod.SendWait:
-                    SetForegroundWindow(hwnd);
-                    System.Windows.Forms.SendKeys.SendWait("{TAB}");
-                    break;
-            }
-        }
-
-        public static void SendSpace(IntPtr hwnd, VirtualInputMethod inputMethod)
-        {
-            switch (inputMethod)
-            {
-                case VirtualInputMethod.SendMessage:
-                    SendMessage(hwnd, WM_KEYDOWN, VK_SPACE, IntPtr.Zero);
-                    SendMessage(hwnd, WM_KEYUP, VK_SPACE, IntPtr.Zero);
-                    break;
-
-                case VirtualInputMethod.PostMessage:
-                    PostMessage(hwnd, WM_KEYDOWN, (IntPtr)VK_SPACE, IntPtr.Zero);
-                    PostMessage(hwnd, WM_KEYUP, (IntPtr)VK_SPACE, IntPtr.Zero);
-                    break;
-
-                case VirtualInputMethod.SendWait:
-                    SetForegroundWindow(hwnd);
-                    System.Windows.Forms.SendKeys.SendWait(" ");
-                    break;
-            }
-        }
-
         public static void ClearSteamUserDataFolder(string steamPath, int sleepTime, int maxRetry)
         {
-            WindowHandle steamLoginWindow = GetLegacySteamLoginWindow();
+            WindowHandle steamLoginWindow = GetSteamLoginWindow();
             int waitCount = 0;
 
             while (steamLoginWindow.IsValid && waitCount < maxRetry)
@@ -732,19 +557,6 @@ namespace SAM.Core
             {
                 Console.WriteLine("userdata directory not found.");
             }
-        }
-
-        public static bool IsSpecialCharacter(char c)
-        {
-            foreach (char special in specialChars)
-            {
-                if (c.Equals(special))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         public static string Generate2FACode(string shared_secret)
