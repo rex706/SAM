@@ -62,7 +62,6 @@ namespace SAM.Views
         private static bool deleting = false;
         private static bool loginAllSequence = false;
         private static bool loginAllCancelled = false;
-        private static bool noReactLogin = false;
 
         private static Button holdingButton = null;
         private static bool dragging = false;
@@ -1322,12 +1321,10 @@ namespace SAM.Views
             if (account.HasParameters)
             {
                 parameters = account.Parameters.Split(' ').ToList();
-                noReactLogin = account.Parameters.Contains("-noreactlogin");
             }
             else if (settings.User.CustomParameters)
             {
                 parametersBuilder.Append(settings.User.CustomParametersValue).Append(" ");
-                noReactLogin = settings.User.CustomParametersValue.Contains("-noreactlogin");
             }
 
             foreach (string parameter in parameters)

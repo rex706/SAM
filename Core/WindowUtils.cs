@@ -1,6 +1,7 @@
 ﻿using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Definitions;
 using FlaUI.Core.Input;
+using FlaUI.Core.WindowsAPI;
 using FlaUI.UIA3;
 using SteamAuth;
 using System;
@@ -228,7 +229,7 @@ namespace SAM.Core
                     window.Focus();
 
                     AutomationElement document = window.FindFirstDescendant(e => e.ByControlType(ControlType.Document));
-                    AutomationElement[] children = document.FindAllChildren(); 
+                    AutomationElement[] children = document.FindAllChildren();
 
                     if (children.Length == 0)
                     {
@@ -419,19 +420,27 @@ namespace SAM.Core
 
                     string code = Generate2FACode(secret);
 
+                    IDataObject originalClipboard = GetClipboardDataObjectSTA();
+                    SetClipboardTextSTA(code);
+
                     try
                     {
-                        for (int i = 0; i < buttons.Length; i++)
-                        {
-                            buttons[i].Focus();
-                            Keyboard.Type(code[i]);
-                            WaitForChildEdit(buttons[i]);
-                        }
+                        buttons[0].Focus();
+                        buttons[0].AsButton().Invoke();
+
+                        Keyboard.Press(VirtualKeyShort.CONTROL);
+                        Keyboard.Type(VirtualKeyShort.KEY_V);
+                        Keyboard.Release(VirtualKeyShort.CONTROL);
                     }
                     catch (Exception e)
                     {
                         Console.WriteLine(e.Message);
                         return LoginWindowState.Code;
+                    }
+
+                    if (originalClipboard != null)
+                    {
+                        Clipboard.SetDataObject(originalClipboard);
                     }
 
                     return LoginWindowState.Success;
@@ -445,14 +454,14 @@ namespace SAM.Core
             return LoginWindowState.Invalid;
         }
 
-        public static AutomationElement WaitForChildEdit(AutomationElement parent, int timeoutMs = 10, int intervalMs = 10)
+        public static AutomationElement WaitForChildEdit(AutomationElement parent, int timeoutMs = 500, int intervalMs = 1)
         {
             var stopwatch = Stopwatch.StartNew();
 
             while (stopwatch.ElapsedMilliseconds < timeoutMs)
             {
                 var textBox = parent.FindFirstChild(cf => cf.ByControlType(ControlType.Edit));
-                if (textBox != null && textBox.AsTextBox().Text.Length > 0)
+                if (textBox != null && !string.IsNullOrEmpty(textBox.AsTextBox().Text))
                     return textBox;
 
                 Thread.Sleep(intervalMs);
@@ -564,6 +573,24 @@ namespace SAM.Core
             SteamGuardAccount authAccount = new SteamGuardAccount { SharedSecret = shared_secret };
             string code = authAccount.GenerateSteamGuardCode();
             return code;
+        }
+
+        public static void SetClipboardTextSTA(string text)
+        {
+            var thread = new Thread(() => Clipboard.SetText(text));
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+        }
+
+        public static IDataObject GetClipboardDataObjectSTA()
+        {
+            IDataObject data = null;
+            var thread = new Thread(() => { data = Clipboard.GetDataObject(); });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+            return data;
         }
     }
 }
