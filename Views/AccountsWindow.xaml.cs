@@ -1008,7 +1008,7 @@ namespace SAM.Views
             var copyPasswordItem = new MenuItem();
             var copyProfileUrlItem = new MenuItem();
             var copySteamIdItem = new MenuItem();
-            var copyMFATokenItem = new MenuItem();
+            var copyGuardTokenItem = new MenuItem();
 
             if (!AccountUtils.AccountHasActiveTimeout(account))
             {
@@ -1027,7 +1027,7 @@ namespace SAM.Views
             copyPasswordItem.Header = "Password";
             copyProfileUrlItem.Header = "Profile";
             copySteamIdItem.Header = "SteamID";
-            copyMFATokenItem.Header = "Guard Token";
+            copyGuardTokenItem.Header = "Guard Token";
 
             deleteItem.Click += delegate { DeleteEntry(account); };
             editItem.Click += delegate { EditEntryAsync(account); };
@@ -1060,14 +1060,14 @@ namespace SAM.Views
 
             if (!string.IsNullOrEmpty(sharedSecret))
             {
-                copyMFATokenItem.Click += delegate { Copy2FA(account); };
+                copyGuardTokenItem.Click += delegate { Copy2FA(account); };
             }
             else
             {
-                copyMFATokenItem.IsEnabled = false;
+                copyGuardTokenItem.IsEnabled = false;
             }
 
-            copyMenuItem.Items.Add(copyMFATokenItem);
+            copyMenuItem.Items.Add(copyGuardTokenItem);
             accountContext.Items.Add(deleteItem);
 
             return accountContext;

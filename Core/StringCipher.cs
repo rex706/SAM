@@ -54,6 +54,11 @@ namespace SAM.Core
 
         public static string Decrypt(string cipherText, string passPhrase)
         {
+            if (cipherText == null || passPhrase == null) 
+            {  
+                return null; 
+            }
+
             // Get the complete stream of bytes that represent:
             // [32 bytes of Salt] + [32 bytes of IV] + [n bytes of CipherText]
             var cipherTextBytesWithSaltAndIv = Convert.FromBase64String(cipherText);
