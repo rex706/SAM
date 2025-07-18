@@ -420,27 +420,41 @@ namespace SAM.Core
 
                     string code = Generate2FACode(secret);
 
-                    IDataObject originalClipboard = GetClipboardDataObjectSTA();
-                    SetClipboardTextSTA(code);
-
                     try
                     {
+                        IDataObject originalClipboard = GetClipboardDataObjectSTA();
+                        SetClipboardTextSTA(code);
+
                         buttons[0].Focus();
                         buttons[0].AsButton().Invoke();
 
                         Keyboard.Press(VirtualKeyShort.CONTROL);
                         Keyboard.Type(VirtualKeyShort.KEY_V);
                         Keyboard.Release(VirtualKeyShort.CONTROL);
+
+                        if (originalClipboard != null)
+                        {
+                            Clipboard.SetDataObject(originalClipboard);
+                        }
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e.Message);
-                        return LoginWindowState.Code;
-                    }
+                        try
+                        {
+                            Console.WriteLine(e.Message);
 
-                    if (originalClipboard != null)
-                    {
-                        Clipboard.SetDataObject(originalClipboard);
+                            for (int i = 0; i < buttons.Length; i++)
+                            {
+                                buttons[i].Focus();
+                                Keyboard.Type(code[i]);
+                                WaitForChildEdit(buttons[i]);
+                            }
+                        }
+                        catch (Exception em)
+                        {
+                            Console.WriteLine(em.Message);
+                            return LoginWindowState.Code;
+                        }
                     }
 
                     return LoginWindowState.Success;
@@ -454,7 +468,7 @@ namespace SAM.Core
             return LoginWindowState.Invalid;
         }
 
-        public static AutomationElement WaitForChildEdit(AutomationElement parent, int timeoutMs = 500, int intervalMs = 1)
+        public static AutomationElement WaitForChildEdit(AutomationElement parent, int timeoutMs = 50, int intervalMs = 1)
         {
             var stopwatch = Stopwatch.StartNew();
 
