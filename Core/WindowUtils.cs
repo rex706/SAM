@@ -422,39 +422,17 @@ namespace SAM.Core
 
                     try
                     {
-                        IDataObject originalClipboard = GetClipboardDataObjectSTA();
-                        SetClipboardTextSTA(code);
-
-                        buttons[0].Focus();
-                        buttons[0].AsButton().Invoke();
-
-                        Keyboard.Press(VirtualKeyShort.CONTROL);
-                        Keyboard.Type(VirtualKeyShort.KEY_V);
-                        Keyboard.Release(VirtualKeyShort.CONTROL);
-
-                        if (originalClipboard != null)
+                        for (int i = 0; i < buttons.Length; i++)
                         {
-                            Clipboard.SetDataObject(originalClipboard);
+                            buttons[i].AsButton().Invoke();
+                            Keyboard.Type(code[i]);
+                            WaitForChildEdit(buttons[i]);
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception em)
                     {
-                        try
-                        {
-                            Console.WriteLine(e.Message);
-
-                            for (int i = 0; i < buttons.Length; i++)
-                            {
-                                buttons[i].Focus();
-                                Keyboard.Type(code[i]);
-                                WaitForChildEdit(buttons[i]);
-                            }
-                        }
-                        catch (Exception em)
-                        {
-                            Console.WriteLine(em.Message);
-                            return LoginWindowState.Code;
-                        }
+                        Console.WriteLine(em.Message);
+                        return LoginWindowState.Code;
                     }
 
                     return LoginWindowState.Success;
@@ -468,14 +446,14 @@ namespace SAM.Core
             return LoginWindowState.Invalid;
         }
 
-        public static AutomationElement WaitForChildEdit(AutomationElement parent, int timeoutMs = 50, int intervalMs = 1)
+        public static AutomationElement WaitForChildEdit(AutomationElement parent, int timeoutMs = 500, int intervalMs = 1)
         {
             var stopwatch = Stopwatch.StartNew();
 
             while (stopwatch.ElapsedMilliseconds < timeoutMs)
             {
-                var textBox = parent.FindFirstChild(cf => cf.ByControlType(ControlType.Edit));
-                if (textBox != null && !string.IsNullOrEmpty(textBox.AsTextBox().Text))
+                var textBox = parent.FindFirstChild(cf => cf.ByControlType(ControlType.Text));
+                if (textBox != null && !string.IsNullOrEmpty(textBox.AsTextBox().Name))
                     return textBox;
 
                 Thread.Sleep(intervalMs);
