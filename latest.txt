@@ -1,4 +1,4 @@
-1.5.9331.17422
+1.5.9331.26720
 SAM.exe
-https://github.com/rex706/SAM/releases/download/v1.5.9331.17422/SAM.exe
+https://github.com/rex706/SAM/releases/download/v1.5.9331.26720/SAM.exe
 SAM.exe
