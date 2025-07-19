@@ -446,7 +446,7 @@ namespace SAM.Core
             return LoginWindowState.Invalid;
         }
 
-        public static AutomationElement WaitForChildEdit(AutomationElement parent, int timeoutMs = 500, int intervalMs = 1)
+        public static AutomationElement WaitForChildEdit(AutomationElement parent, int timeoutMs = 500, int intervalMs = 10)
         {
             var stopwatch = Stopwatch.StartNew();
 
